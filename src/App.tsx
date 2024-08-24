@@ -3,7 +3,9 @@ import Router from "./layout/Router";
 
 function App() {
   return (
-    <Router/>
+    <div className=" h-screen w-screen overflow-hidden">
+      <Router />
+    </div>
   );
 }
 

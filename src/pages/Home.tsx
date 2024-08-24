@@ -1,30 +1,15 @@
-
-import { Button, Checkbox, Label, TextInput } from "flowbite-react";
-
+import Header from "../layout/Header";
+import BannerImg from "../assets/banner-img.jpg";
 export function Home() {
+    
   return (
-    <form className="flex max-w-md flex-col gap-4">
-      <div>
-        <div className="mb-2 block">
-          <Label htmlFor="email1" value="Your email" />
-        </div>
-        <TextInput id="email1" type="email" placeholder="name@flowbite.com" required />
-      </div>
-      <div>
-        <div className="mb-2 block">
-          <Label htmlFor="password1" value="Your password" />
-        </div>
-        <TextInput id="password1" type="password" required />
-      </div>
-      <div className="flex items-center gap-2">
-        <Checkbox id="remember" />
-        <Label htmlFor="remember">Remember me</Label>
-      </div>
-      <Button type="submit">Submit</Button>
-    </form>
-//      <main className="flex min-h-screen items-center justify-center gap-2 dark:bg-gray-800">
-//      <h1 className="text-2xl dark:text-white">Flowbite React + Vite</h1>
-//      <DarkThemeToggle />
-//    </main>
+    <main>  
+        <Header/>
+        <section className="px-32">
+            <h2 className="my-10 text-center text-6xl font-extrabold text-slate-900">Simplify Your Workflow</h2>
+            <h5 className="mb-10 text-center text-2xl font-semibold text-neutral-700">Organize, Prioritize, and Conquer Your Tasks with Ease.</h5>
+            <img src={BannerImg} alt="banner" className="mx-auto w-full max-w-5xl"/>
+        </section>
+    </main>
   );
 }
