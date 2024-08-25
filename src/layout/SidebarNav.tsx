@@ -1,6 +1,14 @@
-import { Sidebar } from "flowbite-react";
-import { BiBuoy } from "react-icons/bi";
-import { HiArrowSmRight, HiChartPie, HiInbox, HiShoppingBag, HiTable, HiUser, HiViewBoards } from "react-icons/hi";
+import { Sidebar } from 'flowbite-react'
+import { BiBuoy } from 'react-icons/bi'
+import {
+  HiArrowSmRight,
+  HiChartPie,
+  HiInbox,
+  HiShoppingBag,
+  HiTable,
+  HiUser,
+  HiViewBoards,
+} from 'react-icons/hi'
 
 export function SidebarNav() {
   return (
@@ -23,7 +31,7 @@ export function SidebarNav() {
             Products
           </Sidebar.Item>
           <Sidebar.Item href="#" icon={HiArrowSmRight}>
-            Sign In
+            Log In
           </Sidebar.Item>
           <Sidebar.Item href="#" icon={HiTable}>
             Sign Up
@@ -42,5 +50,5 @@ export function SidebarNav() {
         </Sidebar.ItemGroup>
       </Sidebar.Items>
     </Sidebar>
-  );
+  )
 }
