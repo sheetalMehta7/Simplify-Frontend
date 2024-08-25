@@ -1,8 +1,10 @@
 import { Button, Navbar } from 'flowbite-react'
 import { useNavigate } from 'react-router-dom'
+import { DarkThemeToggle } from 'flowbite-react'
 
 const Header = () => {
   const navigate = useNavigate()
+
   return (
     <div>
       <Navbar fluid rounded>
@@ -16,9 +18,10 @@ const Header = () => {
             Simplify
           </span>
         </Navbar.Brand>
-        <div className="flex gap-2 md:order-2">
+        <div className="flex items-center gap-2 md:order-2">
           <Button onClick={() => navigate('/register')}>Sign up</Button>
           <Button onClick={() => navigate('/login')}>Log in</Button>
+          <DarkThemeToggle />
           <Navbar.Toggle />
         </div>
         <Navbar.Collapse>
