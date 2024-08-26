@@ -1,57 +1,54 @@
-import { Sidebar } from 'flowbite-react'
-import { BiBuoy } from 'react-icons/bi'
-import {
-  HiArrowSmRight,
-  HiChartPie,
-  HiInbox,
-  HiShoppingBag,
-  HiTable,
-  HiUser,
-  HiViewBoards,
-} from 'react-icons/hi'
+import { MdDashboard } from 'react-icons/md'
+import { HiUserCircle, HiClipboardList } from 'react-icons/hi'
+import { CgLogOut } from 'react-icons/cg'
+import { Link } from 'react-router-dom'
 
-export function SidebarNav() {
+export const SidebarNav: React.FC = () => {
   return (
-    <Sidebar aria-label="Sidebar with content separator example h-100" className='w-56'>
-      <Sidebar.Items>
-      <Sidebar.Logo href="/" img="/fav.png" imgAlt="Simplify Logo">
-        Simplify
-      </Sidebar.Logo>
-        <Sidebar.ItemGroup>
-          <Sidebar.Item href="#" icon={HiChartPie}>
-            Dashboard
-          </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiViewBoards}>
-            Kanban
-          </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiInbox}>
-            Inbox
-          </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiUser}>
-            Users
-          </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiShoppingBag}>
-            Products
-          </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiArrowSmRight}>
-            Log In
-          </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiTable}>
-            Sign Up
-          </Sidebar.Item>
-        </Sidebar.ItemGroup>
-        <Sidebar.ItemGroup>
-          <Sidebar.Item href="#" icon={HiChartPie}>
-            Upgrade to Pro
-          </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiViewBoards}>
-            Documentation
-          </Sidebar.Item>
-          <Sidebar.Item href="#" icon={BiBuoy}>
-            Help
-          </Sidebar.Item>
-        </Sidebar.ItemGroup>
-      </Sidebar.Items>
-    </Sidebar>
+    <aside className="h-full bg-gray-800 text-white flex flex-col">
+      <div className="p-4">
+        <h1 className="text-xl font-bold">Simplify</h1>
+      </div>
+      <nav className="flex-1">
+        <ul className="space-y-2">
+          <li>
+            <Link
+              to="/dashboard"
+              className="flex items-center p-4 hover:bg-gray-700 rounded-lg"
+            >
+              <MdDashboard className="mr-3" />
+              Dashboard
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/profile"
+              className="flex items-center p-4 hover:bg-gray-700 rounded-lg"
+            >
+              <HiUserCircle className="mr-3" />
+              Profile
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/projects"
+              className="flex items-center p-4 hover:bg-gray-700 rounded-lg"
+            >
+              <HiClipboardList className="mr-3" />
+              Projects
+            </Link>
+          </li>
+        </ul>
+      </nav>
+      <div className="p-4">
+        <Link
+          to="/"
+          className="flex items-center p-4 hover:bg-gray-700 rounded-lg"
+        >
+          <CgLogOut className="mr-3" />
+          Log out
+        </Link>
+      </div>
+    </aside>
   )
 }
