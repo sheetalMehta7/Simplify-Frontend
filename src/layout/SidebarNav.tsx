@@ -12,8 +12,11 @@ import {
 
 export function SidebarNav() {
   return (
-    <Sidebar aria-label="Sidebar with content separator example h-100">
+    <Sidebar aria-label="Sidebar with content separator example h-100" className='w-56'>
       <Sidebar.Items>
+      <Sidebar.Logo href="/" img="/fav.png" imgAlt="Simplify Logo">
+        Simplify
+      </Sidebar.Logo>
         <Sidebar.ItemGroup>
           <Sidebar.Item href="#" icon={HiChartPie}>
             Dashboard
