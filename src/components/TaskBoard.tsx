@@ -114,18 +114,10 @@ export const TaskBoard: React.FC = () => {
       <div className="overflow-x-auto p-4">
         <Table>
           <Table.Head>
-            <Table.HeadCell className="border border-slate-700">
-              To-Do
-            </Table.HeadCell>
-            <Table.HeadCell className="border border-slate-700">
-              In-Progress
-            </Table.HeadCell>
-            <Table.HeadCell className="border border-slate-700">
-              Review
-            </Table.HeadCell>
-            <Table.HeadCell className="border border-slate-700">
-              Done
-            </Table.HeadCell>
+            <Table.HeadCell>To-Do</Table.HeadCell>
+            <Table.HeadCell>In-Progress</Table.HeadCell>
+            <Table.HeadCell>Review</Table.HeadCell>
+            <Table.HeadCell>Done</Table.HeadCell>
           </Table.Head>
           <Table.Body className="divide-y">
             <Table.Row>

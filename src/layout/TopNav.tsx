@@ -70,7 +70,8 @@ export const TopNav: React.FC = () => {
             />
           )}
         </div>
-        <RiSettingsLine className="text-2xl" /> {/* Increased icon size */}
+        <RiSettingsLine className="text-2xl cursor-pointer" />{' '}
+        {/* Increased icon size */}
         <CgProfile
           className="text-2xl cursor-pointer" // Increased icon size
           ref={profileIconRef}
