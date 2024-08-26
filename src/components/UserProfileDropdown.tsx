@@ -1,5 +1,4 @@
 import React from 'react'
-import { FaUser, FaProjectDiagram, FaBuilding, FaCog } from 'react-icons/fa'
 import { Transition } from '@headlessui/react'
 
 interface UserProfileDropdownProps {
@@ -32,26 +31,26 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
       leaveTo="transform opacity-0 scale-95"
     >
       <div
-        className="absolute z-50 bg-gray-800 text-white rounded-lg shadow-lg p-4 w-32"
+        className="absolute z-50 bg-slate-800 border border-white-300 rounded-lg shadow-lg p-3 w-32"
         style={{
-          top: dropdownPosition.top + 30, // Adjust for slight spacing
+          top: dropdownPosition.top + 40, // Adjust for slight spacing
           left: dropdownPosition.left,
-          transform: 'translateX(-30px)', // Ensure it doesn't cover the icon
+          transform: 'translateX(-10px)', // Ensure it doesn't cover the icon
         }}
       >
         <div
-          className="flex items-center mb-4 cursor-pointer"
+          className="flex items-center mb-4 cursor-pointer p-2 hover:bg-slate-700 rounded"
           onClick={onClose}
         >
           <span className="text-sm font-semibold">John Doe</span>
         </div>
-        <div className="flex items-center mb-4 cursor-pointer">
+        <div className="flex items-center mb-4 cursor-pointer p-2 hover:bg-slate-700 rounded">
           <span className="text-sm">Projects</span>
         </div>
-        <div className="flex items-center mb-4 cursor-pointer">
+        <div className="flex items-center mb-4 cursor-pointer p-2 hover:bg-slate-700 rounded">
           <span className="text-sm">Company</span>
         </div>
-        <div className="flex items-center cursor-pointer">
+        <div className="flex items-center cursor-pointer p-2 hover:bg-slate-700 rounded">
           <span className="text-sm">Settings</span>
         </div>
       </div>
