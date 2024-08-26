@@ -1,8 +1,10 @@
 import BannerImg from '../assets/banner-img.jpg'
+import Header from '../layout/Header'
 
 export function Home() {
   return (
     <main>
+      <Header/>
       <section className="px-32 bg-gray-100 dark:bg-gray-900 py-16">
         <h2 className="my-10 text-center text-6xl font-extrabold text-gray-700 dark:text-white">
           Simplify Your Workflow
