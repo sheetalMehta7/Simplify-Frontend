@@ -1,7 +1,25 @@
+// src/pages/Dashboard.tsx
+
 import React, { useState } from 'react'
 import DashboardLayout from '../layout/DashboardLayout'
 import { DashboardTabs } from '../components/DashboardTabs'
 import { TaskBoard } from '../components/TaskBoard'
+import CalendarComponent from '../components/Calendar'
+
+interface Task {
+  id: number
+  title: string
+  date: Date
+}
+
+const sampleTasks: Task[] = [
+  { id: 1, title: 'Task 1', date: new Date() },
+  {
+    id: 2,
+    title: 'Task 2',
+    date: new Date(new Date().setDate(new Date().getDate() + 1)),
+  },
+]
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Dashboard')
@@ -39,7 +57,7 @@ const Dashboard: React.FC = () => {
         )}
         {activeTab === 'Issues' && <div>Issues content goes here</div>}
         {activeTab === 'Boards' && <div>Boards content goes here</div>}
-        {activeTab === 'Calendar' && <div>Calendar content goes here</div>}
+        {activeTab === 'Calendar' && <CalendarComponent tasks={sampleTasks} />}
         {activeTab === 'Projects' && <div>Projects content goes here</div>}
         {activeTab === 'Development' && (
           <div>Development content goes here</div>
