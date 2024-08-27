@@ -3,12 +3,14 @@ import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { Label, TextInput, Button } from 'flowbite-react'
 import { useNavigate } from 'react-router-dom'
+import { FaTimes } from 'react-icons/fa'
 
 interface SignUpModalProps {
   onClose: () => void
+  onSwitch: () => void
 }
 
-const SignUpModal: FC<SignUpModalProps> = ({ onClose }) => {
+const SignUpModal: FC<SignUpModalProps> = ({ onClose, onSwitch }) => {
   const [touched, setTouched] = useState<{ [key: string]: boolean }>({})
   const navigate = useNavigate()
 
@@ -41,6 +43,14 @@ const SignUpModal: FC<SignUpModalProps> = ({ onClose }) => {
     })
   }
 
+  // Handle Enter key press
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault() // Prevent default form submission behavior
+      handleSubmit()
+    }
+  }
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 animate-modal">
       <div className="relative w-full max-w-md p-8 mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-blue-300 ring-2 ring-blue-500">
@@ -55,7 +65,7 @@ const SignUpModal: FC<SignUpModalProps> = ({ onClose }) => {
         </div>
 
         {/* Form */}
-        <form onSubmit={formik.handleSubmit}>
+        <form onSubmit={formik.handleSubmit} onKeyDown={handleKeyDown}>
           <div className="mb-4">
             <div className="mb-2 block">
               <Label
@@ -95,7 +105,7 @@ const SignUpModal: FC<SignUpModalProps> = ({ onClose }) => {
             <TextInput
               id="password"
               type="password"
-              placeholder="Create a password"
+              placeholder="Enter your password"
               required
               {...formik.getFieldProps('password')}
               color={
@@ -125,7 +135,7 @@ const SignUpModal: FC<SignUpModalProps> = ({ onClose }) => {
           <div className="h-px flex-grow bg-gray-300 dark:bg-gray-700"></div>
         </div>
 
-        {/* Google Sign Up */}
+        {/* Google Login */}
         <Button className="mb-4 flex w-full items-center justify-center rounded-lg bg-blue-600 py-2 text-white transition hover:bg-blue-700 text-sm">
           <svg className="mr-2 h-5 w-5" viewBox="0 0 48 48">
             {/* SVG paths */}
@@ -138,22 +148,22 @@ const SignUpModal: FC<SignUpModalProps> = ({ onClose }) => {
           <p>
             Already have an account?{' '}
             <a
-              className="text-blue-600 hover:underline dark:text-blue-500"
-              onClick={onClose}
+              className="text-blue-600 hover:underline dark:text-blue-500 cursor-pointer"
+              onClick={onSwitch}
             >
               Log in
             </a>
           </p>
           <p className="mt-2">
             <a
-              className="text-gray-500 hover:underline dark:text-gray-400"
+              className="text-gray-500 hover:underline dark:text-gray-400 cursor-pointer"
               href="/"
             >
               Privacy Policy
             </a>{' '}
             &middot;{' '}
             <a
-              className="text-gray-500 hover:underline dark:text-gray-400"
+              className="text-gray-500 hover:underline dark:text-gray-400 cursor-pointer"
               href="/"
             >
               Terms of Service
@@ -166,7 +176,7 @@ const SignUpModal: FC<SignUpModalProps> = ({ onClose }) => {
           onClick={onClose}
           className="absolute text-3xl top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 w-8 h-8 flex items-center justify-center rounded-full"
         >
-          &times;
+          <FaTimes />
         </button>
       </div>
     </div>

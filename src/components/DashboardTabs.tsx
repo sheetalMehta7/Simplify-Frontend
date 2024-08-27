@@ -6,8 +6,8 @@ import {
   MdFolder,
   MdFilterAlt,
 } from 'react-icons/md'
-import { FilterDropdown } from '../components/FilterDropdown'
-import { CreateTaskModal } from './CreateTaskModal'
+import { FilterDropdown } from './Dropdowns/FilterDropdown'
+import { CreateTaskModal } from './Modals/CreateTaskModal'
 
 interface DashboardTabsProps {
   setActiveTab: (tabName: string) => void
@@ -77,14 +77,23 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
       </div>
 
       {/* Filter Dropdown */}
-      <FilterDropdown
-        isOpen={isFilterOpen}
-        closeDropdown={() => setIsFilterOpen(false)}
-        filterButtonRef={filterButtonRef}
-      />
+      {isFilterOpen && (
+        <FilterDropdown
+          isOpen={isFilterOpen}
+          closeDropdown={() => setIsFilterOpen(false)}
+          filterButtonRef={filterButtonRef}
+        />
+      )}
 
       {/* Create Task Modal */}
-      {isModalOpen && <CreateTaskModal onClose={() => setIsModalOpen(false)} />}
+      {isModalOpen && (
+        <>
+          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-10" />
+          <div className="fixed inset-0 flex items-center justify-center z-20">
+            <CreateTaskModal onClose={() => setIsModalOpen(false)} />
+          </div>
+        </>
+      )}
     </div>
   )
 }

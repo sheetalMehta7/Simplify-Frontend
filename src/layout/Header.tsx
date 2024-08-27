@@ -2,24 +2,21 @@ import { Button, Navbar, Modal } from 'flowbite-react'
 import { useState } from 'react'
 import { DarkThemeToggle } from 'flowbite-react'
 import logo from '../assets/logo.svg'
-import LoginModal from '../components/LoginModal'
-import SignUpModal from '../components/SignupModal'
+import LoginModal from '../components/Modals/LoginModal'
+import SignUpModal from '../components/Modals/SignupModal'
 
 const Header: React.FC = () => {
-  const [isLoginOpen, setIsLoginOpen] = useState(false)
-  const [isSignUpOpen, setIsSignUpOpen] = useState(false)
+  const [activeModal, setActiveModal] = useState<'login' | 'signup' | null>(
+    null,
+  )
 
-  const handleLoginOpen = () => {
-    setIsLoginOpen(true)
-    setIsSignUpOpen(false)
-  }
-  const handleLoginClose = () => setIsLoginOpen(false)
+  const openLoginModal = () => setActiveModal('login')
+  const openSignUpModal = () => setActiveModal('signup')
+  const closeModal = () => setActiveModal(null)
 
-  const handleSignUpOpen = () => {
-    setIsSignUpOpen(true)
-    setIsLoginOpen(false)
-  }
-  const handleSignUpClose = () => setIsSignUpOpen(false)
+  // Switch modals
+  const switchToSignUp = () => setActiveModal('signup')
+  const switchToLogin = () => setActiveModal('login')
 
   return (
     <div>
@@ -31,8 +28,8 @@ const Header: React.FC = () => {
           </span>
         </Navbar.Brand>
         <div className="flex items-center gap-2 md:order-2">
-          <Button onClick={handleSignUpOpen}>Sign up</Button>
-          <Button onClick={handleLoginOpen}>Log in</Button>
+          <Button onClick={openSignUpModal}>Sign up</Button>
+          <Button onClick={openLoginModal}>Log in</Button>
           <DarkThemeToggle />
           <Navbar.Toggle />
         </div>
@@ -45,25 +42,33 @@ const Header: React.FC = () => {
         </Navbar.Collapse>
       </Navbar>
 
-      {isLoginOpen && (
+      {/* Login Modal */}
+      {activeModal === 'login' && (
         <Modal
           show={true}
-          onClose={handleLoginClose}
+          onClose={closeModal}
           size="md"
           className="fixed inset-0 flex items-center justify-center"
         >
-          <LoginModal onClose={handleLoginClose} />
+          <LoginModal
+            onClose={closeModal}
+            onSwitch={switchToSignUp} // Pass switch handler
+          />
         </Modal>
       )}
 
-      {isSignUpOpen && (
+      {/* Sign Up Modal */}
+      {activeModal === 'signup' && (
         <Modal
           show={true}
-          onClose={handleSignUpClose}
+          onClose={closeModal}
           size="md"
           className="fixed inset-0 flex items-center justify-center"
         >
-          <SignUpModal onClose={handleSignUpClose} />
+          <SignUpModal
+            onClose={closeModal}
+            onSwitch={switchToLogin} // Pass switch handler
+          />
         </Modal>
       )}
     </div>

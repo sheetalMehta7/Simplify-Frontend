@@ -1,29 +1,53 @@
 import React, { useState } from 'react'
-import { SidebarNav } from '../layout/SidebarNav'
-import { TopNav } from '../layout/TopNav'
+import DashboardLayout from '../layout/DashboardLayout'
 import { DashboardTabs } from '../components/DashboardTabs'
 import { TaskBoard } from '../components/TaskBoard'
 
 const Dashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('My Tasks')
+  const [activeTab, setActiveTab] = useState('Dashboard')
+  const [activeSubTab, setActiveSubTab] = useState('My Tasks')
+
+  const handleTabSelect = (tab: string) => {
+    setActiveTab(tab)
+    // Reset sub-tab when switching to a different main tab
+    if (tab !== 'Dashboard') {
+      setActiveSubTab('My Tasks')
+    }
+  }
+
+  const handleSubTabSelect = (subTab: string) => {
+    setActiveSubTab(subTab)
+  }
 
   return (
-    <div className="grid grid-cols-12 h-screen">
-      <div className="col-span-2">
-        <SidebarNav />
+    <DashboardLayout onTabSelect={handleTabSelect}>
+      <div>
+        {activeTab === 'Dashboard' && (
+          <>
+            <DashboardTabs
+              setActiveTab={handleSubTabSelect}
+              activeTab={activeSubTab}
+            />
+            <div>
+              {activeSubTab === 'My Tasks' && <TaskBoard />}
+              {activeSubTab === 'Recent' && <div>Recent content goes here</div>}
+              {activeSubTab === 'Projects' && (
+                <div>Projects content goes here</div>
+              )}
+            </div>
+          </>
+        )}
+        {activeTab === 'Issues' && <div>Issues content goes here</div>}
+        {activeTab === 'Boards' && <div>Boards content goes here</div>}
+        {activeTab === 'Calendar' && <div>Calendar content goes here</div>}
+        {activeTab === 'Projects' && <div>Projects content goes here</div>}
+        {activeTab === 'Development' && (
+          <div>Development content goes here</div>
+        )}
+        {activeTab === 'Marketing' && <div>Marketing content goes here</div>}
+        {activeTab === 'Sales' && <div>Sales content goes here</div>}
       </div>
-      <div className="col-span-10 bg-gray-900 text-white">
-        <TopNav />
-        <div className="p-4">
-          <DashboardTabs setActiveTab={setActiveTab} activeTab={activeTab} />
-          <div>
-            {activeTab === 'My Tasks' && <TaskBoard />}
-            {activeTab === 'Recent' && <div>Recent content goes here</div>}
-            {activeTab === 'Projects' && <div>Projects content goes here</div>}
-          </div>
-        </div>
-      </div>
-    </div>
+    </DashboardLayout>
   )
 }
 

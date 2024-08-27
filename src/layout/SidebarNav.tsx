@@ -5,98 +5,98 @@ import { RiGitRepositoryCommitsFill } from 'react-icons/ri'
 import { BsKanban, BsFillBarChartLineFill, BsClock } from 'react-icons/bs'
 import { AiOutlineMail } from 'react-icons/ai'
 import { CgLogOut } from 'react-icons/cg'
-import { Link } from 'react-router-dom'
 
-export const SidebarNav: React.FC = () => {
+interface SidebarNavProps {
+  onTabSelect: (tab: string) => void
+}
+
+export const SidebarNav: React.FC<SidebarNavProps> = ({ onTabSelect }) => {
   return (
-    <aside className="h-full bg-gray-800 text-white flex flex-col ">
+    <aside className="h-full bg-gray-800 text-white flex flex-col">
       <div className="p-4">
         <h1 className="text-xl font-bold tracking-wide pl-1">Simplify</h1>
       </div>
       <nav className="flex-1">
         <ul className="space-y-2">
           <li>
-            <Link
-              to="/dashboard"
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg"
+            <button
+              onClick={() => onTabSelect('Dashboard')}
+              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
             >
               <MdDashboard className="mr-3 text-xl" />
               Dashboard
-            </Link>
+            </button>
           </li>
           <li>
-            <Link
-              to="/issues"
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg"
+            <button
+              onClick={() => onTabSelect('Issues')}
+              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
             >
               <RiGitRepositoryCommitsFill className="mr-3 text-xl" />
               Issues
-            </Link>
+            </button>
           </li>
           <li>
-            <Link
-              to="/boards"
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg"
+            <button
+              onClick={() => onTabSelect('Boards')}
+              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
             >
               <BsKanban className="mr-3 text-xl" />
               Boards
-            </Link>
+            </button>
           </li>
           <li>
-            <Link
-              to="/calendar"
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg"
+            <button
+              onClick={() => onTabSelect('Calendar')}
+              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
             >
               <MdCalendarToday className="mr-3 text-xl" />
               Calendar
-            </Link>
+            </button>
           </li>
           <li>
-            <Link
-              to="/projects"
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg"
+            <button
+              onClick={() => onTabSelect('Projects')}
+              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
             >
               <HiClipboardList className="mr-3 text-xl" />
               Projects
-            </Link>
+            </button>
           </li>
           <li>
-            <Link
-              to="/development"
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg"
+            <button
+              onClick={() => onTabSelect('Development')}
+              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
             >
               <BsFillBarChartLineFill className="mr-3 text-xl" />
               Development
-            </Link>
+            </button>
           </li>
           <li>
-            <Link
-              to="/marketing"
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg"
+            <button
+              onClick={() => onTabSelect('Marketing')}
+              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
             >
               <AiOutlineMail className="mr-3 text-xl" />
               Marketing
-            </Link>
+            </button>
           </li>
           <li>
-            <Link
-              to="/sales"
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg"
+            <button
+              onClick={() => onTabSelect('Sales')}
+              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
             >
               <BsClock className="mr-3 text-xl" />
               Sales
-            </Link>
+            </button>
           </li>
         </ul>
       </nav>
       <div className="p-4">
-        <Link
-          to="/"
-          className="flex items-center p-4 hover:bg-gray-700 rounded-lg"
-        >
+        <button className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left">
           <CgLogOut className="mr-3 text-xl" />
           Log out
-        </Link>
+        </button>
       </div>
     </aside>
   )

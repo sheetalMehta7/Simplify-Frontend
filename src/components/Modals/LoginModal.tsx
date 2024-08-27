@@ -3,12 +3,14 @@ import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { Label, TextInput, Button } from 'flowbite-react'
 import { useNavigate } from 'react-router-dom'
+import { FaTimes } from 'react-icons/fa'
 
 interface LoginModalProps {
   onClose: () => void
+  onSwitch: () => void
 }
 
-const LoginModal: FC<LoginModalProps> = ({ onClose }) => {
+const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
   const [touched, setTouched] = useState<{ [key: string]: boolean }>({})
   const navigate = useNavigate()
 
@@ -39,6 +41,14 @@ const LoginModal: FC<LoginModalProps> = ({ onClose }) => {
     })
   }
 
+  // Handle Enter key press
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault() // Prevent default form submission behavior
+      handleSubmit()
+    }
+  }
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 animate-modal">
       <div className="relative w-full max-w-md p-8 mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-blue-300 ring-2 ring-blue-500">
@@ -53,7 +63,7 @@ const LoginModal: FC<LoginModalProps> = ({ onClose }) => {
         </div>
 
         {/* Form */}
-        <form onSubmit={formik.handleSubmit}>
+        <form onSubmit={formik.handleSubmit} onKeyDown={handleKeyDown}>
           <div className="mb-4">
             <div className="mb-2 block">
               <Label
@@ -106,8 +116,8 @@ const LoginModal: FC<LoginModalProps> = ({ onClose }) => {
           </div>
           <Button
             type="button"
-            color="green"
-            className="w-full py-2 dark:text-white bg-green-400 hover:bg-green-700"
+            color="blue"
+            className="w-full py-2 dark:text-white bg-blue-500 hover:bg-blue-700"
             onClick={handleSubmit}
           >
             Log In
@@ -136,22 +146,22 @@ const LoginModal: FC<LoginModalProps> = ({ onClose }) => {
           <p>
             Don't have an account?{' '}
             <a
-              className="text-blue-600 hover:underline dark:text-blue-500"
-              onClick={onClose}
+              className="text-blue-600 hover:underline dark:text-blue-500 cursor-pointer"
+              onClick={onSwitch}
             >
               Sign up
             </a>
           </p>
           <p className="mt-2">
             <a
-              className="text-gray-500 hover:underline dark:text-gray-400"
+              className="text-gray-500 hover:underline dark:text-gray-400 cursor-pointer"
               href="/"
             >
               Privacy Policy
             </a>{' '}
             &middot;{' '}
             <a
-              className="text-gray-500 hover:underline dark:text-gray-400"
+              className="text-gray-500 hover:underline dark:text-gray-400 cursor-pointer"
               href="/"
             >
               Terms of Service
@@ -164,7 +174,7 @@ const LoginModal: FC<LoginModalProps> = ({ onClose }) => {
           onClick={onClose}
           className="absolute text-3xl top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 w-8 h-8 flex items-center justify-center rounded-full"
         >
-          &times;
+          <FaTimes />
         </button>
       </div>
     </div>

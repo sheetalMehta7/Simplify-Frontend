@@ -2,8 +2,13 @@ import React, { useState, useRef, useEffect } from 'react'
 import { IoMdNotificationsOutline, IoMdSearch } from 'react-icons/io'
 import { RiSettingsLine } from 'react-icons/ri'
 import { CgProfile } from 'react-icons/cg'
-import UserProfileDropdown from '../components/UserProfileDropdown'
-import NotificationDropdown from '../components/NotificationDropdown'
+import UserProfileDropdown from '../components/Dropdowns/UserProfileDropdown'
+import NotificationDropdown from '../components/Dropdowns/NotificationDropdown'
+
+const CgProfileWithRef = React.forwardRef<
+  SVGSVGElement,
+  React.SVGProps<SVGSVGElement>
+>((props, ref) => <CgProfile ref={ref} {...props} />)
 
 export const TopNav: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
@@ -69,9 +74,9 @@ export const TopNav: React.FC = () => {
             />
           )}
         </div>
-        <RiSettingsLine className="text-2xl cursor-pointer" />{' '}
+        <RiSettingsLine className="text-2xl cursor-pointer" />
         {/* Increased icon size */}
-        <CgProfile
+        <CgProfileWithRef
           className="text-2xl cursor-pointer" // Increased icon size
           ref={profileIconRef}
           onClick={toggleProfileDropdown}
