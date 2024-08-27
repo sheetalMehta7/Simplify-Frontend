@@ -17,13 +17,14 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   return (
     <div className="absolute right-0 top-full mt-2 w-64 bg-slate-800 border border-white-300 rounded-lg shadow-lg z-50">
       <div className="p-4 text-sm">
-        <h3 className=" font-bold mb-2 text-center text-yellow-200">
-          Notifications
-        </h3>
+        <h3 className=" font-bold mb-2 pl-2 text-yellow-200 ">Notifications</h3>
         <ul className="space-y-2 ">
           {notifications.map((notification, index) => (
             <>
-              <li key={index} className="p-2 hover:bg-slate-700 rounded">
+              <li
+                key={index}
+                className="p-2 hover:bg-slate-700 rounded cursor-pointer"
+              >
                 {notification}
               </li>
               <hr />

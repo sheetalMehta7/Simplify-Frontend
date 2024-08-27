@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import moment from 'moment'
+import { MdClose } from 'react-icons/md'
 
 interface CreateTaskModalProps {
   onClose: () => void
@@ -45,8 +46,16 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-      <div className="bg-gray-800 text-white p-6 rounded-lg w-96">
-        <h2 className="text-2xl font-bold mb-4">Create New Task</h2>
+      <div className="relative bg-gray-800 text-white p-6 rounded-lg w-96">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold">Create New Task</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white text-2xl transition-colors"
+          >
+            <MdClose />
+          </button>
+        </div>
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Title</label>
           <input

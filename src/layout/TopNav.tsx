@@ -42,15 +42,14 @@ export const TopNav: React.FC = () => {
 
   return (
     <div className="relative flex items-center justify-between bg-gray-800 text-white p-4">
-      <div className="flex items-center w-full max-w-2xl relative">
+      <div className="flex items-center w-full max-w-4xl relative">
         <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <IoMdSearch className="text-gray-400 text-xl" />
         </span>
         <input
           type="text"
           placeholder="Search people, projects or tasks"
-          className="pl-10 w-full bg-gray-700 text-white rounded-lg border-none focus:ring-0"
-          style={{ width: '100%' }}
+          className="pl-10 w-full bg-gray-700 text-white rounded-lg border-none focus:ring-0 w-100"
         />
       </div>
       <div className="flex gap-6 relative">

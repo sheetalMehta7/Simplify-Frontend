@@ -80,6 +80,7 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
       <FilterDropdown
         isOpen={isFilterOpen}
         closeDropdown={() => setIsFilterOpen(false)}
+        filterButtonRef={filterButtonRef}
       />
 
       {/* Create Task Modal */}
