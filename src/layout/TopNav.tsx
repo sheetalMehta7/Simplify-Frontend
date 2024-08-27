@@ -46,7 +46,7 @@ export const TopNav: React.FC = () => {
   }, [])
 
   return (
-    <div className="relative flex items-center justify-between bg-gray-800 text-white p-4">
+    <div className="relative flex items-center justify-between p-4">
       <div className="flex items-center w-full max-w-4xl relative">
         <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <IoMdSearch className="text-gray-400 text-xl" />

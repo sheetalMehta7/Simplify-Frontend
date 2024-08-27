@@ -1,24 +1,17 @@
 import React from 'react'
+import { Outlet } from 'react-router-dom';
 import { SidebarNav } from '../layout/SidebarNav'
 import { TopNav } from '../layout/TopNav'
 
-interface DashboardLayoutProps {
-  children: React.ReactNode
-  onTabSelect: (tab: string) => void
-}
-
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-  children,
-  onTabSelect,
-}) => {
+const DashboardLayout = () => {
   return (
-    <div className="grid grid-cols-12 h-screen">
+    <div className="grid h-screen grid-cols-12 db-bg" style={{width: '1000px'}}>
       <div className="col-span-2">
-        <SidebarNav onTabSelect={onTabSelect} />
+        <SidebarNav />
       </div>
-      <div className="col-span-10 bg-gray-900 text-white flex flex-col">
+      <div className="col-span-10 flex flex-col text-white">
         <TopNav />
-        <main className="flex-1 p-4">{children}</main>
+        <Outlet />
       </div>
     </div>
   )

@@ -14,6 +14,14 @@
   }
 }
 
+.db-bg {
+  background: rgba(34, 26, 74, 0.6);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(173, 173, 173, 0.3);
+}
+
 .animate-modal {
   animation: modal-in 0.3s ease-out;
 }
