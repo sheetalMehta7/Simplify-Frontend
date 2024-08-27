@@ -6,14 +6,14 @@ import {
   DropResult,
 } from 'react-beautiful-dnd'
 import { Table } from 'flowbite-react'
-import TaskCard from './TaskCard' // Import TaskCard component
+import TaskCard from './TaskCard'
 
 // Define the interface for Task
 interface Task {
   id: string
   content: string
   assignee: string
-  dueDate: string // ISO date string
+  dueDate: string
   status: string
 }
 
@@ -29,7 +29,7 @@ const initialTasks: TaskColumns = {
       id: 'task-1',
       content: 'Design the new landing page',
       assignee: 'John Doe',
-      dueDate: '2024-09-01', // ISO date string format
+      dueDate: '2024-09-01',
       status: 'todo',
     },
     {
@@ -113,7 +113,7 @@ export const TaskBoard: React.FC = () => {
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="overflow-x-auto p-4">
         <Table>
-          <Table.Head>
+          <Table.Head className="text-center">
             <Table.HeadCell>To-Do</Table.HeadCell>
             <Table.HeadCell>In-Progress</Table.HeadCell>
             <Table.HeadCell>Review</Table.HeadCell>
@@ -124,7 +124,7 @@ export const TaskBoard: React.FC = () => {
               {['todo', 'in-progress', 'review', 'done'].map((columnId) => (
                 <Table.Cell
                   key={columnId}
-                  className="border border-slate-700 rounded-md p-2"
+                  className="border border-slate-700 rounded-md w-1/4"
                 >
                   <Droppable droppableId={columnId}>
                     {(provided, snapshot) => (

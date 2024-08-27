@@ -7,6 +7,7 @@ import {
   MdFilterAlt,
 } from 'react-icons/md'
 import { FilterDropdown } from '../components/FilterDropdown'
+import { CreateTaskModal } from './CreateTaskModal'
 
 interface DashboardTabsProps {
   setActiveTab: (tabName: string) => void
@@ -18,6 +19,7 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
   activeTab,
 }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false) // State to control modal visibility
   const filterButtonRef = useRef<HTMLButtonElement>(null)
 
   const tabClass = (tabName: string) =>
@@ -30,8 +32,8 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
   }
 
   return (
-    <div className="relative p-4 bg-slate-800 rounded-md shadow-md mb-4">
-      <div className="flex justify-between items-center mb-4">
+    <div className="relative p-4 bg-slate-800 rounded-md shadow-md mt-2 mb-3">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex space-x-4">
           <button
             className={tabClass('My Tasks')}
@@ -65,7 +67,10 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
         </div>
 
         {/* Create Tasks Button */}
-        <button className="flex items-center justify-center rounded-md w-36 h-10 border border-gray-300 hover:bg-blue-400 hover:text-white transition-all duration-300">
+        <button
+          className="flex items-center justify-center rounded-md w-36 h-10 border border-gray-300 hover:bg-blue-400 hover:text-white transition-all duration-300"
+          onClick={() => setIsModalOpen(true)}
+        >
           <MdCreate className="h-6 mr-2" />
           Create Tasks
         </button>
@@ -76,6 +81,9 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
         isOpen={isFilterOpen}
         closeDropdown={() => setIsFilterOpen(false)}
       />
+
+      {/* Create Task Modal */}
+      {isModalOpen && <CreateTaskModal onClose={() => setIsModalOpen(false)} />}
     </div>
   )
 }
