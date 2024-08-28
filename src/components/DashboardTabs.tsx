@@ -19,7 +19,7 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
   activeTab,
 }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const [isModalOpen, setIsModalOpen] = useState(false) // State to control modal visibility
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const filterButtonRef = useRef<HTMLButtonElement>(null)
 
   const tabClass = (tabName: string) =>

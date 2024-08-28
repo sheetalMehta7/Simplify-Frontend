@@ -34,17 +34,24 @@
   background: transparent; /* Transparent background for tiles */
   font-size: 1rem; /* Increase font size for better readability */
   text-align: center; /* Center-align text */
-  transition: background 0.3s ease; /* Smooth transition for hover effect */
+  transition: 0.3s ease; /* Smooth transition for hover effect */
+  border: 2px solid #1f2937; /* Border with dark gray color */
+  margin: 2px; /* Add margin to create gaps between tiles */
+  box-sizing: border-box; /* Ensure padding and borders are included in the element's width and height */
+}
+.react-calendar__tile--active {
+  background: #404455; /* Custom active date background */
+  color: white; /* Custom active date text color */
 }
 
-.react-calendar__tile--active {
-  background: #f59e0b; /* Custom active date background */
-  color: #ffffff; /* Custom active date text color */
+.react-calendar__tile:focus {
+  background: #404455; /* Custom active date background */
+  color: white; /* Custom active date text color */
 }
 
 .react-calendar__tile--now {
-  background: #10b981; /* Custom current date background */
-  color: #ffffff; /* Custom current date text color */
+  background: #ffcc5d; /* Custom current date background */
+  color: black; /* Custom current date text color */
 }
 
 .react-calendar__tile:hover {

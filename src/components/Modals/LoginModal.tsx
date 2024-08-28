@@ -116,8 +116,8 @@ const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
           </div>
           <Button
             type="button"
-            color="blue"
-            className="w-full py-2 dark:text-white bg-blue-500 hover:bg-blue-700"
+            color="green"
+            className="w-full py-2 "
             onClick={handleSubmit}
           >
             Log In
