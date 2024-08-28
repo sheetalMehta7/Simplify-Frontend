@@ -24,8 +24,10 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
 
   const tabClass = (tabName: string) =>
     `flex items-center justify-center w-32 h-10 ${
-      tabName === activeTab ? 'bg-blue-400 text-white' : 'text-white'
-    } bg-transparent rounded-md hover:bg-blue-400 hover:text-white transition-all duration-300`
+      tabName === activeTab
+        ? 'bg-blue-400 text-white'
+        : 'bg-transparent text-white'
+    } rounded-md hover:bg-blue-400 hover:text-white transition-all duration-300`
 
   const handleFilterClick = () => {
     setIsFilterOpen(!isFilterOpen)
@@ -58,7 +60,7 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
           </button>
           <button
             ref={filterButtonRef}
-            className="flex items-center justify-center w-32 h-10 text-white bg-transparent rounded-md hover:bg-blue-400 hover:text-white transition-all duration-300"
+            className="flex items-center justify-center w-32 h-10 bg-transparent text-white rounded-md hover:bg-blue-400 hover:text-white transition-all duration-300"
             onClick={handleFilterClick}
           >
             <MdFilterAlt className="mr-2" />

@@ -5,12 +5,14 @@ import { RiGitRepositoryCommitsFill } from 'react-icons/ri'
 import { BsKanban, BsFillBarChartLineFill, BsClock } from 'react-icons/bs'
 import { AiOutlineMail } from 'react-icons/ai'
 import { CgLogOut } from 'react-icons/cg'
+import { useNavigate } from 'react-router-dom'
 
 interface SidebarNavProps {
   onTabSelect: (tab: string) => void
 }
 
 export const SidebarNav: React.FC<SidebarNavProps> = ({ onTabSelect }) => {
+  const navigate = useNavigate()
   return (
     <aside className="h-full bg-gray-800 text-white flex flex-col">
       <div className="p-4">
@@ -93,7 +95,10 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ onTabSelect }) => {
         </ul>
       </nav>
       <div className="p-4">
-        <button className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left">
+        <button
+          className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
+          onClick={() => navigate('/')}
+        >
           <CgLogOut className="mr-3 text-xl" />
           Log out
         </button>

@@ -1,9 +1,7 @@
-import { FC, useState } from 'react'
-import { useFormik } from 'formik'
+import { FC } from 'react'
 import * as Yup from 'yup'
-import { Label, TextInput, Button } from 'flowbite-react'
+import AuthModal from './AuthModal'
 import { useNavigate } from 'react-router-dom'
-import { FaTimes } from 'react-icons/fa'
 
 interface LoginModalProps {
   onClose: () => void
@@ -11,9 +9,7 @@ interface LoginModalProps {
 }
 
 const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
-  const [touched, setTouched] = useState<{ [key: string]: boolean }>({})
   const navigate = useNavigate()
-
   const validationSchema = Yup.object({
     email: Yup.string()
       .email('Invalid email address')
@@ -21,163 +17,24 @@ const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
     password: Yup.string().required('Password is required'),
   })
 
-  const formik = useFormik({
-    initialValues: {
-      email: '',
-      password: '',
-    },
-    validationSchema,
-    onSubmit: (values) => {
-      console.log(values)
-      navigate('/dashboard')
-    },
-  })
-
-  const handleSubmit = () => {
-    formik.handleSubmit()
-    setTouched({
-      email: true,
-      password: true,
-    })
-  }
-
-  // Handle Enter key press
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault() // Prevent default form submission behavior
-      handleSubmit()
-    }
+  const handleSubmit = (values: { email: string; password: string }) => {
+    console.log(values)
+    navigate('/dashboard')
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 animate-modal">
-      <div className="relative w-full max-w-md p-8 mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-blue-300 ring-2 ring-blue-500">
-        {/* Logo and Description */}
-        <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Simplify
-          </h1>
-          <p className="mt-1 text-slate-600 dark:text-slate-400 text-sm">
-            Log in to manage your tasks efficiently
-          </p>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={formik.handleSubmit} onKeyDown={handleKeyDown}>
-          <div className="mb-4">
-            <div className="mb-2 block">
-              <Label
-                htmlFor="email"
-                className="text-slate-900 dark:text-white"
-                color={
-                  formik.errors.email && touched.email ? 'failure' : undefined
-                }
-                value="Email"
-              />
-            </div>
-            <TextInput
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              required
-              {...formik.getFieldProps('email')}
-              color={formik.errors.email && touched.email ? 'failure' : 'gray'}
-            />
-            {formik.errors.email && touched.email ? (
-              <p className="text-sm text-red-500">{formik.errors.email}</p>
-            ) : null}
-          </div>
-          <div className="mb-6">
-            <div className="mb-2 block">
-              <Label
-                htmlFor="password"
-                className="text-slate-900 dark:text-white"
-                color={
-                  formik.errors.password && touched.password
-                    ? 'failure'
-                    : undefined
-                }
-                value="Password"
-              />
-            </div>
-            <TextInput
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              required
-              {...formik.getFieldProps('password')}
-              color={
-                formik.errors.password && touched.password ? 'failure' : 'gray'
-              }
-            />
-            {formik.errors.password && touched.password ? (
-              <p className="text-sm text-red-500">{formik.errors.password}</p>
-            ) : null}
-          </div>
-          <Button
-            type="button"
-            color="green"
-            className="w-full py-2 "
-            onClick={handleSubmit}
-          >
-            Log In
-          </Button>
-        </form>
-
-        {/* OR Divider */}
-        <div className="my-4 flex items-center">
-          <div className="h-px flex-grow bg-gray-300 dark:bg-gray-700"></div>
-          <span className="px-2 text-gray-500 dark:text-gray-400 text-sm">
-            OR
-          </span>
-          <div className="h-px flex-grow bg-gray-300 dark:bg-gray-700"></div>
-        </div>
-
-        {/* Google Login */}
-        <Button className="mb-4 flex w-full items-center justify-center rounded-lg bg-blue-600 py-2 text-white transition hover:bg-blue-700 text-sm">
-          <svg className="mr-2 h-5 w-5" viewBox="0 0 48 48">
-            {/* SVG paths */}
-          </svg>
-          Log in with Google
-        </Button>
-
-        {/* Footer Links */}
-        <div className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
-          <p>
-            Don't have an account?{' '}
-            <a
-              className="text-blue-600 hover:underline dark:text-blue-500 cursor-pointer"
-              onClick={onSwitch}
-            >
-              Sign up
-            </a>
-          </p>
-          <p className="mt-2">
-            <a
-              className="text-gray-500 hover:underline dark:text-gray-400 cursor-pointer"
-              href="/"
-            >
-              Privacy Policy
-            </a>{' '}
-            &middot;{' '}
-            <a
-              className="text-gray-500 hover:underline dark:text-gray-400 cursor-pointer"
-              href="/"
-            >
-              Terms of Service
-            </a>
-          </p>
-        </div>
-
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute text-3xl top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 w-8 h-8 flex items-center justify-center rounded-full"
-        >
-          <FaTimes />
-        </button>
-      </div>
-    </div>
+    <AuthModal
+      title="Simplify"
+      description="Log in to manage your tasks efficiently"
+      initialValues={{ email: '', password: '' }}
+      validationSchema={validationSchema}
+      onSubmit={handleSubmit}
+      onClose={onClose}
+      onSwitch={onSwitch}
+      switchText="Don't have an account?"
+      switchLinkText="Sign up"
+      buttonText="Log In"
+    />
   )
 }
 
