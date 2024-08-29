@@ -1,136 +1,240 @@
 import React, { useState } from 'react'
-import moment from 'moment'
-import { MdClose } from 'react-icons/md'
+import {
+  Modal,
+  Button,
+  TextInput,
+  Textarea,
+  Select,
+  Label,
+  Badge,
+} from 'flowbite-react'
+import {
+  MdClose,
+  MdTitle,
+  MdPerson,
+  MdDateRange,
+  MdPriorityHigh,
+  MdLabel,
+} from 'react-icons/md'
+
+interface Task {
+  id: number
+  title: string
+  assignee: string
+  dueDate: string
+  priority: string
+  status: string
+  description: string
+  tags: string[]
+}
 
 interface CreateTaskModalProps {
+  isOpen: boolean
   onClose: () => void
+  onSave: (task: Task) => void
 }
 
 export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
+  isOpen,
   onClose,
+  onSave,
 }) => {
-  const [taskDetails, setTaskDetails] = useState({
+  const [taskDetails, setTaskDetails] = useState<Task>({
+    id: Date.now(),
     title: '',
     assignee: '',
     dueDate: '',
-    status: 'todo', // Default status
+    priority: 'Low',
+    status: 'todo',
+    description: '',
+    tags: [],
   })
+
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) => {
     const { name, value } = e.target
     setTaskDetails((prevDetails) => ({ ...prevDetails, [name]: value }))
   }
 
-  const handleSubmit = () => {
-    const { title, assignee, dueDate, status } = taskDetails
-    let newErrors: { [key: string]: string } = {}
+  const validateForm = () => {
+    const { title, assignee, dueDate, tags } = taskDetails
+    const newErrors: { [key: string]: string } = {}
 
     if (!title) newErrors.title = 'Title is required'
     if (!assignee) newErrors.assignee = 'Assignee is required'
     if (!dueDate) newErrors.dueDate = 'Due Date is required'
-    else if (moment(dueDate).isBefore(moment(), 'day'))
+    else if (new Date(dueDate) < new Date())
       newErrors.dueDate = 'Due Date cannot be in the past'
-    if (!status) newErrors.status = 'Status is required'
+    if (tags.length === 0) newErrors.tags = 'At least one tag is required'
 
-    if (Object.keys(newErrors).length === 0) {
-      // Logic to create a new task
-      console.log('New Task:', taskDetails)
-      onClose() // Close the modal after creating the task
-    } else {
-      setErrors(newErrors)
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = () => {
+    if (validateForm()) {
+      onSave(taskDetails)
+      onClose()
     }
   }
 
+  const handleTagKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      const value = e.currentTarget.value.trim()
+      if (value && !taskDetails.tags.includes(value)) {
+        setTaskDetails((prevDetails) => ({
+          ...prevDetails,
+          tags: [...prevDetails.tags, value],
+        }))
+        e.currentTarget.value = ''
+      }
+    }
+  }
+
+  const removeTag = (tag: string) => {
+    setTaskDetails((prevDetails) => ({
+      ...prevDetails,
+      tags: prevDetails.tags.filter((t) => t !== tag),
+    }))
+  }
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 animate-modal">
-      <div className="relative bg-gray-800 text-white p-6 rounded-lg w-96">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold">Create New Task</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white text-2xl transition-colors"
-          >
-            <MdClose />
-          </button>
+    <Modal show={isOpen} onClose={onClose} size="lg">
+      <Modal.Header>
+        <div className="flex justify-between items-center w-full">
+          <h2 className="text-xl font-bold">Create New Task</h2>
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Title</label>
-          <input
-            type="text"
-            name="title"
-            value={taskDetails.title}
-            onChange={handleChange}
-            className="w-full p-2 bg-gray-700 rounded-lg border-none focus:ring-0"
-            placeholder="Task title"
-          />
-          {errors.title && (
-            <div className="text-red-500 text-sm mt-1">{errors.title}</div>
-          )}
+      </Modal.Header>
+      <Modal.Body>
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="title" value="Title" />
+            <TextInput
+              id="title"
+              name="title"
+              icon={MdTitle}
+              value={taskDetails.title}
+              onChange={handleChange}
+              color={errors.title ? 'failure' : ''}
+              placeholder="Enter task title"
+            />
+            {errors.title && (
+              <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+            )}
+          </div>
+          <div>
+            <Label htmlFor="assignee" value="Assignee" />
+            <TextInput
+              id="assignee"
+              name="assignee"
+              icon={MdPerson}
+              value={taskDetails.assignee}
+              onChange={handleChange}
+              color={errors.assignee ? 'failure' : ''}
+              placeholder="Assign to"
+            />
+            {errors.assignee && (
+              <p className="text-red-500 text-sm mt-1">{errors.assignee}</p>
+            )}
+          </div>
+          <div>
+            <Label htmlFor="dueDate" value="Due Date" />
+            <TextInput
+              id="dueDate"
+              name="dueDate"
+              type="date"
+              icon={MdDateRange}
+              value={taskDetails.dueDate}
+              onChange={handleChange}
+              color={errors.dueDate ? 'failure' : ''}
+            />
+            {errors.dueDate && (
+              <p className="text-red-500 text-sm mt-1">{errors.dueDate}</p>
+            )}
+          </div>
+          <div>
+            <Label htmlFor="priority" value="Priority" />
+            <Select
+              id="priority"
+              name="priority"
+              value={taskDetails.priority}
+              onChange={handleChange}
+              icon={MdPriorityHigh}
+            >
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="status" value="Status" />
+            <Select
+              id="status"
+              name="status"
+              value={taskDetails.status}
+              onChange={handleChange}
+              icon={MdLabel}
+            >
+              <option value="todo">To-Do</option>
+              <option value="in-progress">In-Progress</option>
+              <option value="review">Review</option>
+              <option value="done">Done</option>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="description" value="Description" />
+            <Textarea
+              id="description"
+              name="description"
+              value={taskDetails.description}
+              onChange={handleChange}
+              placeholder="Enter task description"
+              rows={4}
+            />
+          </div>
+          <div>
+            <Label htmlFor="tags" value="Tags" />
+            <div className="flex items-center gap-2">
+              <TextInput
+                id="tags"
+                name="tags"
+                onKeyDown={handleTagKeyPress}
+                placeholder="Enter tags and press Enter"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {taskDetails.tags.map((tag) => (
+                <Badge key={tag} color="info">
+                  {tag}
+                  <MdClose
+                    className="ml-1 cursor-pointer"
+                    onClick={() => removeTag(tag)}
+                  />
+                </Badge>
+              ))}
+            </div>
+            {errors.tags && (
+              <p className="text-red-500 text-sm mt-1">{errors.tags}</p>
+            )}
+          </div>
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Assignee</label>
-          <input
-            type="text"
-            name="assignee"
-            value={taskDetails.assignee}
-            onChange={handleChange}
-            className="w-full p-2 bg-gray-700 rounded-lg border-none focus:ring-0"
-            placeholder="Assign to"
-          />
-          {errors.assignee && (
-            <div className="text-red-500 text-sm mt-1">{errors.assignee}</div>
-          )}
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Due Date</label>
-          <input
-            type="date"
-            name="dueDate"
-            value={taskDetails.dueDate}
-            onChange={handleChange}
-            className={`w-full p-2 bg-gray-700 rounded-lg border-none focus:ring-0 ${
-              errors.dueDate ? 'border-red-500' : ''
-            }`}
-          />
-          {errors.dueDate && (
-            <div className="text-red-500 text-sm mt-1">{errors.dueDate}</div>
-          )}
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Status</label>
-          <select
-            name="status"
-            value={taskDetails.status}
-            onChange={handleChange}
-            className="w-full p-2 bg-gray-700 rounded-lg border-none focus:ring-0"
-          >
-            <option value="todo">To-Do</option>
-            <option value="in-progress">In-Progress</option>
-            <option value="review">Review</option>
-            <option value="done">Done</option>
-          </select>
-          {errors.status && (
-            <div className="text-red-500 text-sm mt-1">{errors.status}</div>
-          )}
-        </div>
-        <div className="flex justify-end">
-          <button
-            className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg mr-2"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
-          <button
-            className="bg-blue-400 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg"
-            onClick={handleSubmit}
-          >
-            Create Task
-          </button>
-        </div>
-      </div>
-    </div>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button color="gray" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button color="blue" onClick={handleSubmit}>
+          Create Task
+        </Button>
+      </Modal.Footer>
+    </Modal>
   )
 }
+
+export default CreateTaskModal

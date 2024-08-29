@@ -8,7 +8,6 @@ import {
 import { Table } from 'flowbite-react'
 import TaskCard from './TaskCard'
 
-// Define the interface for Task
 interface Task {
   id: string
   content: string
@@ -17,12 +16,10 @@ interface Task {
   status: string
 }
 
-// Define the type for TaskColumns
 interface TaskColumns {
   [key: string]: Task[]
 }
 
-// Demo data for tasks
 const initialTasks: TaskColumns = {
   todo: [
     {
@@ -83,7 +80,7 @@ const initialTasks: TaskColumns = {
   ],
 }
 
-export const TaskBoard: React.FC = () => {
+const TaskBoard: React.FC = () => {
   const [tasks, setTasks] = React.useState<TaskColumns>(initialTasks)
 
   const onDragEnd = (result: DropResult) => {
@@ -177,3 +174,5 @@ export const TaskBoard: React.FC = () => {
     </DragDropContext>
   )
 }
+
+export default TaskBoard

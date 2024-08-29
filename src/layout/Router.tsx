@@ -4,12 +4,10 @@ import Dashboard from '../pages/Dashboard'
 
 const AppRouter = () => {
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-      </Routes>
-    </>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/dashboard" element={<Dashboard />}></Route>
+    </Routes>
   )
 }
 

@@ -9,100 +9,118 @@ import { useNavigate } from 'react-router-dom'
 
 interface SidebarNavProps {
   onTabSelect: (tab: string) => void
+  onToggle: () => void
+  isShrinked: boolean
 }
 
-export const SidebarNav: React.FC<SidebarNavProps> = ({ onTabSelect }) => {
+const SidebarNav: React.FC<SidebarNavProps> = ({
+  onTabSelect,
+  onToggle,
+  isShrinked,
+}) => {
   const navigate = useNavigate()
+
   return (
-    <aside className="h-full bg-gray-800 text-white flex flex-col">
-      <div className="p-4">
-        <h1 className="text-xl font-bold tracking-wide pl-1">Simplify</h1>
+    <aside
+      className={`fixed top-0 left-0 h-screen bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200 flex flex-col transition-all duration-300 shadow-lg rounded-r-lg border-r ${
+        isShrinked ? 'w-14' : 'w-52'
+      }`}
+    >
+      <div className="p-4 flex justify-between items-center border-b border-gray-300 dark:border-gray-700">
+        {!isShrinked && (
+          <h1 className="text-lg font-bold tracking-wide">Simplify</h1>
+        )}
+        <button onClick={onToggle} className="text-xl p-2">
+          {isShrinked ? '>' : '<'}
+        </button>
       </div>
-      <nav className="flex-1">
+      <nav className="flex-1 space-y-2 scrollbar-hide">
         <ul className="space-y-2">
           <li>
             <button
               onClick={() => onTabSelect('Dashboard')}
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
+              className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left"
             >
-              <MdDashboard className="mr-3 text-xl" />
-              Dashboard
+              <MdDashboard className="text-xl" />
+              {!isShrinked && <span className="ml-3">Dashboard</span>}
             </button>
           </li>
           <li>
             <button
               onClick={() => onTabSelect('Issues')}
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
+              className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left"
             >
-              <RiGitRepositoryCommitsFill className="mr-3 text-xl" />
-              Issues
+              <RiGitRepositoryCommitsFill className="text-xl" />
+              {!isShrinked && <span className="ml-3">Issues</span>}
             </button>
           </li>
           <li>
             <button
               onClick={() => onTabSelect('Boards')}
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
+              className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left"
             >
-              <BsKanban className="mr-3 text-xl" />
-              Boards
+              <BsKanban className="text-xl" />
+              {!isShrinked && <span className="ml-3">Boards</span>}
             </button>
           </li>
           <li>
             <button
               onClick={() => onTabSelect('Calendar')}
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
+              className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left"
             >
-              <MdCalendarToday className="mr-3 text-xl" />
-              Calendar
+              <MdCalendarToday className="text-xl" />
+              {!isShrinked && <span className="ml-3">Calendar</span>}
             </button>
           </li>
           <li>
             <button
               onClick={() => onTabSelect('Projects')}
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
+              className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left"
             >
-              <HiClipboardList className="mr-3 text-xl" />
-              Projects
+              <HiClipboardList className="text-xl" />
+              {!isShrinked && <span className="ml-3">Projects</span>}
             </button>
           </li>
           <li>
             <button
               onClick={() => onTabSelect('Development')}
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
+              className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left"
             >
-              <BsFillBarChartLineFill className="mr-3 text-xl" />
-              Development
+              <BsFillBarChartLineFill className="text-xl" />
+              {!isShrinked && <span className="ml-3">Development</span>}
             </button>
           </li>
           <li>
             <button
               onClick={() => onTabSelect('Marketing')}
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
+              className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left"
             >
-              <AiOutlineMail className="mr-3 text-xl" />
-              Marketing
+              <AiOutlineMail className="text-xl" />
+              {!isShrinked && <span className="ml-3">Marketing</span>}
             </button>
           </li>
           <li>
             <button
               onClick={() => onTabSelect('Sales')}
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
+              className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left"
             >
-              <BsClock className="mr-3 text-xl" />
-              Sales
+              <BsClock className="text-xl" />
+              {!isShrinked && <span className="ml-3">Sales</span>}
             </button>
           </li>
         </ul>
       </nav>
-      <div className="p-4">
+      <div className="p-4 border-t border-gray-300 dark:border-gray-700">
         <button
-          className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
+          className="flex items-center justify-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full"
           onClick={() => navigate('/')}
         >
-          <CgLogOut className="mr-3 text-xl" />
-          Log out
+          <CgLogOut className="text-xl" />
+          {!isShrinked && <span className="ml-3">Log out</span>}
         </button>
       </div>
     </aside>
   )
 }
+
+export default SidebarNav

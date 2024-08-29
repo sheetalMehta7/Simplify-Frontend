@@ -2,7 +2,7 @@ import Router from './layout/Router'
 
 function App() {
   return (
-    <div className="h-screen w-screen overflow-auto dark:bg-gray-900">
+    <div className="w-screen h-screen overflow-auto bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
       <Router />
     </div>
   )

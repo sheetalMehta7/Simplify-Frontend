@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { IoMdNotificationsOutline, IoMdSearch } from 'react-icons/io'
 import { RiSettingsLine } from 'react-icons/ri'
 import { CgProfile } from 'react-icons/cg'
+import { DarkThemeToggle } from 'flowbite-react'
 import UserProfileDropdown from '../components/Dropdowns/UserProfileDropdown'
 import NotificationDropdown from '../components/Dropdowns/NotificationDropdown'
 
@@ -10,25 +11,24 @@ const CgProfileWithRef = React.forwardRef<
   React.SVGProps<SVGSVGElement>
 >((props, ref) => <CgProfile ref={ref} {...props} />)
 
-export const TopNav: React.FC = () => {
+const TopNav: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
-  const [notifications, setNotifications] = useState(2) // Example notification count
-  const profileIconRef = useRef<SVGSVGElement>(null) // Ref for the profile icon
-  const notificationsIconRef = useRef<SVGSVGElement>(null) // Ref for the notifications icon
+  const [notifications, setNotifications] = useState(2)
 
-  const toggleProfileDropdown = () => setIsProfileOpen(!isProfileOpen)
+  const profileIconRef = useRef<SVGSVGElement>(null)
+  const notificationsIconRef = useRef<SVGSVGElement>(null)
 
+  const toggleProfileDropdown = () => setIsProfileOpen((prev) => !prev)
   const toggleNotificationsDropdown = () =>
-    setIsNotificationsOpen(!isNotificationsOpen)
+    setIsNotificationsOpen((prev) => !prev)
 
   const handleNotificationClick = () => {
-    setNotifications(0) // Clear notifications on click
-    toggleNotificationsDropdown() // Toggle dropdown visibility
+    setNotifications(0)
+    toggleNotificationsDropdown()
   }
 
   useEffect(() => {
-    // Close dropdowns if clicking outside of the dropdown and icons
     const handleClickOutside = (event: MouseEvent) => {
       if (
         profileIconRef.current &&
@@ -46,7 +46,7 @@ export const TopNav: React.FC = () => {
   }, [])
 
   return (
-    <div className="relative flex items-center justify-between bg-gray-800 text-white p-4">
+    <div className="sticky top-0 z-50 flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 shadow-md">
       <div className="flex items-center w-full max-w-4xl relative">
         <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <IoMdSearch className="text-gray-400 text-xl" />
@@ -54,13 +54,14 @@ export const TopNav: React.FC = () => {
         <input
           type="text"
           placeholder="Search people, projects or tasks"
-          className="pl-10 w-full bg-gray-700 text-white rounded-lg border-none focus:ring-0 w-100"
+          className="pl-10 w-full bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg border-none focus:ring-0"
         />
       </div>
-      <div className="flex gap-6 relative">
+      <div className="flex gap-6 relative items-center">
+        <DarkThemeToggle />
         <div className="relative flex items-center" ref={notificationsIconRef}>
           <IoMdNotificationsOutline
-            className="text-2xl cursor-pointer" // Increased icon size
+            className="text-2xl cursor-pointer"
             onClick={handleNotificationClick}
           />
           {notifications > 0 && (
@@ -75,20 +76,23 @@ export const TopNav: React.FC = () => {
           )}
         </div>
         <RiSettingsLine className="text-2xl cursor-pointer" />
-        {/* Increased icon size */}
-        <CgProfileWithRef
-          className="text-2xl cursor-pointer" // Increased icon size
-          ref={profileIconRef}
-          onClick={toggleProfileDropdown}
-        />
-        {isProfileOpen && (
-          <UserProfileDropdown
-            isOpen={isProfileOpen}
-            onClose={() => setIsProfileOpen(false)}
-            iconRef={profileIconRef}
+        <div className="relative flex items-center">
+          <CgProfileWithRef
+            className="text-2xl cursor-pointer"
+            ref={profileIconRef}
+            onClick={toggleProfileDropdown}
           />
-        )}
+          {isProfileOpen && (
+            <UserProfileDropdown
+              isOpen={isProfileOpen}
+              onClose={() => setIsProfileOpen(false)}
+              iconRef={profileIconRef}
+            />
+          )}
+        </div>
       </div>
     </div>
   )
 }
+
+export default TopNav

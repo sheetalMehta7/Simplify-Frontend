@@ -73,7 +73,7 @@ const monthsList = [
   'December',
 ]
 
-const CalendarComponent = () => {
+const CalendarComponent: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -123,11 +123,11 @@ const CalendarComponent = () => {
   }
 
   return (
-    <div className="w-full text-gray-100 border border-slate-500 rounded-md relative pb-2">
-      <header className="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800 relative">
+    <div className="w-full text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-700 rounded-md relative pb-2">
+      <header className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
         <button
           onClick={handlePrevMonth}
-          className="p-2 text-gray-300 hover:text-gray-100"
+          className="p-2 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
         >
           <MdArrowCircleLeft size={30} />
           <span className="sr-only">Previous month</span>
@@ -137,21 +137,21 @@ const CalendarComponent = () => {
           {format(currentDate, 'MMMM yyyy')}
         </h2>
 
-        <div className="flex items-center space-x-4 ml-auto ">
+        <div className="flex items-center space-x-4 ml-auto">
           <div className="relative">
             <button
               onClick={() => setDropdownOpen(!isDropdownOpen)}
-              className="flex items-center p-2 bg-orange-400 text-white rounded-lg shadow-lg hover:bg-orange-400"
+              className="flex items-center p-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600"
             >
               Months <MdArrowDropDown className="ml-1" />
             </button>
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 bg-slate-700 text-gray-200 rounded-lg shadow-lg z-10">
+              <div className="absolute right-0 mt-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg shadow-lg z-10">
                 {monthsList.map((month, index) => (
                   <button
                     key={month}
                     onClick={() => handleMonthJump(index)}
-                    className="block px-4 py-2 hover:bg-gray-500 w-full text-left"
+                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
                   >
                     {month}
                   </button>
@@ -161,7 +161,7 @@ const CalendarComponent = () => {
           </div>
           <button
             onClick={() => setAddEventModalOpen(true)}
-            className="p-2 bg-purple-500 text-white rounded-lg shadow-lg hover:bg-purple-600"
+            className="p-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600"
           >
             Add Event
           </button>
@@ -169,21 +169,19 @@ const CalendarComponent = () => {
 
         <button
           onClick={handleNextMonth}
-          className="p-2 text-gray-300 hover:text-gray-100"
+          className="p-2 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
         >
           <MdArrowCircleRight size={30} />
           <span className="sr-only">Next month</span>
         </button>
       </header>
 
-      <div className="grid grid-cols-7 gap-2 sm:gap-4 text-center text-sm font-medium mt-4 mx-2 sm:mx-4 pl-10">
-        <div className="py-2 text-gray-300">S</div>
-        <div className="py-2 text-gray-300">M</div>
-        <div className="py-2 text-gray-300">T</div>
-        <div className="py-2 text-gray-300">W</div>
-        <div className="py-2 text-gray-300">T</div>
-        <div className="py-2 text-gray-300">F</div>
-        <div className="py-2 text-gray-300">S</div>
+      <div className="grid grid-cols-7 gap-2 sm:gap-4 text-center text-sm font-medium mt-4 mx-2 sm:mx-4">
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
+          <div key={day} className="py-2 text-gray-500 dark:text-gray-400">
+            {day}
+          </div>
+        ))}
         {days.map((day) => {
           const isCurrentMonth = day.getMonth() === currentDate.getMonth()
           const isSelected = selectedDate?.toDateString() === day.toDateString()
@@ -194,15 +192,17 @@ const CalendarComponent = () => {
               key={day.toString()}
               onClick={() => handleDateChange(day)}
               className={`relative flex items-center justify-center text-lg ${
-                isCurrentMonth ? 'bg-gray-800 text-gray-100' : 'text-gray-400'
-              } ${isSelected ? 'border-4 border-blue-500' : ''} rounded-lg ${
                 isCurrentMonth
-                  ? 'w-16 h-16 sm:w-24 sm:h-24'
-                  : 'w-12 h-12 sm:w-16 sm:h-16'
-              }`}
+                  ? 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                  : 'text-gray-400 dark:text-gray-500'
+              } ${isSelected ? 'border-4 border-blue-500 dark:border-blue-400' : ''} rounded-lg ${
+                isCurrentMonth
+                  ? 'w-20 h-20 sm:w-24 sm:h-24'
+                  : 'w-16 h-16 sm:w-20 sm:h-20'
+              } transition-all duration-200 ease-in-out`}
               style={{ minHeight: '64px', minWidth: '64px' }}
             >
-              <span className="block">{format(day, 'd')}</span>
+              <span>{format(day, 'd')}</span>
               {taskTitle && (
                 <div
                   className="absolute bottom-2 left-2 right-2 bg-blue-500 text-white text-xs font-medium rounded-lg p-1 truncate"

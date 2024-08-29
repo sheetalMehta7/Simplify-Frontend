@@ -1,34 +1,16 @@
-// src/pages/Dashboard.tsx
-
 import React, { useState } from 'react'
 import DashboardLayout from '../layout/DashboardLayout'
-import { DashboardTabs } from '../components/DashboardTabs'
-import { TaskBoard } from '../components/TaskBoard'
-import CalendarComponent from '../components/Calendar'
-
-interface Task {
-  id: number
-  title: string
-  date: Date
-}
-
-const sampleTasks: Task[] = [
-  { id: 1, title: 'Task 1', date: new Date() },
-  {
-    id: 2,
-    title: 'Task 2',
-    date: new Date(new Date().setDate(new Date().getDate() + 1)),
-  },
-]
+import DashboardTabs from '../components/DashboardTabs'
+import { Outlet } from 'react-router-dom'
+import Calendar from '../components/Calendar'
 
 const Dashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('Dashboard')
-  const [activeSubTab, setActiveSubTab] = useState('My Tasks')
+  const [activeTab, setActiveTab] = useState<string>('Dashboard')
+  const [activeSubTab, setActiveSubTab] = useState<string>('My Tasks')
 
   const handleTabSelect = (tab: string) => {
     setActiveTab(tab)
-    // Reset sub-tab when switching to a different main tab
-    if (tab !== 'Dashboard') {
+    if (tab === 'Dashboard') {
       setActiveSubTab('My Tasks')
     }
   }
@@ -37,34 +19,70 @@ const Dashboard: React.FC = () => {
     setActiveSubTab(subTab)
   }
 
-  return (
-    <DashboardLayout onTabSelect={handleTabSelect}>
-      <div>
-        {activeTab === 'Dashboard' && (
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'Dashboard':
+        return (
           <>
             <DashboardTabs
               setActiveTab={handleSubTabSelect}
               activeTab={activeSubTab}
             />
-            <div>
-              {activeSubTab === 'My Tasks' && <TaskBoard />}
-              {activeSubTab === 'Recent' && <div>Recent content goes here</div>}
-              {activeSubTab === 'Projects' && (
-                <div>Projects content goes here</div>
-              )}
+            <div className="mt-2">
+              {' '}
+              {/* Reduced margin */}
+              <Outlet />
             </div>
           </>
-        )}
-        {activeTab === 'Issues' && <div>Issues content goes here</div>}
-        {activeTab === 'Boards' && <div>Boards content goes here</div>}
-        {activeTab === 'Calendar' && <CalendarComponent tasks={sampleTasks} />}
-        {activeTab === 'Projects' && <div>Projects content goes here</div>}
-        {activeTab === 'Development' && (
-          <div>Development content goes here</div>
-        )}
-        {activeTab === 'Marketing' && <div>Marketing content goes here</div>}
-        {activeTab === 'Sales' && <div>Sales content goes here</div>}
-      </div>
+        )
+      case 'Calendar':
+        return <Calendar />
+      case 'Issues':
+        return (
+          <p className="text-gray-900 dark:text-gray-200">
+            Issues content goes here.
+          </p>
+        )
+      case 'Boards':
+        return (
+          <p className="text-gray-900 dark:text-gray-200">
+            Boards content goes here.
+          </p>
+        )
+      case 'Projects':
+        return (
+          <p className="text-gray-900 dark:text-gray-200">
+            Projects content goes here.
+          </p>
+        )
+      case 'Development':
+        return (
+          <p className="text-gray-900 dark:text-gray-200">
+            Development content goes here.
+          </p>
+        )
+      case 'Marketing':
+        return (
+          <p className="text-gray-900 dark:text-gray-200">
+            Marketing content goes here.
+          </p>
+        )
+      case 'Sales':
+        return (
+          <p className="text-gray-900 dark:text-gray-200">
+            Sales content goes here.
+          </p>
+        )
+      default:
+        return (
+          <p className="text-gray-900 dark:text-gray-200">Content not found.</p>
+        )
+    }
+  }
+
+  return (
+    <DashboardLayout onTabSelect={handleTabSelect}>
+      <div>{renderContent()}</div>
     </DashboardLayout>
   )
 }
