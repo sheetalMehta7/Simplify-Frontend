@@ -34,7 +34,7 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
   }
 
   return (
-    <div className="relative p-4 bg-slate-800 rounded-md shadow-md mt-2 mb-3">
+    <div className="relative p-5  bg-slate-800 rounded-md shadow-md mt-2 mb-2">
       <div className="flex items-center justify-between mb-4">
         <div className="flex space-x-4">
           <button

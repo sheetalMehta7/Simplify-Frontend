@@ -16,6 +16,7 @@ import {
   MdArrowCircleRight,
 } from 'react-icons/md'
 import { CalendarDrawer } from './CalendarDrawer'
+import AddEventModal from './Modals/AddEventModal'
 
 interface Task {
   id: number
@@ -78,6 +79,7 @@ const CalendarComponent = () => {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isDropdownOpen, setDropdownOpen] = useState(false)
+  const [isAddEventModalOpen, setAddEventModalOpen] = useState(false)
 
   const handleDateChange = (date: Date) => {
     setSelectedDate(date)
@@ -101,6 +103,11 @@ const CalendarComponent = () => {
   const handleMonthJump = (monthIndex: number) => {
     setCurrentDate(setMonth(currentDate, monthIndex))
     setDropdownOpen(false)
+  }
+
+  const handleAddEvent = (newTask: Task) => {
+    sampleTasks.push(newTask)
+    setAddEventModalOpen(false)
   }
 
   const days = eachDayOfInterval({
@@ -130,16 +137,16 @@ const CalendarComponent = () => {
           {format(currentDate, 'MMMM yyyy')}
         </h2>
 
-        <div className="flex items-center space-x-4 ml-auto">
+        <div className="flex items-center space-x-4 ml-auto ">
           <div className="relative">
             <button
               onClick={() => setDropdownOpen(!isDropdownOpen)}
-              className="flex items-center p-2 bg-blue-500 text-white rounded-lg shadow-lg hover:bg-blue-600"
+              className="flex items-center p-2 bg-orange-400 text-white rounded-lg shadow-lg hover:bg-orange-400"
             >
               Months <MdArrowDropDown className="ml-1" />
             </button>
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 bg-slate-800 text-gray-200 rounded-lg shadow-lg z-10">
+              <div className="absolute right-0 mt-2 bg-slate-700 text-gray-200 rounded-lg shadow-lg z-10">
                 {monthsList.map((month, index) => (
                   <button
                     key={month}
@@ -153,7 +160,7 @@ const CalendarComponent = () => {
             )}
           </div>
           <button
-            onClick={() => setDrawerOpen(true)}
+            onClick={() => setAddEventModalOpen(true)}
             className="p-2 bg-purple-500 text-white rounded-lg shadow-lg hover:bg-purple-600"
           >
             Add Event
@@ -198,7 +205,7 @@ const CalendarComponent = () => {
               <span className="block">{format(day, 'd')}</span>
               {taskTitle && (
                 <div
-                  className="absolute bottom-2 left-2 right-2 bg-red-500 text-white text-xs font-medium rounded-lg p-1 truncate"
+                  className="absolute bottom-2 left-2 right-2 bg-blue-500 text-white text-xs font-medium rounded-lg p-1 truncate"
                   title={taskTitle}
                 >
                   {taskTitle.length > 10
@@ -218,6 +225,13 @@ const CalendarComponent = () => {
         task={selectedTask || null}
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
+      />
+
+      <AddEventModal
+        isOpen={isAddEventModalOpen}
+        onClose={() => setAddEventModalOpen(false)}
+        onSave={handleAddEvent}
+        selectedDate={selectedDate || currentDate}
       />
     </div>
   )

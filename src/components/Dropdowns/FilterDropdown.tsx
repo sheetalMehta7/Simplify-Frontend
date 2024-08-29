@@ -2,6 +2,7 @@ import React from 'react'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import moment from 'moment'
+import { Modal, Button } from 'flowbite-react'
 import { MdClose } from 'react-icons/md'
 
 interface FilterDropdownProps {
@@ -53,92 +54,83 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
   })
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black bg-opacity-70 z-50">
-      <div className="relative bg-slate-800 text-white p-8 rounded-lg shadow-lg w-[500px] h-[400px]">
+    <Modal
+      show={isOpen}
+      onClose={closeDropdown}
+      className="z-50 bg-black bg-opacity-80"
+    >
+      <div className="relative p-6 bg-slate-800 text-white">
         <button
-          className="absolute top-2 right-2 text-white text-2xl hover:bg-slate-700 rounded-full p-1"
+          className="absolute top-2 right-2 text-white text-2xl"
           onClick={closeDropdown}
         >
           <MdClose />
         </button>
         <h2 className="text-xl font-bold mb-4">Filter Options</h2>
-        <form
-          onSubmit={formik.handleSubmit}
-          className="space-y-4 overflow-y-auto h-[calc(100%-48px)]"
-        >
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
           <div className="mb-4">
-            <label className="block text-sm font-medium">Filter by Date</label>
+            <label htmlFor="date" />
             <input
               type="date"
+              id="date"
               name="date"
               value={formik.values.date}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className={`mt-1 block w-full bg-slate-700 border border-gray-300 rounded-md shadow-sm text-white ${
+              className={`mt-1 block w-full bg-slate-700 border border-gray-600 rounded-md text-white ${
                 formik.touched.date && formik.errors.date
                   ? 'border-red-500'
                   : ''
               }`}
             />
-            <div
-              className={`text-red-500 text-sm mt-1 transition-opacity duration-500 ${
-                formik.touched.date && formik.errors.date
-                  ? 'opacity-100'
-                  : 'opacity-0'
-              }`}
-            >
-              {formik.errors.date}
-            </div>
+            {formik.touched.date && formik.errors.date && (
+              <div className="text-red-500 text-sm mt-1">
+                {formik.errors.date}
+              </div>
+            )}
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium">
-              Filter by Assignee
-            </label>
+            <label htmlFor="assignee" />
             <input
               type="text"
+              id="assignee"
               name="assignee"
               value={formik.values.assignee}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               placeholder="Enter assignee name"
-              className="mt-1 block w-full bg-slate-700 border border-gray-300 rounded-md shadow-sm text-white"
+              className="mt-1 block w-full bg-slate-700 border border-gray-600 rounded-md text-white"
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium">
-              Filter by Status
-            </label>
+            <label htmlFor="status" />
             <select
+              id="status"
               name="status"
               value={formik.values.status}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="mt-1 block w-full bg-slate-700 border border-gray-300 rounded-md shadow-sm text-white"
+              className="mt-1 block w-full bg-slate-700 border border-gray-600 rounded-md text-white"
             >
-              <option value="">Select status</option>
+              <option value="">select status</option>
               <option value="todo">Todo</option>
               <option value="in-progress">In Progress</option>
               <option value="review">Review</option>
               <option value="completed">Completed</option>
             </select>
           </div>
-          <div
-            className={`text-red-500 text-sm mt-1 transition-opacity duration-500 ${
-              formik.errors.anyField ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            {formik.errors.anyField}
-          </div>
-          <div className="absolute bottom-4 left-0 right-0 flex justify-end px-4">
-            <button
-              type="submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
-            >
+          {formik.errors.anyField && (
+            <div className="text-red-500 text-sm mt-1">
+              {formik.errors.anyField}
+            </div>
+          )}
+          <div className="flex justify-end space-x-4 mt-4">
+            <Button type="submit" color="blue">
               Apply Filters
-            </button>
+            </Button>
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   )
 }
