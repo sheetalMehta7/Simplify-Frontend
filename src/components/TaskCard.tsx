@@ -18,7 +18,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
     <div className="relative bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md text-gray-900 dark:text-white">
       {/* Flag Icon */}
       <FaFlag
-        className={`absolute top-2 left-2 ${getStatusColor(status)}`}
+        className={`absolute top-2 left-2 ${getFlagColor(status)}`}
         size={16}
       />
       {/* Card Content */}
@@ -31,7 +31,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
           Due Date: {formatDate(dueDate)}
         </p>
         <span
-          className={`text-xxs md:text-xs font-bold py-1 px-2 rounded-full bg-opacity-20 ${getStatusColor(
+          className={`text-xs font-bold py-1 px-2 rounded-full ${getBadgeColor(
             status,
           )}`}
         >
@@ -42,18 +42,33 @@ const TaskCard: React.FC<TaskCardProps> = ({
   )
 }
 
-function getStatusColor(status: string) {
+function getFlagColor(status: string) {
   switch (status) {
     case 'todo':
-      return 'text-yellow-700 dark:text-yellow-500 bg-yellow-200 dark:bg-yellow-500'
+      return 'text-yellow-500'
     case 'in-progress':
-      return 'text-blue-700 dark:text-blue-500 bg-blue-200 dark:bg-blue-500'
+      return 'text-blue-500'
     case 'review':
-      return 'text-orange-700 dark:text-orange-500 bg-orange-200 dark:bg-orange-500'
+      return 'text-orange-500'
     case 'done':
-      return 'text-green-700 dark:text-green-500 bg-green-200 dark:bg-green-500'
+      return 'text-green-500'
     default:
-      return 'text-gray-700 dark:text-gray-500 bg-gray-200 dark:bg-gray-500'
+      return 'text-gray-500'
+  }
+}
+
+function getBadgeColor(status: string) {
+  switch (status) {
+    case 'todo':
+      return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-200 dark:text-yellow-800'
+    case 'in-progress':
+      return 'bg-blue-100 text-blue-700 dark:bg-blue-200 dark:text-blue-800'
+    case 'review':
+      return 'bg-orange-100 text-orange-700 dark:bg-orange-200 dark:text-orange-800'
+    case 'done':
+      return 'bg-green-100 text-green-700 dark:bg-green-200 dark:text-green-800'
+    default:
+      return 'bg-gray-100 text-gray-700 dark:bg-gray-200 dark:text-gray-800'
   }
 }
 

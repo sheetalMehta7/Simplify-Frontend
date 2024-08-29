@@ -29,8 +29,6 @@ const Dashboard: React.FC = () => {
               activeTab={activeSubTab}
             />
             <div className="mt-2">
-              {' '}
-              {/* Reduced margin */}
               <Outlet />
             </div>
           </>
