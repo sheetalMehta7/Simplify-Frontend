@@ -20,14 +20,20 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
           Notifications
         </h3>
         <ul className="mt-2 space-y-2 divide-y divide-gray-200 dark:divide-gray-700">
-          {notifications.map((notification, index) => (
-            <li
-              key={index}
-              className="py-2 text-sm text-gray-700 dark:text-gray-300"
-            >
-              {notification}
+          {notifications.length > 0 ? (
+            notifications.map((notification, index) => (
+              <li
+                key={index}
+                className="py-2 text-sm text-gray-700 dark:text-gray-300"
+              >
+                {notification}
+              </li>
+            ))
+          ) : (
+            <li className="py-2 text-sm text-gray-700 dark:text-gray-300">
+              No new notifications
             </li>
-          ))}
+          )}
         </ul>
         <div className="mt-4">
           <button

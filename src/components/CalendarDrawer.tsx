@@ -25,7 +25,7 @@ export const CalendarDrawer: React.FC<CalendarDrawerProps> = ({
   onClose,
 }) => {
   return (
-    <Drawer open={isOpen} onClose={onClose} position="right">
+    <Drawer open={isOpen} onClose={onClose} position="right" className="z-50">
       <Drawer.Header>
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">Task Details</h2>

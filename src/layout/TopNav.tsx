@@ -1,3 +1,4 @@
+// src/components/TopNav.tsx
 import React, { useState, useRef, useEffect } from 'react'
 import { IoMdNotificationsOutline, IoMdSearch } from 'react-icons/io'
 import { RiSettingsLine } from 'react-icons/ri'

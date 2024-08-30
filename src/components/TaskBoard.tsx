@@ -119,30 +119,34 @@ const TaskBoard: React.FC = () => {
     <>
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="overflow-x-auto p-4">
-          <Table>
+          <Table className="min-w-full table-auto">
             <Table.Head className="text-center">
-              <Table.HeadCell>To-Do</Table.HeadCell>
-              <Table.HeadCell>In-Progress</Table.HeadCell>
-              <Table.HeadCell>Review</Table.HeadCell>
-              <Table.HeadCell>Done</Table.HeadCell>
+              {['To-Do', 'In-Progress', 'Review', 'Done'].map((header) => (
+                <Table.HeadCell
+                  key={header}
+                  className="w-1/4 p-2 text-xs md:text-sm"
+                >
+                  {header}
+                </Table.HeadCell>
+              ))}
             </Table.Head>
             <Table.Body className="divide-y">
               <Table.Row>
                 {['todo', 'in-progress', 'review', 'done'].map((columnId) => (
                   <Table.Cell
                     key={columnId}
-                    className="border border-slate-700 rounded-md w-1/4"
+                    className="border border-slate-700 rounded-md p-2"
                   >
                     <Droppable droppableId={columnId}>
                       {(provided, snapshot) => (
                         <div
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className={`min-h-[400px] p-2 rounded-lg ${
+                          className={`min-h-[300px] md:min-h-[400px] p-2 rounded-lg transition-colors duration-200 ease-in-out ${
                             snapshot.isDraggingOver
                               ? 'bg-slate-300 dark:bg-slate-600'
                               : 'bg-transparent'
-                          } transition-colors duration-200 ease-in-out`}
+                          }`}
                         >
                           {tasks[columnId].map((task, index) => (
                             <Draggable

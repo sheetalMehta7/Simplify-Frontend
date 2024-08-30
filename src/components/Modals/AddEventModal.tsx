@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { MdClose } from 'react-icons/md'
 import { Modal, Button } from 'flowbite-react'
 
 interface Task {
@@ -42,7 +41,7 @@ const AddEventModal = ({
       status,
     }
     onSave(newTask)
-    onClose() // Close modal after saving
+    onClose()
   }
 
   return (
@@ -52,12 +51,6 @@ const AddEventModal = ({
           <h3 className="text-xl font-bold text-gray-900 dark:text-gray-200">
             Add New Event
           </h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-          >
-            <MdClose size={24} />
-          </button>
         </div>
       </Modal.Header>
       <Modal.Body>

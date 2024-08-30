@@ -1,3 +1,4 @@
+// src/components/SidebarNav.tsx
 import React from 'react'
 import { MdDashboard, MdCalendarToday } from 'react-icons/md'
 import { HiClipboardList } from 'react-icons/hi'
@@ -13,6 +14,34 @@ interface SidebarNavProps {
   isShrinked: boolean
 }
 
+interface NavItemProps {
+  icon: React.ReactNode
+  label: string
+  tab: string
+  isShrinked: boolean
+  onTabSelect: (tab: string) => void
+}
+
+const NavItem: React.FC<NavItemProps> = ({
+  icon,
+  label,
+  tab,
+  isShrinked,
+  onTabSelect,
+}) => (
+  <li>
+    <button
+      onClick={() => onTabSelect(tab)}
+      className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left transition-all duration-200"
+    >
+      {icon}
+      {!isShrinked && (
+        <span className="ml-3 text-sm md:text-base">{label}</span>
+      )}
+    </button>
+  </li>
+)
+
 const SidebarNav: React.FC<SidebarNavProps> = ({
   onTabSelect,
   onToggle,
@@ -20,94 +49,67 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
 }) => {
   const navigate = useNavigate()
 
+  const navItems = [
+    {
+      icon: <MdDashboard className="text-xl" />,
+      label: 'Dashboard',
+      tab: 'Dashboard',
+    },
+    {
+      icon: <RiGitRepositoryCommitsFill className="text-xl" />,
+      label: 'Issues',
+      tab: 'Issues',
+    },
+    { icon: <BsKanban className="text-xl" />, label: 'Boards', tab: 'Boards' },
+    {
+      icon: <MdCalendarToday className="text-xl" />,
+      label: 'Calendar',
+      tab: 'Calendar',
+    },
+    {
+      icon: <HiClipboardList className="text-xl" />,
+      label: 'Projects',
+      tab: 'Projects',
+    },
+    {
+      icon: <BsFillBarChartLineFill className="text-xl" />,
+      label: 'Development',
+      tab: 'Development',
+    },
+    {
+      icon: <AiOutlineMail className="text-xl" />,
+      label: 'Marketing',
+      tab: 'Marketing',
+    },
+    { icon: <BsClock className="text-xl" />, label: 'Sales', tab: 'Sales' },
+  ]
+
   return (
     <aside
       className={`fixed top-0 left-0 h-screen bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200 flex flex-col transition-all duration-300 shadow-lg rounded-r-lg ${
         isShrinked ? 'w-14' : 'w-52'
       }`}
     >
-      <div className="p-4 flex justify-between items-center border-gray-300 dark:border-gray-700">
+      <div className="p-4 flex justify-between items-center border-b border-gray-300 dark:border-gray-700">
         {!isShrinked && (
-          <h1 className="text-lg font-bold tracking-wide">Simplify</h1>
+          <h1 className="text-lg font-bold tracking-wide truncate">Simplify</h1>
         )}
         <button onClick={onToggle} className="text-xl p-2">
           {isShrinked ? '>' : '<'}
         </button>
       </div>
-      <nav className="flex-1 space-y-2 scrollbar-hide">
+      <nav className="flex-1 space-y-2 scrollbar-hide overflow-y-auto">
         <ul className="space-y-2">
-          <li>
-            <button
-              onClick={() => onTabSelect('Dashboard')}
-              className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left"
-            >
-              <MdDashboard className="text-xl" />
-              {!isShrinked && <span className="ml-3">Dashboard</span>}
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => onTabSelect('Issues')}
-              className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left"
-            >
-              <RiGitRepositoryCommitsFill className="text-xl" />
-              {!isShrinked && <span className="ml-3">Issues</span>}
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => onTabSelect('Boards')}
-              className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left"
-            >
-              <BsKanban className="text-xl" />
-              {!isShrinked && <span className="ml-3">Boards</span>}
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => onTabSelect('Calendar')}
-              className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left"
-            >
-              <MdCalendarToday className="text-xl" />
-              {!isShrinked && <span className="ml-3">Calendar</span>}
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => onTabSelect('Projects')}
-              className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left"
-            >
-              <HiClipboardList className="text-xl" />
-              {!isShrinked && <span className="ml-3">Projects</span>}
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => onTabSelect('Development')}
-              className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left"
-            >
-              <BsFillBarChartLineFill className="text-xl" />
-              {!isShrinked && <span className="ml-3">Development</span>}
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => onTabSelect('Marketing')}
-              className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left"
-            >
-              <AiOutlineMail className="text-xl" />
-              {!isShrinked && <span className="ml-3">Marketing</span>}
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => onTabSelect('Sales')}
-              className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left"
-            >
-              <BsClock className="text-xl" />
-              {!isShrinked && <span className="ml-3">Sales</span>}
-            </button>
-          </li>
+          {navItems.map((item) => (
+            <NavItem
+              key={item.tab}
+              icon={item.icon}
+              label={item.label}
+              tab={item.tab}
+              isShrinked={isShrinked}
+              onTabSelect={onTabSelect}
+            />
+          ))}
         </ul>
       </nav>
       <div className="p-4 border-t border-gray-300 dark:border-gray-700">
@@ -116,7 +118,9 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
           onClick={() => navigate('/')}
         >
           <CgLogOut className="text-xl" />
-          {!isShrinked && <span className="ml-3">Log out</span>}
+          {!isShrinked && (
+            <span className="ml-3 text-sm md:text-base">Log out</span>
+          )}
         </button>
       </div>
     </aside>

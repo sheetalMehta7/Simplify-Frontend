@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import {
   format,
   startOfMonth,
@@ -92,13 +92,9 @@ const CalendarComponent: React.FC = () => {
     }
   }
 
-  const handlePrevMonth = () => {
-    setCurrentDate(subMonths(currentDate, 1))
-  }
+  const handlePrevMonth = () => setCurrentDate(subMonths(currentDate, 1))
 
-  const handleNextMonth = () => {
-    setCurrentDate(addMonths(currentDate, 1))
-  }
+  const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1))
 
   const handleMonthJump = (monthIndex: number) => {
     setCurrentDate(setMonth(currentDate, monthIndex))
@@ -117,13 +113,13 @@ const CalendarComponent: React.FC = () => {
 
   const getTaskTitle = (date: Date) => {
     const task = sampleTasks.find(
-      (t) => t.date.toDateString() === date.toDateString(),
+      (task) => task.date.toDateString() === date.toDateString(),
     )
     return task ? task.title : ''
   }
 
   return (
-    <div className="w-full text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-700 rounded-md relative pb-2">
+    <div className="w-full text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-700 rounded-md relative pb-4">
       <header className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
         <button
           onClick={handlePrevMonth}
@@ -137,7 +133,7 @@ const CalendarComponent: React.FC = () => {
           {format(currentDate, 'MMMM yyyy')}
         </h2>
 
-        <div className="flex items-center space-x-4 ml-auto">
+        <div className="flex items-center space-x-2 sm:space-x-4 ml-auto">
           <div className="relative">
             <button
               onClick={() => setDropdownOpen(!isDropdownOpen)}
@@ -176,7 +172,7 @@ const CalendarComponent: React.FC = () => {
         </button>
       </header>
 
-      <div className="grid grid-cols-7 gap-2 sm:gap-4 text-center text-sm font-medium mt-4 mx-2 sm:mx-4">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2 lg:gap-4 text-center text-xs sm:text-sm font-medium mt-4 mx-2 sm:mx-4">
         {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
           <div key={day} className="py-2 text-gray-500 dark:text-gray-400">
             {day}
@@ -195,12 +191,8 @@ const CalendarComponent: React.FC = () => {
                 isCurrentMonth
                   ? 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                   : 'text-gray-400 dark:text-gray-500'
-              } ${isSelected ? 'border-4 border-blue-500 dark:border-blue-400' : ''} rounded-lg ${
-                isCurrentMonth
-                  ? 'w-20 h-20 sm:w-24 sm:h-24'
-                  : 'w-16 h-16 sm:w-20 sm:h-20'
-              } transition-all duration-200 ease-in-out`}
-              style={{ minHeight: '64px', minWidth: '64px' }}
+              } ${isSelected ? 'border-2 border-blue-500 dark:border-blue-400' : ''} rounded-lg transition-all duration-200 ease-in-out`}
+              style={{ minHeight: '100px' }}
             >
               <span>{format(day, 'd')}</span>
               {taskTitle && (
