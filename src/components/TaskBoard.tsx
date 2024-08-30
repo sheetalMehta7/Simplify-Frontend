@@ -1,4 +1,5 @@
-import React from 'react'
+// src/components/TaskBoard.tsx
+import React, { useState } from 'react'
 import {
   DragDropContext,
   Droppable,
@@ -7,8 +8,9 @@ import {
 } from 'react-beautiful-dnd'
 import { Table } from 'flowbite-react'
 import TaskCard from './TaskCard'
+import TaskDetailsDrawer from '../components/TaskDetailsDrawer'
 
-interface Task {
+export interface Task {
   id: string
   content: string
   assignee: string
@@ -81,7 +83,9 @@ const initialTasks: TaskColumns = {
 }
 
 const TaskBoard: React.FC = () => {
-  const [tasks, setTasks] = React.useState<TaskColumns>(initialTasks)
+  const [tasks, setTasks] = useState<TaskColumns>(initialTasks)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result
@@ -106,72 +110,86 @@ const TaskBoard: React.FC = () => {
     }
   }
 
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task)
+    setIsDrawerOpen(true)
+  }
+
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="overflow-x-auto p-4">
-        <Table>
-          <Table.Head className="text-center">
-            <Table.HeadCell>To-Do</Table.HeadCell>
-            <Table.HeadCell>In-Progress</Table.HeadCell>
-            <Table.HeadCell>Review</Table.HeadCell>
-            <Table.HeadCell>Done</Table.HeadCell>
-          </Table.Head>
-          <Table.Body className="divide-y">
-            <Table.Row>
-              {['todo', 'in-progress', 'review', 'done'].map((columnId) => (
-                <Table.Cell
-                  key={columnId}
-                  className="border border-slate-700 rounded-md w-1/4"
-                >
-                  <Droppable droppableId={columnId}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={`min-h-[400px] p-2 ${
-                          snapshot.isDraggingOver
-                            ? 'bg-slate-700'
-                            : 'bg-transparent'
-                        } transition-colors duration-300`}
-                      >
-                        {tasks[columnId].map((task, index) => (
-                          <Draggable
-                            key={task.id}
-                            draggableId={task.id}
-                            index={index}
-                          >
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className={`bg-gray-800 text-white p-2 rounded-lg mb-2 transition-transform duration-300 ease-in-out ${
-                                  snapshot.isDragging
-                                    ? 'transform scale-105'
-                                    : ''
-                                }`}
-                              >
-                                <TaskCard
-                                  title={task.content}
-                                  assignee={task.assignee}
-                                  dueDate={task.dueDate}
-                                  status={task.status}
-                                />
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </Table.Cell>
-              ))}
-            </Table.Row>
-          </Table.Body>
-        </Table>
-      </div>
-    </DragDropContext>
+    <>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="overflow-x-auto p-4">
+          <Table>
+            <Table.Head className="text-center">
+              <Table.HeadCell>To-Do</Table.HeadCell>
+              <Table.HeadCell>In-Progress</Table.HeadCell>
+              <Table.HeadCell>Review</Table.HeadCell>
+              <Table.HeadCell>Done</Table.HeadCell>
+            </Table.Head>
+            <Table.Body className="divide-y">
+              <Table.Row>
+                {['todo', 'in-progress', 'review', 'done'].map((columnId) => (
+                  <Table.Cell
+                    key={columnId}
+                    className="border border-slate-700 rounded-md w-1/4"
+                  >
+                    <Droppable droppableId={columnId}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className={`min-h-[400px] p-2 rounded-lg ${
+                            snapshot.isDraggingOver
+                              ? 'bg-slate-300 dark:bg-slate-600'
+                              : 'bg-transparent'
+                          } transition-colors duration-200 ease-in-out`}
+                        >
+                          {tasks[columnId].map((task, index) => (
+                            <Draggable
+                              key={task.id}
+                              draggableId={task.id}
+                              index={index}
+                            >
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className={`bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white p-2 rounded-lg mb-2 transition-transform duration-200 ease-in-out ${
+                                    snapshot.isDragging
+                                      ? 'transform scale-105'
+                                      : ''
+                                  }`}
+                                  onClick={() => handleTaskClick(task)}
+                                >
+                                  <TaskCard
+                                    title={task.content}
+                                    assignee={task.assignee}
+                                    dueDate={task.dueDate}
+                                    status={task.status}
+                                  />
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </Table.Cell>
+                ))}
+              </Table.Row>
+            </Table.Body>
+          </Table>
+        </div>
+      </DragDropContext>
+
+      <TaskDetailsDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        task={selectedTask}
+      />
+    </>
   )
 }
 

@@ -37,8 +37,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   }
 
   return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
+    <div className="flex">
       <div
         className={`transition-all duration-300 ${isShrinked ? 'w-14' : 'w-52'}`}
       >
@@ -50,11 +49,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col">
+      <div
+        className="flex-1 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col transition-opacity duration-300 ease-in-out ${
+        isShrinked ? 'delay-200 opacity-0' : 'opacity-100'
+      }`}"
+      >
         <TopNav />
         <main className="flex-1">
           {children}
-          <Outlet /> {/* Dynamically render the child routes here */}
+          <Outlet />
         </main>
       </div>
     </div>

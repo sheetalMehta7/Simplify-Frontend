@@ -26,7 +26,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
         isShrinked ? 'w-14' : 'w-52'
       }`}
     >
-      <div className="p-4 flex justify-between items-center border-b border-gray-300 dark:border-gray-700">
+      <div className="p-4 flex justify-between items-center border-gray-300 dark:border-gray-700">
         {!isShrinked && (
           <h1 className="text-lg font-bold tracking-wide">Simplify</h1>
         )}
@@ -112,7 +112,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
       </nav>
       <div className="p-4 border-t border-gray-300 dark:border-gray-700">
         <button
-          className="flex items-center justify-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full"
+          className="flex items-center justify-center p-4 hover:bg-gray-200 dark:hover:bg-red-700 rounded-lg w-full transition-all duration-300 text-left"
           onClick={() => navigate('/')}
         >
           <CgLogOut className="text-xl" />
