@@ -85,7 +85,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
 
   return (
     <aside
-      className={`fixed top-0 left-0 h-screen bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200 flex flex-col transition-all duration-300 shadow-lg rounded-r-lg ${
+      className={`fixed top-0 z-40 left-0 h-screen bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200 flex flex-col transition-all duration-300 shadow-lg rounded-r-lg ${
         isShrinked ? 'w-14' : 'w-52'
       }`}
     >
