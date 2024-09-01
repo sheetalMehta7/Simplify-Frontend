@@ -58,7 +58,7 @@ const TopNav: React.FC = () => {
           className="pl-10 w-full bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg border-none focus:ring-0"
         />
       </div>
-      <div className="flex gap-6 relative items-center">
+      <div className="flex gap-6 relative items-center pl-4">
         <DarkThemeToggle />
         <div className="relative flex items-center" ref={notificationsIconRef}>
           <IoMdNotificationsOutline

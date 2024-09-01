@@ -9,6 +9,8 @@ import {
   addMonths,
   subMonths,
   setMonth,
+  isPast,
+  isToday,
 } from 'date-fns'
 import {
   MdArrowDropDown,
@@ -32,7 +34,7 @@ const sampleTasks: Task[] = [
   {
     id: 1,
     title: 'Team Meeting',
-    date: new Date(2024, 7, 14),
+    date: new Date(2024, 8, 1),
     description: 'Monthly review meeting with the team.',
     assignee: 'John Doe',
     priority: 'High',
@@ -182,6 +184,7 @@ const CalendarComponent: React.FC = () => {
           const isCurrentMonth = day.getMonth() === currentDate.getMonth()
           const isSelected = selectedDate?.toDateString() === day.toDateString()
           const taskTitle = getTaskTitle(day)
+          const isPastTask = isPast(day)
 
           return (
             <button
@@ -197,7 +200,11 @@ const CalendarComponent: React.FC = () => {
               <span>{format(day, 'd')}</span>
               {taskTitle && (
                 <div
-                  className="absolute bottom-2 left-2 right-2 bg-blue-500 text-white text-xs font-medium rounded-lg p-1 truncate"
+                  className={`absolute bottom-2 left-2 right-2 text-xs font-medium rounded-lg p-1 truncate ${
+                    isPastTask && !isToday(day)
+                      ? 'bg-blue-500 text-white border border-blue-500 bg-[repeating-linear-gradient(45deg,_transparent,_transparent_5px,_rgba(255,255,255,0.3)_5px,_rgba(255,255,255,0.3)_12px)]'
+                      : 'bg-blue-500 text-white'
+                  }`}
                   title={taskTitle}
                 >
                   {taskTitle.length > 10

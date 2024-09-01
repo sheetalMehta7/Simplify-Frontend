@@ -41,7 +41,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       <div className="flex-1 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col transition-opacity duration-300 ease-in-out">
         <TopNav />
-        <main className="flex-1 p-2 md:p-4">
+        <main className="flex-1 p-1 md:p-2">
           {children}
           <Outlet />
         </main>

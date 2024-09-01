@@ -28,7 +28,7 @@ const Dashboard: React.FC = () => {
               setActiveTab={handleSubTabSelect}
               activeTab={activeSubTab}
             />
-            <div className="mt-2">
+            <div>
               <Outlet />
             </div>
           </>
@@ -65,12 +65,6 @@ const Dashboard: React.FC = () => {
             Marketing content goes here.
           </p>
         )
-      case 'Sales':
-        return (
-          <p className="text-gray-900 dark:text-gray-200">
-            Sales content goes here.
-          </p>
-        )
       default:
         return (
           <p className="text-gray-900 dark:text-gray-200">Content not found.</p>
@@ -80,7 +74,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <DashboardLayout onTabSelect={handleTabSelect}>
-      <div>{renderContent()}</div>
+      <div>{renderContent()}</div> {/* Adjusted margin here */}
     </DashboardLayout>
   )
 }

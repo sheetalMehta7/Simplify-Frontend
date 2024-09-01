@@ -47,7 +47,7 @@ const DashboardTabs: React.FC = () => {
               activeTab={activeTab}
               onTabClick={handleTabClick}
             />
-            <div className="mt-4 md:mt-0 flex space-x-4">
+            <div className="mt-4 md:mt-0 flex space-x-">
               <FilterButton
                 ref={filterButtonRef}
                 isFilterOpen={isFilterOpen}
@@ -121,7 +121,7 @@ const FilterButton = React.forwardRef<HTMLButtonElement, FilterButtonProps>(
   ({ isFilterOpen, onClick }, ref) => (
     <button
       ref={ref}
-      className="flex items-center justify-center px-4 py-2 text-gray-900 dark:text-gray-200 rounded-md transition-all duration-300 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-500"
+      className="flex items-center justify-center px-4 py-2  text-gray-900 dark:text-gray-200 rounded-md transition-all duration-300 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-500"
       onClick={onClick}
     >
       <MdFilterAlt className="mr-2" />

@@ -3,7 +3,7 @@ import React from 'react'
 import { MdDashboard, MdCalendarToday } from 'react-icons/md'
 import { HiClipboardList } from 'react-icons/hi'
 import { RiGitRepositoryCommitsFill } from 'react-icons/ri'
-import { BsKanban, BsFillBarChartLineFill, BsClock } from 'react-icons/bs'
+import { BsKanban, BsFillBarChartLineFill } from 'react-icons/bs'
 import { AiOutlineMail } from 'react-icons/ai'
 import { CgLogOut } from 'react-icons/cg'
 import { useNavigate } from 'react-router-dom'
@@ -81,7 +81,6 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
       label: 'Marketing',
       tab: 'Marketing',
     },
-    { icon: <BsClock className="text-xl" />, label: 'Sales', tab: 'Sales' },
   ]
 
   return (
@@ -90,7 +89,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
         isShrinked ? 'w-14' : 'w-52'
       }`}
     >
-      <div className="p-4 flex justify-between items-center border-b border-gray-300 dark:border-gray-700">
+      <div className="p-4 flex justify-between items-center">
         {!isShrinked && (
           <h1 className="text-lg font-bold tracking-wide truncate">Simplify</h1>
         )}
@@ -112,9 +111,9 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
           ))}
         </ul>
       </nav>
-      <div className="p-4 border-t border-gray-300 dark:border-gray-700">
+      <div className="pb-3">
         <button
-          className="flex items-center justify-center p-4 hover:bg-gray-200 dark:hover:bg-red-700 rounded-lg w-full transition-all duration-300 text-left"
+          className="flex items-center justify-center p-4 hover:bg-gray-200 dark:hover:bg-red-700 rounded-lg w-full transition-all duration-300"
           onClick={() => navigate('/')}
         >
           <CgLogOut className="text-xl" />
