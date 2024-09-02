@@ -97,7 +97,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
           {isShrinked ? '>' : '<'}
         </button>
       </div>
-      <nav className="flex-1 space-y-2 scrollbar-hide overflow-y-auto">
+      <nav className="flex-1 space-y-2 overflow-hidden">
         <ul className="space-y-2">
           {navItems.map((item) => (
             <NavItem

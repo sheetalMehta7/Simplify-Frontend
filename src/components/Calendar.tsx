@@ -16,7 +16,9 @@ import {
   MdArrowDropDown,
   MdArrowCircleLeft,
   MdArrowCircleRight,
+  MdToday,
 } from 'react-icons/md'
+import { Button } from 'flowbite-react'
 import { CalendarDrawer } from './CalendarDrawer'
 import AddEventModal from './Modals/AddEventModal'
 
@@ -43,7 +45,7 @@ const sampleTasks: Task[] = [
   {
     id: 2,
     title: 'Project Deadline',
-    date: new Date(2024, 7, 22),
+    date: new Date(2024, 8, 20),
     description: 'Final deadline for the project submission.',
     assignee: 'Jane Smith',
     priority: 'Medium',
@@ -52,7 +54,7 @@ const sampleTasks: Task[] = [
   {
     id: 3,
     title: 'Annual Review',
-    date: new Date(2024, 7, 27),
+    date: new Date(2024, 8, 23),
     description: 'Annual performance review meeting.',
     assignee: 'Alice Johnson',
     priority: 'Low',
@@ -108,6 +110,10 @@ const CalendarComponent: React.FC = () => {
     setAddEventModalOpen(false)
   }
 
+  const handleTodayClick = () => {
+    setCurrentDate(new Date())
+  }
+
   const days = eachDayOfInterval({
     start: startOfWeek(startOfMonth(currentDate)),
     end: endOfWeek(endOfMonth(currentDate)),
@@ -123,19 +129,31 @@ const CalendarComponent: React.FC = () => {
   return (
     <div className="w-full text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-700 rounded-md relative pb-4">
       <header className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-        <button
-          onClick={handlePrevMonth}
-          className="p-2 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-        >
-          <MdArrowCircleLeft size={30} />
-          <span className="sr-only">Previous month</span>
-        </button>
+        <div className="flex items-center">
+          <button
+            onClick={handlePrevMonth}
+            className="p-2 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+          >
+            <MdArrowCircleLeft size={30} />
+            <span className="sr-only">Previous month</span>
+          </button>
+
+          <Button
+            onClick={handleTodayClick}
+            className="ml-4"
+            color={'gray'}
+            outline
+          >
+            <MdToday className="mr-1 mt-1" />
+            Today
+          </Button>
+        </div>
 
         <h2 className="text-lg font-bold text-center flex-grow">
           {format(currentDate, 'MMMM yyyy')}
         </h2>
 
-        <div className="flex items-center space-x-2 sm:space-x-4 ml-auto">
+        <div className="flex items-center space-x-2 sm:space-x-4 ml-auto mr-4">
           <div className="relative">
             <button
               onClick={() => setDropdownOpen(!isDropdownOpen)}
@@ -194,7 +212,11 @@ const CalendarComponent: React.FC = () => {
                 isCurrentMonth
                   ? 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                   : 'text-gray-400 dark:text-gray-500'
-              } ${isSelected ? 'border-2 border-blue-500 dark:border-blue-400' : ''} rounded-lg transition-all duration-200 ease-in-out`}
+              } ${
+                isSelected
+                  ? 'border-2 border-blue-500 dark:border-blue-400'
+                  : ''
+              } rounded-lg transition-all duration-200 ease-in-out`}
               style={{ minHeight: '100px' }}
             >
               <span>{format(day, 'd')}</span>
