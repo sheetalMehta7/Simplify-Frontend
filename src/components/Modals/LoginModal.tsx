@@ -2,6 +2,8 @@ import { FC } from 'react'
 import * as Yup from 'yup'
 import AuthModal from './AuthModal'
 import { useNavigate } from 'react-router-dom'
+import { login } from '../../api/authApi'
+import { useError } from '../../context/ErrorContext'
 
 interface LoginModalProps {
   onClose: () => void
@@ -10,6 +12,8 @@ interface LoginModalProps {
 
 const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
   const navigate = useNavigate()
+  const { setError } = useError()
+
   const validationSchema = Yup.object({
     email: Yup.string()
       .email('Invalid email address')
@@ -17,9 +21,14 @@ const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
     password: Yup.string().required('Password is required'),
   })
 
-  const handleSubmit = (values: { email: string; password: string }) => {
-    console.log(values)
-    navigate('/dashboard')
+  const handleSubmit = async (values: { email: string; password: string }) => {
+    try {
+      await login(values.email, values.password)
+      navigate('/dashboard')
+      onClose()
+    } catch (error) {
+      setError('Login failed. Please check your credentials and try again.')
+    }
   }
 
   return (
