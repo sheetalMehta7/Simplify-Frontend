@@ -1,4 +1,3 @@
-// src/components/TaskBoard.tsx
 import React, { useState } from 'react'
 import {
   DragDropContext,
@@ -118,8 +117,8 @@ const TaskBoard: React.FC = () => {
   return (
     <>
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="overflow-x-auto p-4">
-          <Table className="min-w-full table-auto">
+        <div className="flex-1 overflow-x-auto p-4">
+          <Table className="min-w-full table-auto h-full">
             <Table.Head className="text-center">
               {['To-Do', 'In-Progress', 'Review', 'Done'].map((header) => (
                 <Table.HeadCell
@@ -130,19 +129,19 @@ const TaskBoard: React.FC = () => {
                 </Table.HeadCell>
               ))}
             </Table.Head>
-            <Table.Body className="divide-y">
-              <Table.Row>
+            <Table.Body className="h-full divide-y">
+              <Table.Row className="h-full">
                 {['todo', 'in-progress', 'review', 'done'].map((columnId) => (
                   <Table.Cell
                     key={columnId}
-                    className="border border-slate-700 rounded-md p-2"
+                    className="h-full border border-slate-700 rounded-md p-2 align-top"
                   >
                     <Droppable droppableId={columnId}>
                       {(provided, snapshot) => (
                         <div
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className={`min-h-[300px] md:min-h-[400px] p-2 rounded-lg transition-colors duration-200 ease-in-out ${
+                          className={`min-h-[400px] md:min-h-[500px] p-2 rounded-lg transition-colors duration-200 ease-in-out flex flex-col h-full ${
                             snapshot.isDraggingOver
                               ? 'bg-slate-300 dark:bg-slate-600'
                               : 'bg-transparent'
