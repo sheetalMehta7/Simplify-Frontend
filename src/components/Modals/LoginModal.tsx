@@ -23,9 +23,13 @@ const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
 
   const handleSubmit = async (values: { email: string; password: string }) => {
     try {
-      await login(values.email, values.password)
+      const { token } = await login(values.email, values.password)
+
+      // Store the JWT token
+      localStorage.setItem('authToken', token)
+
+      // Redirect to dashboard
       navigate('/dashboard')
-      onClose()
     } catch (error) {
       setError('Login failed. Please check your credentials and try again.')
     }
@@ -43,6 +47,7 @@ const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
       switchText="Don't have an account?"
       switchLinkText="Sign up"
       buttonText="Log In"
+      showNameField={false}
     />
   )
 }

@@ -6,14 +6,19 @@ import { useFormik } from 'formik'
 interface AuthModalProps {
   title: string
   description: string
-  initialValues: { email: string; password: string }
-  validationSchema: any // Import Yup's Schema type and use it here
-  onSubmit: (values: { email: string; password: string }) => void
+  initialValues: { email: string; password: string; name?: string }
+  validationSchema: any
+  onSubmit: (values: {
+    email: string
+    password: string
+    name?: string
+  }) => Promise<void>
   onClose: () => void
   onSwitch: () => void
   switchText: string
   switchLinkText: string
   buttonText: string
+  showNameField?: boolean
 }
 
 const AuthModal: FC<AuthModalProps> = ({
@@ -27,13 +32,22 @@ const AuthModal: FC<AuthModalProps> = ({
   switchText,
   switchLinkText,
   buttonText,
+  showNameField = false,
 }) => {
   const [touched, setTouched] = useState<{ [key: string]: boolean }>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   const formik = useFormik({
     initialValues,
     validationSchema,
-    onSubmit: (values) => {
-      onSubmit(values)
+    onSubmit: async (values) => {
+      setIsSubmitting(true)
+      try {
+        await onSubmit(values)
+        onClose() // Close the modal after successful submission
+      } finally {
+        setIsSubmitting(false)
+      }
     },
   })
 
@@ -42,6 +56,7 @@ const AuthModal: FC<AuthModalProps> = ({
     setTouched({
       email: true,
       password: true,
+      ...(showNameField && { name: true }),
     })
   }
 
@@ -54,7 +69,7 @@ const AuthModal: FC<AuthModalProps> = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 animate-modal">
-      <div className="relative w-full max-w-md p-8 mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-blue-300 ring-2 ring-blue-500">
+      <div className="relative w-full max-w-md p-8 mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-blue-300 ring-2 ring-blue-500 max-h-screen overflow-hidden">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
             {title}
@@ -65,6 +80,31 @@ const AuthModal: FC<AuthModalProps> = ({
         </div>
 
         <form onSubmit={formik.handleSubmit} onKeyDown={handleKeyDown}>
+          {showNameField && (
+            <div className="mb-4">
+              <div className="mb-2 block">
+                <Label
+                  htmlFor="name"
+                  className="text-slate-900 dark:text-white"
+                  color={
+                    formik.errors.name && touched.name ? 'failure' : undefined
+                  }
+                  value="Name"
+                />
+              </div>
+              <TextInput
+                id="name"
+                type="text"
+                placeholder="Enter your name"
+                required
+                {...formik.getFieldProps('name')}
+                color={formik.errors.name && touched.name ? 'failure' : 'gray'}
+              />
+              {formik.errors.name && touched.name ? (
+                <p className="text-sm text-red-500">{formik.errors.name}</p>
+              ) : null}
+            </div>
+          )}
           <div className="mb-4">
             <div className="mb-2 block">
               <Label
@@ -120,8 +160,9 @@ const AuthModal: FC<AuthModalProps> = ({
             color="green"
             className="w-full py-2 dark:text-white bg-green-400 hover:bg-green-700"
             onClick={handleSubmit}
+            disabled={isSubmitting}
           >
-            {buttonText}
+            {isSubmitting ? 'Submitting...' : buttonText}
           </Button>
         </form>
 
