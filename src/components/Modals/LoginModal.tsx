@@ -2,8 +2,10 @@ import { FC } from 'react'
 import * as Yup from 'yup'
 import AuthModal from './AuthModal'
 import { useNavigate } from 'react-router-dom'
-import { login } from '../../api/authApi'
 import { useError } from '../../context/ErrorContext'
+import { useAuth0 } from '@auth0/auth0-react'
+import { Button } from 'flowbite-react'
+import { login } from '../../api/authApi'
 
 interface LoginModalProps {
   onClose: () => void
@@ -13,6 +15,7 @@ interface LoginModalProps {
 const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
   const navigate = useNavigate()
   const { setError } = useError()
+  const { loginWithRedirect } = useAuth0()
 
   const validationSchema = Yup.object({
     email: Yup.string()
@@ -35,6 +38,14 @@ const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
     }
   }
 
+  const handleGoogleLogin = () => {
+    try {
+      loginWithRedirect()
+    } catch (error) {
+      setError('Login failed. Please try again.')
+    }
+  }
+
   return (
     <AuthModal
       title="Simplify"
@@ -48,7 +59,16 @@ const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
       switchLinkText="Sign up"
       buttonText="Log In"
       showNameField={false}
-    />
+    >
+      <Button
+        type="button"
+        onClick={handleGoogleLogin}
+        className="mb-4 flex w-full items-center justify-center rounded-lg bg-blue-600 py-2 text-white transition hover:bg-blue-700 text-sm"
+      >
+        <svg className="mr-2 h-5 w-5" viewBox="0 0 48 48"></svg>
+        Log In with Google
+      </Button>
+    </AuthModal>
   )
 }
 

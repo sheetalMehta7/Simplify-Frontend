@@ -1,4 +1,3 @@
-// src/components/SidebarNav.tsx
 import React from 'react'
 import { MdDashboard, MdCalendarToday } from 'react-icons/md'
 import { HiClipboardList } from 'react-icons/hi'
@@ -6,7 +5,7 @@ import { RiGitRepositoryCommitsFill } from 'react-icons/ri'
 import { BsKanban, BsFillBarChartLineFill } from 'react-icons/bs'
 import { AiOutlineMail } from 'react-icons/ai'
 import { CgLogOut } from 'react-icons/cg'
-import { useNavigate } from 'react-router-dom'
+import { useAuth0 } from '@auth0/auth0-react'
 
 interface SidebarNavProps {
   onTabSelect: (tab: string) => void
@@ -47,7 +46,22 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
   onToggle,
   isShrinked,
 }) => {
-  const navigate = useNavigate()
+  const { logout } = useAuth0()
+
+  const handleLogout = () => {
+    // Clear any tokens or data from localStorage/sessionStorage
+    localStorage.removeItem('authToken')
+    sessionStorage.clear()
+
+    // Call the Auth0 logout function and redirect to the homepage
+    logout({
+      logoutParams: { returnTo: window.location.origin },
+    })
+
+    // Alternatively, if you need more control:
+    // logout()
+    // navigate('/', { replace: true })
+  }
 
   const navItems = [
     {
@@ -114,7 +128,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
       <div className="pb-3">
         <button
           className="flex items-center justify-center p-4 hover:bg-gray-200 dark:hover:bg-red-700 rounded-lg w-full transition-all duration-300"
-          onClick={() => navigate('/')}
+          onClick={handleLogout} // Use the handleLogout function
         >
           <CgLogOut className="text-xl" />
           {!isShrinked && (
