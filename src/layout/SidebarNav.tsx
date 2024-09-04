@@ -5,7 +5,7 @@ import { RiGitRepositoryCommitsFill } from 'react-icons/ri'
 import { BsKanban, BsFillBarChartLineFill } from 'react-icons/bs'
 import { AiOutlineMail } from 'react-icons/ai'
 import { CgLogOut } from 'react-icons/cg'
-import { useAuth0 } from '@auth0/auth0-react'
+import { useNavigate } from 'react-router-dom'
 
 interface SidebarNavProps {
   onTabSelect: (tab: string) => void
@@ -46,21 +46,14 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
   onToggle,
   isShrinked,
 }) => {
-  const { logout } = useAuth0()
-
+  const navigate = useNavigate()
   const handleLogout = () => {
     // Clear any tokens or data from localStorage/sessionStorage
     localStorage.removeItem('authToken')
     sessionStorage.clear()
 
-    // Call the Auth0 logout function and redirect to the homepage
-    logout({
-      logoutParams: { returnTo: window.location.origin },
-    })
-
-    // Alternatively, if you need more control:
     // logout()
-    // navigate('/', { replace: true })
+    navigate('/', { replace: true })
   }
 
   const navItems = [

@@ -2,7 +2,7 @@
 import React from 'react'
 import { Drawer, Button } from 'flowbite-react'
 import { FaTimes, FaTasks } from 'react-icons/fa'
-import { Task } from './TaskBoard' // Adjust the import path as necessary
+import { Task } from './TaskBoard'
 
 interface TaskDetailsDrawerProps {
   isOpen: boolean

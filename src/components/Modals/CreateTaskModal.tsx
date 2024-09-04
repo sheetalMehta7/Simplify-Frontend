@@ -11,7 +11,6 @@ import {
 import {
   MdClose,
   MdTitle,
-  MdPerson,
   MdDateRange,
   MdPriorityHigh,
   MdLabel,
@@ -20,11 +19,11 @@ import {
 interface Task {
   id: number
   title: string
-  assignee: string
-  dueDate: string
-  priority: string
+  description?: string
   status: string
-  description: string
+  priority: string
+  dueDate?: string
+  userId: number
   tags: string[]
 }
 
@@ -32,21 +31,23 @@ interface CreateTaskModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: (task: Task) => void
+  userId: number // Added to pass the current user's ID
 }
 
 export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   isOpen,
   onClose,
   onSave,
+  userId,
 }) => {
   const [taskDetails, setTaskDetails] = useState<Task>({
     id: Date.now(),
     title: '',
-    assignee: '',
-    dueDate: '',
-    priority: 'Low',
-    status: 'todo',
     description: '',
+    status: 'todo',
+    priority: 'normal',
+    dueDate: '',
+    userId: userId,
     tags: [],
   })
 
@@ -62,14 +63,13 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   }
 
   const validateForm = () => {
-    const { title, assignee, dueDate, tags } = taskDetails
+    const { title, dueDate, tags } = taskDetails
     const newErrors: { [key: string]: string } = {}
 
     if (!title) newErrors.title = 'Title is required'
-    if (!assignee) newErrors.assignee = 'Assignee is required'
-    if (!dueDate) newErrors.dueDate = 'Due Date is required'
-    else if (new Date(dueDate) < new Date())
+    if (dueDate && new Date(dueDate) < new Date()) {
       newErrors.dueDate = 'Due Date cannot be in the past'
+    }
     if (tags.length === 0) newErrors.tags = 'At least one tag is required'
 
     setErrors(newErrors)
@@ -129,28 +129,13 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             )}
           </div>
           <div>
-            <Label htmlFor="assignee" value="Assignee" />
-            <TextInput
-              id="assignee"
-              name="assignee"
-              icon={MdPerson}
-              value={taskDetails.assignee}
-              onChange={handleChange}
-              color={errors.assignee ? 'failure' : ''}
-              placeholder="Assign to"
-            />
-            {errors.assignee && (
-              <p className="text-red-500 text-sm mt-1">{errors.assignee}</p>
-            )}
-          </div>
-          <div>
             <Label htmlFor="dueDate" value="Due Date" />
             <TextInput
               id="dueDate"
               name="dueDate"
               type="date"
               icon={MdDateRange}
-              value={taskDetails.dueDate}
+              value={taskDetails.dueDate ?? ''}
               onChange={handleChange}
               color={errors.dueDate ? 'failure' : ''}
             />
@@ -167,9 +152,9 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               onChange={handleChange}
               icon={MdPriorityHigh}
             >
-              <option value="Low">Low</option>
-              <option value="Medium">Medium</option>
-              <option value="High">High</option>
+              <option value="normal">Normal</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
             </Select>
           </div>
           <div>
@@ -210,7 +195,11 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             </div>
             <div className="flex flex-wrap gap-2 mt-2">
               {taskDetails.tags.map((tag) => (
-                <Badge key={tag} color="info">
+                <Badge
+                  key={tag}
+                  color="info"
+                  className="flex items-center bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                >
                   {tag}
                   <MdClose
                     className="ml-1 cursor-pointer"

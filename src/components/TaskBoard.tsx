@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   DragDropContext,
   Droppable,
@@ -8,6 +8,7 @@ import {
 import { Table } from 'flowbite-react'
 import TaskCard from './TaskCard'
 import TaskDetailsDrawer from '../components/TaskDetailsDrawer'
+import { getAllTasks, createTask, updateTask, deleteTask } from '../api/taskApi'
 
 export interface Task {
   id: string
@@ -21,72 +22,38 @@ interface TaskColumns {
   [key: string]: Task[]
 }
 
-const initialTasks: TaskColumns = {
-  todo: [
-    {
-      id: 'task-1',
-      content: 'Design the new landing page',
-      assignee: 'John Doe',
-      dueDate: '2024-09-01',
-      status: 'todo',
-    },
-    {
-      id: 'task-2',
-      content: 'Implement user authentication',
-      assignee: 'Jane Doe',
-      dueDate: '2024-09-05',
-      status: 'todo',
-    },
-  ],
-  'in-progress': [
-    {
-      id: 'task-3',
-      content: 'Develop the API endpoints',
-      assignee: 'John Doe',
-      dueDate: '2024-09-10',
-      status: 'in-progress',
-    },
-    {
-      id: 'task-4',
-      content: 'Write unit tests for components',
-      assignee: 'Emily Smith',
-      dueDate: '2024-09-12',
-      status: 'in-progress',
-    },
-  ],
-  review: [
-    {
-      id: 'task-5',
-      content: 'Code review for authentication module',
-      assignee: 'Alice Johnson',
-      dueDate: '2024-09-15',
-      status: 'review',
-    },
-  ],
-  done: [
-    {
-      id: 'task-6',
-      content: 'Setup project repository',
-      assignee: 'Michael Brown',
-      dueDate: '2024-08-25',
-      status: 'done',
-    },
-    {
-      id: 'task-7',
-      content: 'Configure build pipeline',
-      assignee: 'Sophia Davis',
-      dueDate: '2024-08-28',
-      status: 'done',
-    },
-  ],
-}
-
 const TaskBoard: React.FC = () => {
-  const [tasks, setTasks] = useState<TaskColumns>(initialTasks)
+  const [tasks, setTasks] = useState<TaskColumns>({
+    todo: [],
+    'in-progress': [],
+    review: [],
+    done: [],
+  })
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
-  const onDragEnd = (result: DropResult) => {
+  useEffect(() => {
+    // Fetch tasks from the API on component mount
+    const fetchTasks = async () => {
+      const tasks = await getAllTasks()
+      const tasksByStatus: TaskColumns = {
+        todo: [],
+        'in-progress': [],
+        review: [],
+        done: [],
+      }
+
+      tasks.forEach((task) => {
+        tasksByStatus[task.status].push(task)
+      })
+
+      setTasks(tasksByStatus)
+    }
+
+    fetchTasks()
+  }, [])
+
+  const onDragEnd = async (result: DropResult) => {
     const { source, destination } = result
     if (!destination) return
 
@@ -94,6 +61,8 @@ const TaskBoard: React.FC = () => {
     const destinationColumn = destination.droppableId
     const sourceTasks = Array.from(tasks[sourceColumn])
     const [movedTask] = sourceTasks.splice(source.index, 1)
+
+    movedTask.status = destinationColumn // Update task status
 
     if (sourceColumn === destinationColumn) {
       sourceTasks.splice(destination.index, 0, movedTask)
@@ -107,11 +76,35 @@ const TaskBoard: React.FC = () => {
         [destinationColumn]: destinationTasks,
       }))
     }
+
+    // Update the task status in the backend
+    await updateTask(movedTask.id, { status: destinationColumn })
   }
 
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task)
     setIsDrawerOpen(true)
+  }
+
+  const handleTaskCreate = async (task: Partial<Task>) => {
+    const newTask = await createTask(task)
+    setTasks((prev) => ({
+      ...prev,
+      todo: [...prev.todo, newTask], // Add new task to the "todo" column
+    }))
+  }
+
+  const handleTaskDelete = async (taskId: string) => {
+    await deleteTask(taskId)
+    setTasks((prev) => {
+      const newTasks = { ...prev }
+      Object.keys(newTasks).forEach((columnId) => {
+        newTasks[columnId] = newTasks[columnId].filter(
+          (task) => task.id !== taskId,
+        )
+      })
+      return newTasks
+    })
   }
 
   return (

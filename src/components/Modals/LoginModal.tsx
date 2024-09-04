@@ -3,7 +3,6 @@ import * as Yup from 'yup'
 import AuthModal from './AuthModal'
 import { useNavigate } from 'react-router-dom'
 import { useError } from '../../context/ErrorContext'
-import { useAuth0 } from '@auth0/auth0-react'
 import { Button } from 'flowbite-react'
 import { login } from '../../api/authApi'
 
@@ -15,7 +14,6 @@ interface LoginModalProps {
 const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
   const navigate = useNavigate()
   const { setError } = useError()
-  const { loginWithRedirect } = useAuth0()
 
   const validationSchema = Yup.object({
     email: Yup.string()
@@ -24,6 +22,7 @@ const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
     password: Yup.string().required('Password is required'),
   })
 
+  // The handleSubmit function to pass to AuthModal
   const handleSubmit = async (values: { email: string; password: string }) => {
     try {
       const { token } = await login(values.email, values.password)
@@ -33,16 +32,28 @@ const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
 
       // Redirect to dashboard
       navigate('/dashboard')
-    } catch (error) {
-      setError('Login failed. Please check your credentials and try again.')
+    } catch (error: any) {
+      // Check for specific error codes or messages from your API
+      if (error.response) {
+        const status = error.response.status
+        if (status === 401) {
+          setError('Invalid credentials. Please try again.')
+        } else if (status === 404) {
+          setError('User not found. Please check your email or sign up.')
+        } else {
+          setError('Login failed. Please try again later.')
+        }
+      } else {
+        setError('Login failed. Please try again.')
+      }
     }
   }
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     try {
-      loginWithRedirect()
-    } catch (error) {
-      setError('Login failed. Please try again.')
+      navigate('/dashboard')
+    } catch (error: any) {
+      setError('Google login failed. Please try again.')
     }
   }
 
