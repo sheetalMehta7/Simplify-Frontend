@@ -1,3 +1,4 @@
+// src/redux/rootReducer.ts
 import { combineReducers } from '@reduxjs/toolkit'
 import tasksReducer from './features/tasks/tasksSlice'
 import authReducer from './features/auth/authSlice'

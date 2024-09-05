@@ -1,3 +1,4 @@
+// src/components/Router.tsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Home } from '../pages/Home'
 import Dashboard from '../pages/Dashboard'
@@ -5,6 +6,9 @@ import ProtectedRoute from './ProtectedRoute'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { loadUserFromLocalStorage } from '../redux/features/auth/authSlice'
+import { PersistGate } from 'redux-persist/integration/react'
+import { store, persistor } from '../redux/store'
+import { Provider } from 'react-redux'
 
 const AppRouter = () => {
   const dispatch = useDispatch()
@@ -31,9 +35,13 @@ const AppRouter = () => {
 
 const Router = () => {
   return (
-    <BrowserRouter>
-      <AppRouter />
-    </BrowserRouter>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <BrowserRouter>
+          <AppRouter />
+        </BrowserRouter>
+      </PersistGate>
+    </Provider>
   )
 }
 
