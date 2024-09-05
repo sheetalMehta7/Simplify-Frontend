@@ -21,46 +21,9 @@ import {
 import { Button } from 'flowbite-react'
 import { CalendarDrawer } from './CalendarDrawer'
 import AddEventModal from '../Modals/AddEventModal'
-
-interface Task {
-  id: number
-  title: string
-  date: Date
-  description?: string
-  assignee?: string
-  priority?: string
-  status?: string
-}
-
-const sampleTasks: Task[] = [
-  {
-    id: 1,
-    title: 'Team Meeting',
-    date: new Date(2024, 8, 1),
-    description: 'Monthly review meeting with the team.',
-    assignee: 'John Doe',
-    priority: 'High',
-    status: 'Scheduled',
-  },
-  {
-    id: 2,
-    title: 'Project Deadline',
-    date: new Date(2024, 8, 20),
-    description: 'Final deadline for the project submission.',
-    assignee: 'Jane Smith',
-    priority: 'Medium',
-    status: 'Due Soon',
-  },
-  {
-    id: 3,
-    title: 'Annual Review',
-    date: new Date(2024, 8, 23),
-    description: 'Annual performance review meeting.',
-    assignee: 'Alice Johnson',
-    priority: 'Low',
-    status: 'Pending',
-  },
-]
+import { useSelector } from 'react-redux'
+import { RootState } from '../../redux/store'
+import { Task, TaskFromApi } from '../../interfaces/Task'
 
 const monthsList = [
   'January',
@@ -85,10 +48,22 @@ const CalendarComponent: React.FC = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false)
   const [isAddEventModalOpen, setAddEventModalOpen] = useState(false)
 
+  // Fetch tasks from Redux store, which is grouped by status (e.g., { todo: [], 'in-progress': [], review: [], done: [] })
+  const tasksFromRedux = useSelector((state: RootState) => state.tasks.tasks)
+
+  // Convert TaskFromApi (string dates) to Task (Date objects) and flatten the tasks object
+  const tasks: Task[] = Object.values(tasksFromRedux)
+    .flat() // Flatten the arrays of tasks grouped by status
+    .map((task: TaskFromApi) => ({
+      ...task,
+      dueDate: new Date(task.dueDate), // Convert string to Date object
+    }))
+
+  // Handle date change and open drawer if a task exists on the selected date
   const handleDateChange = (date: Date) => {
     setSelectedDate(date)
-    const task = sampleTasks.find(
-      (task) => task.date.toDateString() === date.toDateString(),
+    const task = tasks.find(
+      (task) => task.dueDate.toDateString() === date.toDateString(),
     )
     if (task) {
       setSelectedTask(task)
@@ -105,8 +80,8 @@ const CalendarComponent: React.FC = () => {
     setDropdownOpen(false)
   }
 
-  const handleAddEvent = (newTask: Task) => {
-    sampleTasks.push(newTask)
+  const handleAddEvent = (_newTask: Task) => {
+    // Assuming you will dispatch the task creation to Redux here
     setAddEventModalOpen(false)
   }
 
@@ -120,8 +95,8 @@ const CalendarComponent: React.FC = () => {
   })
 
   const getTaskTitle = (date: Date) => {
-    const task = sampleTasks.find(
-      (task) => task.date.toDateString() === date.toDateString(),
+    const task = tasks.find(
+      (task) => task.dueDate.toDateString() === date.toDateString(),
     )
     return task ? task.title : ''
   }

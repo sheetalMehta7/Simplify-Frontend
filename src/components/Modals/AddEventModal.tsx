@@ -1,15 +1,6 @@
 import { useState } from 'react'
 import { Modal, Button } from 'flowbite-react'
-
-interface Task {
-  id: number
-  title: string
-  date: Date
-  description: string
-  assignee: string
-  priority: string
-  status: string
-}
+import { Task } from '../../interfaces/Task' // Use the Task type from your types file
 
 interface AddEventModalProps {
   isOpen: boolean
@@ -18,12 +9,12 @@ interface AddEventModalProps {
   selectedDate: Date
 }
 
-const AddEventModal = ({
+const AddEventModal: React.FC<AddEventModalProps> = ({
   isOpen,
   onClose,
   onSave,
   selectedDate,
-}: AddEventModalProps) => {
+}) => {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [assignee, setAssignee] = useState('')
@@ -32,16 +23,16 @@ const AddEventModal = ({
 
   const handleSave = () => {
     const newTask: Task = {
-      id: Date.now(),
+      id: Date.now(), // Using Date.now() to generate a unique ID
       title,
-      date: selectedDate,
+      dueDate: selectedDate, // Ensuring `dueDate` is a Date object
       description,
       assignee,
       priority,
       status,
     }
-    onSave(newTask)
-    onClose()
+    onSave(newTask) // Trigger the onSave callback to save the task
+    onClose() // Close the modal after saving
   }
 
   return (

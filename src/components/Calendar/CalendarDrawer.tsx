@@ -1,17 +1,7 @@
-// src/components/CalendarDrawer.tsx
 import React from 'react'
 import { Drawer } from 'flowbite-react'
 import { MdClose } from 'react-icons/md'
-
-interface Task {
-  id: number
-  title: string
-  date: Date
-  description?: string
-  assignee?: string
-  priority?: string
-  status?: string
-}
+import { Task } from '../../interfaces/Task' // Importing the updated Task type
 
 interface CalendarDrawerProps {
   task: Task | null
@@ -42,7 +32,7 @@ export const CalendarDrawer: React.FC<CalendarDrawerProps> = ({
           <div className="p-6 space-y-4">
             <h2 className="text-2xl font-bold mb-2">{task.title}</h2>
             <p className="mb-2">
-              <strong>Date:</strong> {task.date.toDateString()}
+              <strong>Date:</strong> {task.dueDate.toDateString()}
             </p>
             <p className="mb-2">
               <strong>Description:</strong>{' '}
