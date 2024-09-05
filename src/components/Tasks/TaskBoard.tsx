@@ -58,6 +58,12 @@ const TaskBoard: React.FC = () => {
     dispatch(deleteTaskThunk(taskId))
   }
 
+  // Handle opening the drawer with selected task details
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task) // Set the clicked task as the selected task
+    setIsDrawerOpen(true) // Open the drawer
+  }
+
   const areAllTasksEmpty = Object.values(tasks).every(
     (taskList) => taskList.length === 0,
   )
@@ -70,7 +76,7 @@ const TaskBoard: React.FC = () => {
       <div className="relative p-4">
         <DragDropContext onDragEnd={onDragEnd}>
           <div className="flex-1 overflow-x-auto">
-            <TaskBoardTable tasks={tasks} onTaskClick={setSelectedTask} />
+            <TaskBoardTable tasks={tasks} onTaskClick={handleTaskClick} />
           </div>
         </DragDropContext>
 
@@ -86,7 +92,7 @@ const TaskBoard: React.FC = () => {
       <TaskDetailsDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        task={selectedTask}
+        task={selectedTask} // Pass the selected task to the drawer
       />
 
       <CreateTaskModal
@@ -146,7 +152,7 @@ const TaskBoardTable: React.FC<{
                             className={`bg-gray-100 dark:bg-gray-800 p-2 rounded-lg mb-2 shadow-sm hover:shadow-md transition-transform ${
                               snapshot.isDragging ? 'transform scale-105' : ''
                             }`}
-                            onClick={() => onTaskClick(task)}
+                            onClick={() => onTaskClick(task)} // Call onTaskClick when task is clicked
                           >
                             <TaskCard
                               title={task.title}

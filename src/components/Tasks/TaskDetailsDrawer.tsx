@@ -1,4 +1,3 @@
-// src/components/TaskDetailsDrawer.tsx
 import React from 'react'
 import { Drawer, Button } from 'flowbite-react'
 import { FaTimes, FaTasks } from 'react-icons/fa'
@@ -37,7 +36,7 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
         <div className="space-y-6">
           <div>
             <h3 className="text-md font-bold">Title</h3>
-            <p className="text-gray-700 dark:text-gray-300">{task.content}</p>
+            <p className="text-gray-700 dark:text-gray-300">{task.title}</p>
           </div>
           <div>
             <h3 className="text-md font-bold">Assignee</h3>
