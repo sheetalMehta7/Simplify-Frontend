@@ -26,13 +26,22 @@ const TABS: Tab[] = [
 ]
 
 const DashboardTabs: React.FC = () => {
-  const [activeTab, setActiveTab] = useState(TABS[0].name)
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<string>(TABS[0].name)
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false)
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [filters, setFilters] = useState<{
+    date: string
+    assignee: string
+    status: string
+  }>({
+    date: '',
+    assignee: '',
+    status: '',
+  })
 
   // Access tasks from the Redux store
   const { tasks } = useSelector((state: RootState) => state.tasks)
-  const dispatch: AppDispatch = useDispatch() // Correctly type the dispatch
+  const dispatch: AppDispatch = useDispatch()
 
   const filterButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -40,6 +49,14 @@ const DashboardTabs: React.FC = () => {
   const toggleFilter = () => setIsFilterOpen((prev) => !prev)
   const openModal = () => setIsModalOpen(true)
   const closeModal = () => setIsModalOpen(false)
+
+  const applyFilters = (filterValues: {
+    date: string
+    assignee: string
+    status: string
+  }) => {
+    setFilters(filterValues)
+  }
 
   // Dispatch the task creation to Redux and close the modal
   const handleSaveTask = async (newTask: Partial<Task>) => {
@@ -72,7 +89,11 @@ const DashboardTabs: React.FC = () => {
           </div>
 
           {isFilterOpen && (
-            <FilterDropdown isOpen={isFilterOpen} onClose={toggleFilter} />
+            <FilterDropdown
+              isOpen={isFilterOpen}
+              onClose={toggleFilter}
+              onApply={applyFilters}
+            />
           )}
 
           {/* Create Task Modal */}
@@ -87,7 +108,9 @@ const DashboardTabs: React.FC = () => {
 
       <div className="flex-1 container mx-auto p-4 md:p-5">
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md p-4 h-full">
-          {activeTab === 'My Tasks' && <TaskBoard tasks={tasks} />}
+          {activeTab === 'My Tasks' && (
+            <TaskBoard tasks={tasks} filters={filters} />
+          )}
         </div>
       </div>
     </div>
@@ -96,11 +119,17 @@ const DashboardTabs: React.FC = () => {
 
 export default DashboardTabs
 
-const TabButtons: React.FC<{
+interface TabButtonsProps {
   tabs: Tab[]
   activeTab: string
   onTabClick: (tabName: string) => void
-}> = ({ tabs, activeTab, onTabClick }) => (
+}
+
+const TabButtons: React.FC<TabButtonsProps> = ({
+  tabs,
+  activeTab,
+  onTabClick,
+}) => (
   <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
     {tabs.map((tab) => (
       <button
@@ -119,19 +148,23 @@ const TabButtons: React.FC<{
   </div>
 )
 
-const FilterButton = React.forwardRef<
-  HTMLButtonElement,
-  { isFilterOpen: boolean; onClick: () => void }
->(({ isFilterOpen, onClick }, ref) => (
-  <button
-    ref={ref}
-    className="flex items-center justify-center px-4 py-2 text-gray-900 dark:text-gray-200 rounded-md transition-all duration-300 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-500"
-    onClick={onClick}
-  >
-    <MdFilterAlt className="mr-2" />
-    Filter
-  </button>
-))
+interface FilterButtonProps {
+  isFilterOpen: boolean
+  onClick: () => void
+}
+
+const FilterButton = React.forwardRef<HTMLButtonElement, FilterButtonProps>(
+  ({ isFilterOpen, onClick }, ref) => (
+    <button
+      ref={ref}
+      className="flex items-center justify-center px-4 py-2 text-gray-900 dark:text-gray-200 rounded-md transition-all duration-300 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-500"
+      onClick={onClick}
+    >
+      <MdFilterAlt className="mr-2" />
+      Filter
+    </button>
+  ),
+)
 
 const CreateTaskButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   <button

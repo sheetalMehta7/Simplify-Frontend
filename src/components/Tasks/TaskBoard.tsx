@@ -19,11 +19,13 @@ import {
 import { RootState, AppDispatch } from '../../redux/store'
 import { Task } from '../../redux/features/tasks/tasksSlice'
 
-const TaskBoard: React.FC = () => {
+interface TaskBoardProps {
+  tasks: { [key: string]: Task[] }
+  filters: { date: string; assignee: string; status: string }
+}
+
+const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, filters }) => {
   const dispatch: AppDispatch = useDispatch()
-  const { tasks, loading, error } = useSelector(
-    (state: RootState) => state.tasks,
-  )
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -33,50 +35,55 @@ const TaskBoard: React.FC = () => {
     dispatch(fetchTasks())
   }, [dispatch])
 
-  // Handle drag and drop between columns
+  const applyFilters = (tasks: { [key: string]: Task[] }) => {
+    const filteredTasks = Object.entries(tasks).reduce(
+      (acc: { [key: string]: Task[] }, [status, tasksArray]) => {
+        acc[status] = tasksArray.filter((task) => {
+          const matchesDate =
+            !filters.date || task.dueDate.startsWith(filters.date)
+          const matchesAssignee =
+            !filters.assignee || task.assignee === filters.assignee
+          const matchesStatus =
+            !filters.status || task.status === filters.status
+          return matchesDate && matchesAssignee && matchesStatus
+        })
+        return acc
+      },
+      {},
+    )
+    return filteredTasks
+  }
+
+  const filteredTasks = applyFilters(tasks)
+
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result
     if (!destination || source.droppableId === destination.droppableId) return
 
-    const taskId = tasks[source.droppableId][source.index].id
+    const taskId = filteredTasks[source.droppableId][source.index].id
     const newStatus = destination.droppableId
 
     dispatch(updateTaskStatus({ taskId, status: newStatus }))
   }
 
-  // Handle task creation and make sure it is added to the correct column
-  const handleTaskCreate = (task: Partial<Task>) => {
-    if (!task.status) {
-      task.status = 'todo' // Default status if not provided
-    }
-    dispatch(createNewTask(task))
-    setIsCreateModalOpen(false)
-  }
-
-  // Handle task deletion
-  const handleTaskDelete = (taskId: string) => {
-    dispatch(deleteTaskThunk(taskId))
-  }
-
-  // Handle opening the drawer with selected task details
   const handleTaskClick = (task: Task) => {
-    setSelectedTask(task) // Set the clicked task as the selected task
-    setIsDrawerOpen(true) // Open the drawer
+    setSelectedTask(task)
+    setIsDrawerOpen(true)
   }
 
-  const areAllTasksEmpty = Object.values(tasks).every(
+  const areAllTasksEmpty = Object.values(filteredTasks).every(
     (taskList) => taskList.length === 0,
   )
 
   return (
     <>
-      {loading && <div>Loading tasks...</div>}
-      {error && <div>Error: {error}</div>}
-
       <div className="relative p-4">
         <DragDropContext onDragEnd={onDragEnd}>
           <div className="flex-1 overflow-x-auto">
-            <TaskBoardTable tasks={tasks} onTaskClick={handleTaskClick} />
+            <TaskBoardTable
+              tasks={filteredTasks}
+              onTaskClick={handleTaskClick}
+            />
           </div>
         </DragDropContext>
 
@@ -92,13 +99,13 @@ const TaskBoard: React.FC = () => {
       <TaskDetailsDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        task={selectedTask} // Pass the selected task to the drawer
+        task={selectedTask}
       />
 
       <CreateTaskModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onSave={handleTaskCreate}
+        onSave={(task) => dispatch(createNewTask(task))}
         userId={1}
       />
     </>
@@ -152,7 +159,7 @@ const TaskBoardTable: React.FC<{
                             className={`bg-gray-100 dark:bg-gray-800 p-2 rounded-lg mb-2 shadow-sm hover:shadow-md transition-transform ${
                               snapshot.isDragging ? 'transform scale-105' : ''
                             }`}
-                            onClick={() => onTaskClick(task)} // Call onTaskClick when task is clicked
+                            onClick={() => onTaskClick(task)}
                           >
                             <TaskCard
                               title={task.title}

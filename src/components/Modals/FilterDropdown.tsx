@@ -8,9 +8,14 @@ import { MdPerson, MdDateRange, MdLabel } from 'react-icons/md'
 interface FilterDropdownProps {
   isOpen: boolean
   onClose: () => void
+  onApply: (filters: { date: string; assignee: string; status: string }) => void
 }
 
-const FilterDropdown: React.FC<FilterDropdownProps> = ({ isOpen, onClose }) => {
+const FilterDropdown: React.FC<FilterDropdownProps> = ({
+  isOpen,
+  onClose,
+  onApply,
+}) => {
   const formik = useFormik({
     initialValues: {
       date: '',
@@ -31,7 +36,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({ isOpen, onClose }) => {
       status: Yup.string().optional(),
     }),
     onSubmit: (values) => {
-      console.log('Filter Values:', values)
+      onApply(values) // Pass filter values back to parent
       onClose()
     },
   })
