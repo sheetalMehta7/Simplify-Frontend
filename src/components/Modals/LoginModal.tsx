@@ -2,9 +2,11 @@ import { FC } from 'react'
 import * as Yup from 'yup'
 import AuthModal from './AuthModal'
 import { useNavigate } from 'react-router-dom'
-import { useError } from '../../context/ErrorContext'
 import { Button } from 'flowbite-react'
 import { login } from '../../api/authApi'
+import { useDispatch } from 'react-redux'
+import { loginSuccess } from '../../redux/features/auth/authSlice'
+import { setError, clearError } from '../../redux/features/error/errorSlice'
 
 interface LoginModalProps {
   onClose: () => void
@@ -13,7 +15,7 @@ interface LoginModalProps {
 
 const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
   const navigate = useNavigate()
-  const { setError } = useError()
+  const dispatch = useDispatch()
 
   const validationSchema = Yup.object({
     email: Yup.string()
@@ -22,38 +24,47 @@ const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
     password: Yup.string().required('Password is required'),
   })
 
-  // The handleSubmit function to pass to AuthModal
   const handleSubmit = async (values: { email: string; password: string }) => {
     try {
-      const { token } = await login(values.email, values.password)
+      const { token, user } = await login(values.email, values.password)
 
-      // Store the JWT token
-      localStorage.setItem('authToken', token)
+      console.log('Login successful, user:', user, 'token:', token)
+
+      // Dispatch loginSuccess action to store user and token in Redux and LocalStorage
+      dispatch(loginSuccess({ user, token }))
 
       // Redirect to dashboard
       navigate('/dashboard')
+
+      // Clear any previous errors
+      dispatch(clearError())
     } catch (error: any) {
-      // Check for specific error codes or messages from your API
+      console.log('Login error:', error)
+
       if (error.response) {
         const status = error.response.status
         if (status === 401) {
-          setError('Invalid credentials. Please try again.')
+          dispatch(setError('Invalid credentials. Please try again.'))
         } else if (status === 404) {
-          setError('User not found. Please check your email or sign up.')
+          dispatch(
+            setError('User not found. Please check your email or sign up.'),
+          )
         } else {
-          setError('Login failed. Please try again later.')
+          dispatch(setError('Login failed. Please try again later.'))
         }
       } else {
-        setError('Login failed. Please try again.')
+        dispatch(setError('Login failed. Please try again.'))
       }
     }
   }
 
   const handleGoogleLogin = async () => {
     try {
+      // Simulate Google login and navigate to dashboard
       navigate('/dashboard')
+      dispatch(clearError())
     } catch (error: any) {
-      setError('Google login failed. Please try again.')
+      dispatch(setError('Google login failed. Please try again.'))
     }
   }
 

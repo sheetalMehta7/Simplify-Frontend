@@ -2,10 +2,11 @@ import { FC } from 'react'
 import * as Yup from 'yup'
 import AuthModal from './AuthModal'
 import { useNavigate } from 'react-router-dom'
-import { useError } from '../../context/ErrorContext'
-import { useAuth0 } from '@auth0/auth0-react'
 import { Button } from 'flowbite-react'
 import { signup } from '../../api/authApi'
+import { useDispatch } from 'react-redux'
+import { loginSuccess } from '../../redux/features/auth/authSlice'
+import { setError, clearError } from '../../redux/features/error/errorSlice'
 
 interface SignUpModalProps {
   onClose: () => void
@@ -14,8 +15,7 @@ interface SignUpModalProps {
 
 const SignUpModal: FC<SignUpModalProps> = ({ onClose, onSwitch }) => {
   const navigate = useNavigate()
-  const { setError } = useError()
-  const { loginWithRedirect } = useAuth0()
+  const dispatch = useDispatch()
 
   const validationSchema = Yup.object({
     name: Yup.string().required('Name is required'),
@@ -34,30 +34,35 @@ const SignUpModal: FC<SignUpModalProps> = ({ onClose, onSwitch }) => {
   }) => {
     try {
       if (values.name) {
-        const { token } = await signup(
+        const { token, user } = await signup(
           values.email,
           values.password,
           values.name,
         )
 
-        // Store the JWT token
-        localStorage.setItem('authToken', token)
+        // Dispatch loginSuccess action to store user and token in Redux and LocalStorage
+        dispatch(loginSuccess({ user, token }))
+
+        // Clear any previous errors
+        dispatch(clearError())
 
         // Redirect to dashboard
         navigate('/dashboard')
       } else {
-        setError('Name is required')
+        dispatch(setError('Name is required'))
       }
-    } catch (error) {
-      setError('Sign-up failed. Please try again.')
+    } catch (error: any) {
+      dispatch(setError('Sign-up failed. Please try again.'))
     }
   }
 
   const handleGoogleSignup = () => {
     try {
-      loginWithRedirect()
-    } catch (error) {
-      setError('Login failed. Please try again.')
+      // Simulate Google signup and redirect to dashboard
+      navigate('/dashboard')
+      dispatch(clearError())
+    } catch (error: any) {
+      dispatch(setError('Login failed. Please try again.'))
     }
   }
 

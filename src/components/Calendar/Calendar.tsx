@@ -20,7 +20,7 @@ import {
 } from 'react-icons/md'
 import { Button } from 'flowbite-react'
 import { CalendarDrawer } from './CalendarDrawer'
-import AddEventModal from './Modals/AddEventModal'
+import AddEventModal from '../Modals/AddEventModal'
 
 interface Task {
   id: number

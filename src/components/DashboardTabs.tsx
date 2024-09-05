@@ -9,7 +9,7 @@ import {
 import { Modal } from 'flowbite-react'
 import FilterDropdown from './Modals/FilterDropdown'
 import CreateTaskModal from './Modals/CreateTaskModal'
-import TaskBoard from './TaskBoard'
+import TaskBoard, { Task } from './Tasks/TaskBoard' // Import Task type from TaskBoard
 
 interface Tab {
   name: string
@@ -26,15 +26,18 @@ const DashboardTabs: React.FC = () => {
   const [activeTab, setActiveTab] = useState(TABS[0].name)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [tasks, setTasks] = useState<Task[]>([]) // State to hold tasks
+
   const filterButtonRef = useRef<HTMLButtonElement>(null)
 
   const handleTabClick = (tabName: string) => setActiveTab(tabName)
   const toggleFilter = () => setIsFilterOpen((prev) => !prev)
   const toggleModal = () => setIsModalOpen((prev) => !prev)
 
-  const handleSaveTask = (task: Task) => {
-    console.log('Task saved:', task)
-    setIsModalOpen(false)
+  // Function to save a new task and update the task list
+  const handleSaveTask = (newTask: Task) => {
+    setTasks((prevTasks) => [...prevTasks, newTask]) // Add the new task to the task list
+    setIsModalOpen(false) // Close the modal
   }
 
   return (
@@ -61,6 +64,7 @@ const DashboardTabs: React.FC = () => {
             <FilterDropdown isOpen={isFilterOpen} onClose={toggleFilter} />
           )}
 
+          {/* Create Task Modal */}
           <Modal show={isModalOpen} onClose={toggleModal}>
             <Modal.Header>Create Task</Modal.Header>
             <Modal.Body>
@@ -68,15 +72,18 @@ const DashboardTabs: React.FC = () => {
                 isOpen={isModalOpen}
                 onClose={toggleModal}
                 onSave={handleSaveTask}
+                userId={1} // Example userId
               />
             </Modal.Body>
           </Modal>
         </div>
       </div>
 
+      {/* Tab Content with TaskBoard */}
       <div className="flex-1 container mx-auto p-4 md:p-5">
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md p-4 h-full">
-          <TabContent activeTab={activeTab} />
+          {activeTab === 'My Tasks' && <TaskBoard tasks={tasks} />}{' '}
+          {/* Pass tasks to TaskBoard */}
         </div>
       </div>
     </div>
@@ -143,30 +150,5 @@ const CreateTaskButton: React.FC<CreateTaskButtonProps> = ({ onClick }) => (
     Create Tasks
   </button>
 )
-
-interface TabContentProps {
-  activeTab: string
-}
-
-const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
-  switch (activeTab) {
-    case 'My Tasks':
-      return <TaskBoard />
-    case 'Recent':
-      return (
-        <p className="text-gray-900 dark:text-gray-200">
-          Recent tasks will be displayed here.
-        </p>
-      )
-    case 'Projects':
-      return (
-        <p className="text-gray-900 dark:text-gray-200">
-          Project tasks will be displayed here.
-        </p>
-      )
-    default:
-      return null
-  }
-}
 
 export default DashboardTabs

@@ -6,6 +6,8 @@ import { BsKanban, BsFillBarChartLineFill } from 'react-icons/bs'
 import { AiOutlineMail } from 'react-icons/ai'
 import { CgLogOut } from 'react-icons/cg'
 import { useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { logout } from '../redux/features/auth/authSlice'
 
 interface SidebarNavProps {
   onTabSelect: (tab: string) => void
@@ -46,13 +48,12 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
   onToggle,
   isShrinked,
 }) => {
+  const dispatch = useDispatch()
   const navigate = useNavigate()
-  const handleLogout = () => {
-    // Clear any tokens or data from localStorage/sessionStorage
-    localStorage.removeItem('authToken')
-    sessionStorage.clear()
 
-    // logout()
+  const handleLogout = () => {
+    // Dispatch the logout action
+    dispatch(logout())
     navigate('/', { replace: true })
   }
 

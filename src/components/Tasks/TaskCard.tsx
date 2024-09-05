@@ -3,14 +3,14 @@ import { FaFlag } from 'react-icons/fa'
 
 interface TaskCardProps {
   title: string
-  assignee: string
-  dueDate: string
+  assignee?: string // Optional in case there's no assignee
+  dueDate?: string // Optional in case due date is not set
   status: string
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({
   title,
-  assignee,
+  assignee = 'Unassigned',
   dueDate,
   status,
 }) => {
@@ -28,7 +28,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         </h3>
         <p className="text-xs md:text-xs mb-1">Assignee: {assignee}</p>
         <p className="text-xs md:text-xs mb-2">
-          Due Date: {formatDate(dueDate)}
+          Due Date: {dueDate ? formatDate(dueDate) : 'No due date'}
         </p>
         <span
           className={`text-xs font-bold py-1 px-2 rounded-full ${getBadgeColor(
@@ -74,7 +74,11 @@ function getBadgeColor(status: string) {
 
 function formatDate(dateString: string) {
   const date = new Date(dateString)
-  return date.toLocaleDateString()
+  return date.toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
 }
 
 export default TaskCard

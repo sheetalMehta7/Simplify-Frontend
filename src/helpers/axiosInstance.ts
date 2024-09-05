@@ -1,19 +1,52 @@
 // src/api/axiosInstance.ts
 import axios from 'axios'
-import { useError } from '../context/ErrorContext'
+import { store } from '../redux/store'
+import { setError } from '../redux/features/error/errorSlice'
+import { logout } from '../redux/features/auth/authSlice'
 
+// Create an Axios instance
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api',
   timeout: 10000,
 })
 
+// Add a request interceptor to automatically add the Bearer token
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('authToken') // Retrieve token from localStorage
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}` // Attach token to the Authorization header
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  },
+)
+
+// Setup the Axios response interceptor for error handling
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    const { setError } = useError()
     const errorMessage =
       error.response?.data?.message || 'An unexpected error occurred'
-    setError(errorMessage)
+
+    console.error(`API Error: ${errorMessage}`)
+
+    // Check if the error is due to an expired or invalid token
+    if (
+      error.response?.status === 403 &&
+      errorMessage === 'Invalid or expired token'
+    ) {
+      store.dispatch(setError('Session expired. You have been logged out.'))
+      store.dispatch(logout())
+
+      // Use a flag to indicate that the user needs to be redirected
+      store.dispatch({ type: 'auth/triggerRedirectAfterLogout' }) // Custom action
+    } else {
+      // For other errors, set the error message in the store
+      store.dispatch(setError(errorMessage))
+    }
 
     return Promise.reject(error)
   },

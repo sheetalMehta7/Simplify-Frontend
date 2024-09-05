@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import DashboardLayout from '../layout/DashboardLayout'
 import DashboardTabs from '../components/DashboardTabs'
 import { Outlet } from 'react-router-dom'
-import Calendar from '../components/Calendar'
+import Calendar from '../components/Calendar/Calendar'
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('Dashboard')
