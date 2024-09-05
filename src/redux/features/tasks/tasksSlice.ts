@@ -1,6 +1,5 @@
-// src/redux/features/tasks/tasksSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { RootState } from '../../store' // Import RootState to access auth state
+import { RootState } from '../../store'
 import {
   getAllTasks,
   createTask,
@@ -112,7 +111,14 @@ const tasksSlice = createSlice({
         state.error = action.error.message || 'Error fetching tasks'
       })
       .addCase(createNewTask.fulfilled, (state, action) => {
-        state.tasks.todo.push(action.payload)
+        const newTask = action.payload
+        const status = newTask.status || 'todo' // Default to "todo" if status is undefined
+
+        if (!state.tasks[status]) {
+          state.tasks[status] = [] // Ensure the status array exists
+        }
+
+        state.tasks[status].push(newTask) // Add the task to the appropriate column based on its status
       })
       .addCase(updateTaskStatus.fulfilled, (state, action) => {
         const { taskId, status } = action.payload

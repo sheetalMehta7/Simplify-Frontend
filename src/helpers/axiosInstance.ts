@@ -1,4 +1,3 @@
-// src/api/axiosInstance.ts
 import axios from 'axios'
 import { store } from '../redux/store'
 import { setError } from '../redux/features/error/errorSlice'
@@ -24,32 +23,34 @@ axiosInstance.interceptors.request.use(
   },
 )
 
-// Setup the Axios response interceptor for error handling
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const errorMessage =
-      error.response?.data?.message || 'An unexpected error occurred'
+// Modify the axiosInstance setup to accept the navigate function
+export const setupAxiosInterceptors = (navigate: (path: string) => void) => {
+  axiosInstance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      const errorMessage =
+        error.response?.data?.message || 'An unexpected error occurred'
 
-    console.error(`API Error: ${errorMessage}`)
+      console.error(`API Error: ${errorMessage}`)
 
-    // Check if the error is due to an expired or invalid token
-    if (
-      error.response?.status === 403 &&
-      errorMessage === 'Invalid or expired token'
-    ) {
-      store.dispatch(setError('Session expired. You have been logged out.'))
-      store.dispatch(logout())
+      // Check if the error is due to an expired or invalid token
+      if (
+        error.response?.status === 403 &&
+        errorMessage === 'Invalid or expired token'
+      ) {
+        store.dispatch(setError('Session expired. You have been logged out.'))
+        store.dispatch(logout())
 
-      // Use a flag to indicate that the user needs to be redirected
-      store.dispatch({ type: 'auth/triggerRedirectAfterLogout' }) // Custom action
-    } else {
-      // For other errors, set the error message in the store
-      store.dispatch(setError(errorMessage))
-    }
+        // Navigate to the '/' route directly
+        navigate('/')
+      } else {
+        // For other errors, set the error message in the store
+        store.dispatch(setError(errorMessage))
+      }
 
-    return Promise.reject(error)
-  },
-)
+      return Promise.reject(error)
+    },
+  )
+}
 
 export default axiosInstance

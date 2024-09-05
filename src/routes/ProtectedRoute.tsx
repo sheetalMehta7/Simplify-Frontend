@@ -1,21 +1,18 @@
-import React from 'react'
 import { Navigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { RootState } from '../redux/store'
 
-interface ProtectedRouteProps {
-  children: React.ReactNode
-}
+const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
+  const { user, token } = useSelector((state: RootState) => state.auth)
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const token = localStorage.getItem('authToken')
-
-  // Check if the token exists and is valid (simple existence check for this example)
-  if (!token) {
-    return <Navigate to="/" replace />
+  // Check if user is authenticated by checking if both user and token exist
+  if (!user || !token) {
+    // Redirect to the home page if the user is not authenticated
+    return <Navigate to="/" />
   }
 
-  // Additional validation can be added here, such as checking token expiration
-
-  return <>{children}</>
+  // If the user is authenticated, allow access to the protected route
+  return children
 }
 
 export default ProtectedRoute

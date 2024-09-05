@@ -74,7 +74,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <DashboardLayout onTabSelect={handleTabSelect}>
-      <div>{renderContent()}</div> {/* Adjusted margin here */}
+      <div>{renderContent()}</div>
     </DashboardLayout>
   )
 }

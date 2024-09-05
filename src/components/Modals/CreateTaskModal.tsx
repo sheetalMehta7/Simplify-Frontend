@@ -37,7 +37,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     status: 'todo',
     priority: 'normal',
     dueDate: '',
-    userId: userId, // Set userId from props
+    userId: userId,
   })
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
@@ -66,8 +66,8 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
   const handleSubmit = () => {
     if (validateForm()) {
-      onSave(taskDetails) // Pass the task details back to the parent component
-      onClose()
+      onSave(taskDetails) // Save task
+      onClose() // Close the modal after saving the task
     }
   }
 

@@ -1,4 +1,3 @@
-// src/components/TaskBoard.tsx
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -29,10 +28,12 @@ const TaskBoard: React.FC = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
+  // Fetch tasks when the component is mounted
   useEffect(() => {
     dispatch(fetchTasks())
   }, [dispatch])
 
+  // Handle drag and drop between columns
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result
     if (!destination || source.droppableId === destination.droppableId) return
@@ -43,11 +44,16 @@ const TaskBoard: React.FC = () => {
     dispatch(updateTaskStatus({ taskId, status: newStatus }))
   }
 
+  // Handle task creation and make sure it is added to the correct column
   const handleTaskCreate = (task: Partial<Task>) => {
+    if (!task.status) {
+      task.status = 'todo' // Default status if not provided
+    }
     dispatch(createNewTask(task))
     setIsCreateModalOpen(false)
   }
 
+  // Handle task deletion
   const handleTaskDelete = (taskId: string) => {
     dispatch(deleteTaskThunk(taskId))
   }
