@@ -3,34 +3,30 @@ import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import moment from 'moment'
 import { Modal, Button, TextInput, Select, Label } from 'flowbite-react'
-import { MdPerson, MdDateRange, MdLabel, MdCancel } from 'react-icons/md'
+import { MdPerson, MdDateRange, MdLabel } from 'react-icons/md'
 
-interface FilterModalProps {
+interface FilterDropdownProps {
   isOpen: boolean
   onClose: () => void
+  filters: { date: string; assignee: string; status: string }
   onApply: (filters: { date: string; assignee: string; status: string }) => void
+  onClearAll: () => void
 }
 
-const FilterModal: React.FC<FilterModalProps> = ({
+const FilterDropdown: React.FC<FilterDropdownProps> = ({
   isOpen,
   onClose,
+  filters,
   onApply,
+  onClearAll,
 }) => {
-  const [activeFilters, setActiveFilters] = useState<{
-    date: string
-    assignee: string
-    status: string
-  }>({
-    date: '',
-    assignee: '',
-    status: '',
-  })
+  const [showValidationMessage, setShowValidationMessage] = useState(false)
 
   const formik = useFormik({
     initialValues: {
-      date: '',
-      assignee: '',
-      status: '',
+      date: filters.date || '',
+      assignee: filters.assignee || '',
+      status: filters.status || '',
     },
     validationSchema: Yup.object({
       date: Yup.date()
@@ -46,52 +42,55 @@ const FilterModal: React.FC<FilterModalProps> = ({
       status: Yup.string().optional(),
     }),
     onSubmit: (values) => {
-      setActiveFilters(values)
-      onApply(values) // Pass filter values back to parent
-      onClose()
+      const hasActiveFilters =
+        !!values.date || !!values.assignee || !!values.status
+
+      if (!hasActiveFilters) {
+        setShowValidationMessage(true)
+      } else {
+        setShowValidationMessage(false)
+        onApply(values) // Apply the filters
+      }
     },
   })
 
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    formik.handleChange(e)
+    setShowValidationMessage(false) // Remove validation error when any input changes
+  }
+
   const hasActiveFilters =
-    activeFilters.date || activeFilters.assignee || activeFilters.status
-
-  const removeFilter = (filterKey: keyof typeof activeFilters) => {
-    setActiveFilters((prevFilters) => ({
-      ...prevFilters,
-      [filterKey]: '',
-    }))
-    formik.setFieldValue(filterKey, '') // Clear the corresponding formik field
-  }
-
-  const clearAllFilters = () => {
-    setActiveFilters({
-      date: '',
-      assignee: '',
-      status: '',
-    })
-    formik.resetForm() // Clear all fields
-  }
+    !!formik.values.date || !!formik.values.assignee || !!formik.values.status
 
   return (
-    <Modal show={isOpen} onClose={onClose} size="lg" className="dark">
+    <Modal show={isOpen} onClose={onClose} size="lg">
       <Modal.Header>
         <div className="flex justify-between items-center w-full">
-          <h2 className="text-xl font-bold">Filter Options</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-200">
+            Filter Options
+          </h2>
         </div>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body className="bg-white dark:bg-gray-900">
         <form onSubmit={formik.handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="date" value="Date" />
+            <Label
+              htmlFor="date"
+              value="Date"
+              className="text-gray-900 dark:text-gray-200"
+            />
             <TextInput
               id="date"
               name="date"
               type="date"
               icon={MdDateRange}
               value={formik.values.date}
-              onChange={formik.handleChange}
+              onChange={handleInputChange} // Handle change with validation reset
               color={formik.touched.date && formik.errors.date ? 'failure' : ''}
               placeholder="Select a date"
+              className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
             />
             {formik.touched.date && formik.errors.date && (
               <p className="text-red-500 text-sm mt-1">{formik.errors.date}</p>
@@ -99,25 +98,35 @@ const FilterModal: React.FC<FilterModalProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="assignee" value="Assignee" />
+            <Label
+              htmlFor="assignee"
+              value="Assignee"
+              className="text-gray-900 dark:text-gray-200"
+            />
             <TextInput
               id="assignee"
               name="assignee"
               icon={MdPerson}
               value={formik.values.assignee}
-              onChange={formik.handleChange}
+              onChange={handleInputChange} // Handle change with validation reset
               placeholder="Enter assignee"
+              className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
             />
           </div>
 
           <div>
-            <Label htmlFor="status" value="Status" />
+            <Label
+              htmlFor="status"
+              value="Status"
+              className="text-gray-900 dark:text-gray-200"
+            />
             <Select
               id="status"
               name="status"
               icon={MdLabel}
               value={formik.values.status}
-              onChange={formik.handleChange}
+              onChange={handleInputChange} // Handle change with validation reset
+              className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
             >
               <option value="">Select status</option>
               <option value="todo">To-Do</option>
@@ -127,44 +136,26 @@ const FilterModal: React.FC<FilterModalProps> = ({
             </Select>
           </div>
 
-          {/* Display active filters as tags */}
-          {hasActiveFilters && (
-            <div className="mt-4 flex flex-wrap space-x-2">
-              {activeFilters.date && (
-                <FilterTag
-                  label={`Date: ${activeFilters.date}`}
-                  onRemove={() => removeFilter('date')}
-                />
-              )}
-              {activeFilters.assignee && (
-                <FilterTag
-                  label={`Assignee: ${activeFilters.assignee}`}
-                  onRemove={() => removeFilter('assignee')}
-                />
-              )}
-              {activeFilters.status && (
-                <FilterTag
-                  label={`Status: ${activeFilters.status}`}
-                  onRemove={() => removeFilter('status')}
-                />
-              )}
+          {showValidationMessage && (
+            <div className="text-red-500 text-sm mt-2">
+              Please select at least one filter before applying.
             </div>
           )}
 
-          <div className="flex justify-end space-x-4 mt-4">
-            <Button color="gray" onClick={onClose}>
-              Cancel
-            </Button>
-
-            {hasActiveFilters ? (
-              <Button color="red" onClick={clearAllFilters}>
+          <div className="flex justify-between space-x-4 mt-4">
+            {hasActiveFilters && (
+              <Button color="red" onClick={onClearAll}>
                 Clear All Filters
               </Button>
-            ) : (
+            )}
+            <div className="flex space-x-4 ml-auto">
+              <Button color="gray" onClick={onClose}>
+                Cancel
+              </Button>
               <Button color="blue" type="submit">
                 Apply Filters
               </Button>
-            )}
+            </div>
           </div>
         </form>
       </Modal.Body>
@@ -172,17 +163,4 @@ const FilterModal: React.FC<FilterModalProps> = ({
   )
 }
 
-export default FilterModal
-
-// FilterTag Component for displaying active filters
-const FilterTag: React.FC<{ label: string; onRemove: () => void }> = ({
-  label,
-  onRemove,
-}) => (
-  <div className="inline-flex items-center px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-full m-1">
-    <span className="mr-2">{label}</span>
-    <button onClick={onRemove} className="text-red-500 hover:text-red-700">
-      <MdCancel size={18} />
-    </button>
-  </div>
-)
+export default FilterDropdown

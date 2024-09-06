@@ -71,7 +71,11 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, filters }) => {
     setIsDrawerOpen(true)
   }
 
-  const areAllTasksEmpty = Object.values(filteredTasks).every(
+  const areAllTasksEmpty = Object.values(tasks).every(
+    (taskList) => taskList.length === 0,
+  )
+
+  const areFilteredTasksEmpty = Object.values(filteredTasks).every(
     (taskList) => taskList.length === 0,
   )
 
@@ -80,10 +84,20 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, filters }) => {
       <div className="relative p-4">
         <DragDropContext onDragEnd={onDragEnd}>
           <div className="flex-1 overflow-x-auto">
-            <TaskBoardTable
-              tasks={filteredTasks}
-              onTaskClick={handleTaskClick}
-            />
+            {areAllTasksEmpty ? (
+              <div className="text-center text-gray-500 dark:text-gray-300 p-4">
+                No tasks available. Create a new task to get started.
+              </div>
+            ) : areFilteredTasksEmpty ? (
+              <div className="text-center text-gray-500 dark:text-gray-300 p-4">
+                No tasks found for the applied filters.
+              </div>
+            ) : (
+              <TaskBoardTable
+                tasks={filteredTasks}
+                onTaskClick={handleTaskClick}
+              />
+            )}
           </div>
         </DragDropContext>
 

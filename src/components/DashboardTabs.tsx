@@ -8,6 +8,8 @@ import TaskBoard from './Tasks/TaskBoard'
 import { createNewTask } from '../redux/features/tasks/tasksSlice'
 import { RootState, AppDispatch } from '../redux/store'
 import { Task } from '../redux/features/tasks/tasksSlice'
+import { MdCancel } from 'react-icons/md'
+import { Button } from 'flowbite-react'
 
 interface Tab {
   name: string
@@ -53,6 +55,17 @@ const DashboardTabs: React.FC = () => {
     setFilters(filterValues)
   }
 
+  const clearAllFilters = () => {
+    setFilters({ date: '', assignee: '', status: '' })
+  }
+
+  const removeFilter = (filterKey: keyof typeof filters) => {
+    setFilters((prev) => ({
+      ...prev,
+      [filterKey]: '',
+    }))
+  }
+
   // Dispatch the task creation to Redux and close the modal
   const handleSaveTask = async (newTask: Partial<Task>) => {
     try {
@@ -86,9 +99,38 @@ const DashboardTabs: React.FC = () => {
           {isFilterOpen && (
             <FilterDropdown
               isOpen={isFilterOpen}
-              onClose={toggleFilter}
+              onClose={() => setIsFilterOpen(false)}
+              filters={filters}
               onApply={applyFilters}
+              onClearAll={clearAllFilters}
             />
+          )}
+
+          {/* Render Active Filters as Badges */}
+          {Object.values(filters).some((filter) => filter) && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {filters.date && (
+                <FilterTag
+                  label={`Date: ${filters.date}`}
+                  onRemove={() => removeFilter('date')}
+                />
+              )}
+              {filters.assignee && (
+                <FilterTag
+                  label={`Assignee: ${filters.assignee}`}
+                  onRemove={() => removeFilter('assignee')}
+                />
+              )}
+              {filters.status && (
+                <FilterTag
+                  label={`Status: ${filters.status}`}
+                  onRemove={() => removeFilter('status')}
+                />
+              )}
+              <Button color="red" onClick={clearAllFilters}>
+                Clear All
+              </Button>
+            </div>
           )}
 
           {/* Create Task Modal */}
@@ -114,22 +156,30 @@ const DashboardTabs: React.FC = () => {
 
 export default DashboardTabs
 
-interface TabButtonsProps {
+interface FilterTagProps {
+  label: string
+  onRemove: () => void
+}
+
+const FilterTag: React.FC<FilterTagProps> = ({ label, onRemove }) => (
+  <div className="inline-flex items-center px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-full m-1">
+    <span className="mr-2">{label}</span>
+    <button onClick={onRemove} className="text-red-500 hover:text-red-700">
+      <MdCancel size={18} />
+    </button>
+  </div>
+)
+
+const TabButtons: React.FC<{
   tabs: Tab[]
   activeTab: string
   onTabClick: (tabName: string) => void
-}
-
-const TabButtons: React.FC<TabButtonsProps> = ({
-  tabs,
-  activeTab,
-  onTabClick,
-}) => (
+}> = ({ tabs, activeTab, onTabClick }) => (
   <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
     {tabs.map((tab) => (
       <button
         key={tab.name}
-        className={`flex items-center justify-center px-4 py-2 rounded-md transition-all duration-300 ${
+        className={`flex items-center justify-center px-4 py-2 rounded-md transition-all duration-300 border border-gray-100 ${
           tab.name === activeTab
             ? 'text-white bg-blue-500'
             : 'text-gray-900 dark:text-gray-200 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-500'
@@ -152,7 +202,7 @@ const FilterButton = React.forwardRef<HTMLButtonElement, FilterButtonProps>(
   ({ isFilterOpen, onClick }, ref) => (
     <button
       ref={ref}
-      className="flex items-center justify-center px-4 py-2 text-gray-900 dark:text-gray-200 rounded-md transition-all duration-300 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-500"
+      className="flex items-center justify-center px-4 py-2 text-gray-900 dark:text-gray-200 rounded-md transition-all duration-300 border border-gray-100 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-500"
       onClick={onClick}
     >
       <VscSettings className="mr-2" />
@@ -164,7 +214,7 @@ const FilterButton = React.forwardRef<HTMLButtonElement, FilterButtonProps>(
 const CreateTaskButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   <button
     onClick={onClick}
-    className="flex items-center justify-center px-4 py-2 text-gray-900 dark:text-gray-200 rounded-md transition-all duration-300 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-500"
+    className="flex items-center justify-center px-4 py-2 text-gray-900 dark:text-gray-200 rounded-md transition-all duration-300 border border-gray-100 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-500"
   >
     <MdCreate className="h-6 mr-2" />
     Create Tasks
