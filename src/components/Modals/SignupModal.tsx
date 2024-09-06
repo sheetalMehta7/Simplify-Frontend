@@ -56,15 +56,15 @@ const SignUpModal: FC<SignUpModalProps> = ({ onClose, onSwitch }) => {
     }
   }
 
-  const handleGoogleSignup = () => {
-    try {
-      // Simulate Google signup and redirect to dashboard
-      navigate('/dashboard')
-      dispatch(clearError())
-    } catch (error: any) {
-      dispatch(setError('Login failed. Please try again.'))
-    }
-  }
+  // const handleGoogleSignup = () => {
+  //   try {
+  //     // Simulate Google signup and redirect to dashboard
+  //     navigate('/dashboard')
+  //     dispatch(clearError())
+  //   } catch (error: any) {
+  //     dispatch(setError('Login failed. Please try again.'))
+  //   }
+  // }
 
   return (
     <AuthModal
@@ -82,7 +82,7 @@ const SignUpModal: FC<SignUpModalProps> = ({ onClose, onSwitch }) => {
     >
       <Button
         type="button"
-        onClick={handleGoogleSignup}
+        // onClick={handleGoogleSignup}
         className="mb-4 flex w-full items-center justify-center rounded-lg bg-blue-600 py-2 text-white transition hover:bg-blue-700 text-sm"
       >
         <svg className="mr-2 h-5 w-5" viewBox="0 0 48 48"></svg>
