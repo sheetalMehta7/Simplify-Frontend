@@ -1,22 +1,22 @@
-// src/components/Router.tsx
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { loadUserFromLocalStorage } from '../redux/features/auth/authSlice'
+import { setupAxiosInterceptors } from '../helpers/axiosInstance'
 import { Home } from '../pages/Home'
 import Dashboard from '../pages/Dashboard'
 import ProtectedRoute from './ProtectedRoute'
-import { useEffect } from 'react'
-import { useDispatch } from 'react-redux'
-import { loadUserFromLocalStorage } from '../redux/features/auth/authSlice'
-import { PersistGate } from 'redux-persist/integration/react'
-import { store, persistor } from '../redux/store'
-import { Provider } from 'react-redux'
 
 const AppRouter = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
-  // Load the user from localStorage when the app starts
   useEffect(() => {
+    // Load user from localStorage when the app starts
     dispatch(loadUserFromLocalStorage())
-  }, [dispatch])
+    // Set up Axios interceptors with navigation handling
+    setupAxiosInterceptors(navigate)
+  }, [dispatch, navigate])
 
   return (
     <Routes>
@@ -35,13 +35,9 @@ const AppRouter = () => {
 
 const Router = () => {
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <BrowserRouter>
-          <AppRouter />
-        </BrowserRouter>
-      </PersistGate>
-    </Provider>
+    <BrowserRouter>
+      <AppRouter />
+    </BrowserRouter>
   )
 }
 

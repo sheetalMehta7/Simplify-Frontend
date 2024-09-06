@@ -12,7 +12,7 @@ export interface TaskFromApi {
 export interface Task {
   id: string
   title: string
-  dueDate: Date // In the UI, we want this as a Date object
+  dueDate: Date
   description?: string
   assignee?: string
   priority?: string

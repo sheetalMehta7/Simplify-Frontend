@@ -12,9 +12,9 @@ const axiosInstance = axios.create({
 // Add a request interceptor to automatically add the Bearer token
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('authToken') // Retrieve token from localStorage
+    const token = localStorage.getItem('authToken')
     if (token) {
-      config.headers.Authorization = `Bearer ${token}` // Attach token to the Authorization header
+      config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },
@@ -27,7 +27,7 @@ axiosInstance.interceptors.request.use(
 export const setupAxiosInterceptors = (navigate: (path: string) => void) => {
   axiosInstance.interceptors.response.use(
     (response) => response,
-    (error) => {
+    async (error) => {
       const errorMessage =
         error.response?.data?.message || 'An unexpected error occurred'
 
@@ -39,9 +39,11 @@ export const setupAxiosInterceptors = (navigate: (path: string) => void) => {
         errorMessage === 'Invalid or expired token'
       ) {
         store.dispatch(setError('Session expired. You have been logged out.'))
-        store.dispatch(logout())
 
-        // Navigate to the '/' route directly
+        // Wait for logout action to complete
+        await store.dispatch(logout())
+
+        // Navigate to the '/' route after logout
         navigate('/')
       } else {
         // For other errors, set the error message in the store

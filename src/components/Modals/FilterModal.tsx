@@ -66,15 +66,16 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
 
   return (
     <Modal show={isOpen} onClose={onClose} size="lg">
-      <Modal.Header>
+      <Modal.Header className="bg-white dark:bg-gray-700">
         <div className="flex justify-between items-center w-full">
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-200">
             Filter Options
           </h2>
         </div>
       </Modal.Header>
-      <Modal.Body className="bg-white dark:bg-gray-900">
+      <Modal.Body className="bg-white dark:bg-gray-700">
         <form onSubmit={formik.handleSubmit} className="space-y-4">
+          {/* Date Filter */}
           <div>
             <Label
               htmlFor="date"
@@ -87,16 +88,17 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
               type="date"
               icon={MdDateRange}
               value={formik.values.date}
-              onChange={handleInputChange} // Handle change with validation reset
+              onChange={handleInputChange}
               color={formik.touched.date && formik.errors.date ? 'failure' : ''}
               placeholder="Select a date"
-              className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+              className="dark:bg-gray-700  "
             />
             {formik.touched.date && formik.errors.date && (
               <p className="text-red-500 text-sm mt-1">{formik.errors.date}</p>
             )}
           </div>
 
+          {/* Assignee Filter */}
           <div>
             <Label
               htmlFor="assignee"
@@ -110,10 +112,11 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
               value={formik.values.assignee}
               onChange={handleInputChange} // Handle change with validation reset
               placeholder="Enter assignee"
-              className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+              className="dark:bg-gray-700 dark:text-gray-100 "
             />
           </div>
 
+          {/* Status Filter */}
           <div>
             <Label
               htmlFor="status"
@@ -126,7 +129,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
               icon={MdLabel}
               value={formik.values.status}
               onChange={handleInputChange} // Handle change with validation reset
-              className="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+              className="dark:bg-gray-700 dark:text-gray-100 "
             >
               <option value="">Select status</option>
               <option value="todo">To-Do</option>
@@ -136,12 +139,14 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
             </Select>
           </div>
 
+          {/* Validation Message */}
           {showValidationMessage && (
             <div className="text-red-500 text-sm mt-2">
               Please select at least one filter before applying.
             </div>
           )}
 
+          {/* Button Group */}
           <div className="flex justify-between space-x-4 mt-4">
             {hasActiveFilters && (
               <Button color="red" onClick={onClearAll}>

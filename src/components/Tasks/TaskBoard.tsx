@@ -13,7 +13,6 @@ import CreateTaskModal from '../Modals/CreateTaskModal'
 import {
   fetchTasks,
   updateTaskStatus,
-  deleteTaskThunk,
   createNewTask,
 } from '../../redux/features/tasks/tasksSlice'
 import { AppDispatch } from '../../redux/store'
@@ -84,9 +83,14 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, filters }) => {
       <div className="relative p-4">
         <DragDropContext onDragEnd={onDragEnd}>
           <div className="flex-1 overflow-x-auto">
-            {areAllTasksEmpty ? (
-              <div className="text-center text-gray-500 dark:text-gray-300 p-4">
-                No tasks available. Create a new task to get started.
+            {areAllTasksEmpty && areFilteredTasksEmpty ? (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <p className="text-gray-500 dark:text-gray-300 mb-4">
+                  No tasks available. You can create a new task to get started.
+                </p>
+                <Button onClick={() => setIsCreateModalOpen(true)} color="blue">
+                  Create Task
+                </Button>
               </div>
             ) : areFilteredTasksEmpty ? (
               <div className="text-center text-gray-500 dark:text-gray-300 p-4">
@@ -100,14 +104,6 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, filters }) => {
             )}
           </div>
         </DragDropContext>
-
-        {areAllTasksEmpty && (
-          <div className="absolute inset-0 flex justify-center items-center">
-            <Button onClick={() => setIsCreateModalOpen(true)} color="blue">
-              Create Task
-            </Button>
-          </div>
-        )}
       </div>
 
       <TaskDetailsDrawer
