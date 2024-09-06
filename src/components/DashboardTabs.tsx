@@ -1,13 +1,8 @@
 import React, { useState, useRef } from 'react'
-import {
-  MdDashboard,
-  MdLockClock,
-  MdFolder,
-  MdFilterAlt,
-  MdCreate,
-} from 'react-icons/md'
+import { MdDashboard, MdLockClock, MdFolder, MdCreate } from 'react-icons/md'
+import { VscSettings } from 'react-icons/vsc'
 import { useDispatch, useSelector } from 'react-redux'
-import FilterDropdown from './Modals/FilterDropdown'
+import FilterDropdown from './Modals/FilterModal'
 import CreateTaskModal from './Modals/CreateTaskModal'
 import TaskBoard from './Tasks/TaskBoard'
 import { createNewTask } from '../redux/features/tasks/tasksSlice'
@@ -160,7 +155,7 @@ const FilterButton = React.forwardRef<HTMLButtonElement, FilterButtonProps>(
       className="flex items-center justify-center px-4 py-2 text-gray-900 dark:text-gray-200 rounded-md transition-all duration-300 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-500"
       onClick={onClick}
     >
-      <MdFilterAlt className="mr-2" />
+      <VscSettings className="mr-2" />
       Filter
     </button>
   ),

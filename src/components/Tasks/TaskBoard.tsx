@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import {
   DragDropContext,
   Droppable,
@@ -16,7 +16,7 @@ import {
   deleteTaskThunk,
   createNewTask,
 } from '../../redux/features/tasks/tasksSlice'
-import { RootState, AppDispatch } from '../../redux/store'
+import { AppDispatch } from '../../redux/store'
 import { Task } from '../../redux/features/tasks/tasksSlice'
 
 interface TaskBoardProps {

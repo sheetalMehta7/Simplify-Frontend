@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { IoMdNotificationsOutline, IoMdSearch } from 'react-icons/io'
-import { RiSettingsLine } from 'react-icons/ri'
+import { IoSettingsOutline } from 'react-icons/io5'
 import { CgProfile } from 'react-icons/cg'
 import { DarkThemeToggle, Kbd, TextInput } from 'flowbite-react'
 import UserProfileDropdown from '../components/Dropdowns/UserProfileDropdown'
@@ -101,7 +101,7 @@ const TopNav: React.FC = () => {
               />
             )}
           </div>
-          <RiSettingsLine className="text-2xl cursor-pointer" />
+          <IoSettingsOutline className="text-2xl cursor-pointer" />
           <div className="relative flex items-center">
             <CgProfileWithRef
               className="text-2xl cursor-pointer"
