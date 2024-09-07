@@ -33,7 +33,11 @@ const Dashboard: React.FC = () => {
 
   const renderContent = () => {
     if (loading) {
-      return <Loader message="Loading content..." /> // Show loader when loading
+      return (
+        <div className="flex items-center justify-center h-screen">
+          <Loader message="Loading content..." />
+        </div>
+      )
     }
 
     switch (activeTab) {
