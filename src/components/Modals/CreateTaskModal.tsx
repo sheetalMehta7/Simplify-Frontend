@@ -49,14 +49,22 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   ) => {
     const { name, value } = e.target
     setTaskDetails((prevDetails) => ({ ...prevDetails, [name]: value }))
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: '' })) // Clear errors on input change
   }
 
   const validateForm = () => {
-    const { title, dueDate } = taskDetails
+    const { title, dueDate, priority, status } = taskDetails
     const newErrors: { [key: string]: string } = {}
 
+    // Validation rules for required fields
     if (!title) newErrors.title = 'Title is required'
-    if (dueDate && new Date(dueDate) < new Date()) {
+    if (!priority) newErrors.priority = 'Priority is required'
+    if (!status) newErrors.status = 'Status is required'
+
+    // Validate dueDate is in the future, if provided
+    if (!dueDate) {
+      newErrors.dueDate = 'Due Date is required'
+    } else if (new Date(dueDate) < new Date()) {
       newErrors.dueDate = 'Due Date cannot be in the past'
     }
 
@@ -127,11 +135,15 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               value={taskDetails.priority || 'normal'}
               onChange={handleChange}
               icon={MdPriorityHigh}
+              color={errors.priority ? 'failure' : ''}
             >
               <option value="normal">Normal</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
             </Select>
+            {errors.priority && (
+              <p className="text-red-500 text-sm mt-1">{errors.priority}</p>
+            )}
           </div>
           <div>
             <Label htmlFor="status" value="Status" />
@@ -141,12 +153,16 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               value={taskDetails.status || 'todo'}
               onChange={handleChange}
               icon={MdLabel}
+              color={errors.status ? 'failure' : ''}
             >
               <option value="todo">To-Do</option>
               <option value="in-progress">In-Progress</option>
               <option value="review">Review</option>
               <option value="done">Done</option>
             </Select>
+            {errors.status && (
+              <p className="text-red-500 text-sm mt-1">{errors.status}</p>
+            )}
           </div>
         </div>
       </Modal.Body>

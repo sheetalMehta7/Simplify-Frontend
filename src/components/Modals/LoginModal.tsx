@@ -28,8 +28,6 @@ const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
     try {
       const { token, user } = await login(values.email, values.password)
 
-      console.log('Login successful, user:', user, 'token:', token)
-
       // Dispatch loginSuccess action to store user and token in Redux and LocalStorage
       dispatch(loginSuccess({ user, token }))
 

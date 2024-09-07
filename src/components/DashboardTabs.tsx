@@ -1,5 +1,11 @@
 import React, { useState, useRef } from 'react'
-import { MdDashboard, MdLockClock, MdFolder, MdCreate } from 'react-icons/md'
+import {
+  MdDashboard,
+  MdLockClock,
+  MdFolder,
+  MdCreate,
+  MdCancel,
+} from 'react-icons/md'
 import { VscSettings } from 'react-icons/vsc'
 import { useDispatch, useSelector } from 'react-redux'
 import FilterDropdown from './Modals/FilterModal'
@@ -8,7 +14,6 @@ import TaskBoard from './Tasks/TaskBoard'
 import { createNewTask } from '../redux/features/tasks/tasksSlice'
 import { RootState, AppDispatch } from '../redux/store'
 import { Task } from '../redux/features/tasks/tasksSlice'
-import { MdCancel } from 'react-icons/md'
 import { Button } from 'flowbite-react'
 
 interface Tab {
@@ -22,7 +27,12 @@ const TABS: Tab[] = [
   { name: 'Projects', icon: <MdFolder /> },
 ]
 
-const DashboardTabs: React.FC = () => {
+interface DashboardTabsProps {
+  activeTab: string // Active tab state from parent
+  setActiveTab: (tabName: string) => void // Function to set active tab
+}
+
+const DashboardTabs: React.FC<DashboardTabsProps> = () => {
   const [activeTab, setActiveTab] = useState<string>(TABS[0].name)
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
@@ -36,10 +46,8 @@ const DashboardTabs: React.FC = () => {
     status: '',
   })
 
-  // Access tasks from the Redux store
   const { tasks } = useSelector((state: RootState) => state.tasks)
   const dispatch: AppDispatch = useDispatch()
-
   const filterButtonRef = useRef<HTMLButtonElement>(null)
 
   const handleTabClick = (tabName: string) => setActiveTab(tabName)
@@ -66,11 +74,10 @@ const DashboardTabs: React.FC = () => {
     }))
   }
 
-  // Dispatch the task creation to Redux and close the modal
   const handleSaveTask = async (newTask: Partial<Task>) => {
     try {
-      await dispatch(createNewTask(newTask)).unwrap() // Unwrap the promise to handle errors
-      closeModal() // Close the modal after the task is successfully created
+      await dispatch(createNewTask(newTask)).unwrap()
+      closeModal() // Close the modal after successfully saving the task
     } catch (error) {
       console.error('Failed to create task:', error)
     }
@@ -78,6 +85,7 @@ const DashboardTabs: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen">
+      {/* Header with Tabs and Filter/Task buttons */}
       <div className="container mx-auto p-4 md:p-5 flex-none">
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md mb-6 p-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -96,6 +104,7 @@ const DashboardTabs: React.FC = () => {
             </div>
           </div>
 
+          {/* Filter dropdown */}
           {isFilterOpen && (
             <FilterDropdown
               isOpen={isFilterOpen}
@@ -106,7 +115,7 @@ const DashboardTabs: React.FC = () => {
             />
           )}
 
-          {/* Render Active Filters as Badges */}
+          {/* Active filters displayed as badges */}
           {Object.values(filters).some((filter) => filter) && (
             <div className="mt-4 flex flex-wrap gap-2">
               {filters.date && (
@@ -137,12 +146,13 @@ const DashboardTabs: React.FC = () => {
           <CreateTaskModal
             isOpen={isModalOpen}
             onClose={closeModal}
-            onSave={handleSaveTask} // Handle task creation and save to Redux
-            userId={1} // Example userId
+            onSave={handleSaveTask}
+            userId={1}
           />
         </div>
       </div>
 
+      {/* Task Board based on active tab */}
       <div className="flex-1 container mx-auto p-4 md:p-5">
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md p-4 h-full">
           {activeTab === 'My Tasks' && (
@@ -170,11 +180,17 @@ const FilterTag: React.FC<FilterTagProps> = ({ label, onRemove }) => (
   </div>
 )
 
-const TabButtons: React.FC<{
+interface TabButtonsProps {
   tabs: Tab[]
   activeTab: string
   onTabClick: (tabName: string) => void
-}> = ({ tabs, activeTab, onTabClick }) => (
+}
+
+const TabButtons: React.FC<TabButtonsProps> = ({
+  tabs,
+  activeTab,
+  onTabClick,
+}) => (
   <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
     {tabs.map((tab) => (
       <button

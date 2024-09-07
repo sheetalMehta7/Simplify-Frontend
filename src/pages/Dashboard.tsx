@@ -1,12 +1,24 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import DashboardLayout from '../layout/DashboardLayout'
 import DashboardTabs from '../components/DashboardTabs'
 import { Outlet } from 'react-router-dom'
 import Calendar from '../components/Calendar/Calendar'
+import Loader from '../components/Loader'
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('Dashboard')
   const [activeSubTab, setActiveSubTab] = useState<string>('My Tasks')
+  const [loading, setLoading] = useState<boolean>(false) // Add loading state
+
+  // Simulate loading when switching tabs
+  useEffect(() => {
+    setLoading(true)
+    const timer = setTimeout(() => {
+      setLoading(false)
+    }, 1000) // Simulate a 1-second loading time
+
+    return () => clearTimeout(timer) // Clear timer on component unmount
+  }, [activeTab])
 
   const handleTabSelect = (tab: string) => {
     setActiveTab(tab)
@@ -20,6 +32,10 @@ const Dashboard: React.FC = () => {
   }
 
   const renderContent = () => {
+    if (loading) {
+      return <Loader message="Loading content..." /> // Show loader when loading
+    }
+
     switch (activeTab) {
       case 'Dashboard':
         return (

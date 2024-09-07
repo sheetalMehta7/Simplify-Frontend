@@ -17,6 +17,7 @@ import {
 } from '../../redux/features/tasks/tasksSlice'
 import { AppDispatch } from '../../redux/store'
 import { Task } from '../../redux/features/tasks/tasksSlice'
+import Loader from '../Loader'
 
 interface TaskBoardProps {
   tasks: { [key: string]: Task[] }
@@ -28,10 +29,16 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, filters }) => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [loading, setLoading] = useState(true) // New loading state
 
-  // Fetch tasks when the component is mounted
+  // Fetch tasks and handle loading state
   useEffect(() => {
-    dispatch(fetchTasks())
+    const loadTasks = async () => {
+      setLoading(true) // Set loading to true when fetching begins
+      await dispatch(fetchTasks())
+      setLoading(false) // Set loading to false when fetching is complete
+    }
+    loadTasks()
   }, [dispatch])
 
   const applyFilters = (tasks: { [key: string]: Task[] }) => {
@@ -70,6 +77,11 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, filters }) => {
     setIsDrawerOpen(true)
   }
 
+  const handleEditTask = (task: Task) => {
+    setSelectedTask(task)
+    setIsDrawerOpen(true)
+  }
+
   const areAllTasksEmpty = Object.values(tasks).every(
     (taskList) => taskList.length === 0,
   )
@@ -81,29 +93,39 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, filters }) => {
   return (
     <>
       <div className="relative p-4">
-        <DragDropContext onDragEnd={onDragEnd}>
-          <div className="flex-1 overflow-x-auto">
-            {areAllTasksEmpty && areFilteredTasksEmpty ? (
-              <div className="flex flex-col items-center justify-center h-full text-center">
-                <p className="text-gray-500 dark:text-gray-300 mb-4">
-                  No tasks available. You can create a new task to get started.
-                </p>
-                <Button onClick={() => setIsCreateModalOpen(true)} color="blue">
-                  Create Task
-                </Button>
-              </div>
-            ) : areFilteredTasksEmpty ? (
-              <div className="text-center text-gray-500 dark:text-gray-300 p-4">
-                No tasks found for the applied filters.
-              </div>
-            ) : (
-              <TaskBoardTable
-                tasks={filteredTasks}
-                onTaskClick={handleTaskClick}
-              />
-            )}
-          </div>
-        </DragDropContext>
+        {loading ? (
+          // Display Loader when loading state is true
+          <Loader message="Loading tasks..." />
+        ) : (
+          <DragDropContext onDragEnd={onDragEnd}>
+            <div className="flex-1 overflow-x-auto">
+              {areAllTasksEmpty && areFilteredTasksEmpty ? (
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <p className="text-gray-500 dark:text-gray-300 mb-4">
+                    No tasks available. You can create a new task to get
+                    started.
+                  </p>
+                  <Button
+                    onClick={() => setIsCreateModalOpen(true)}
+                    color="blue"
+                  >
+                    Create Task
+                  </Button>
+                </div>
+              ) : areFilteredTasksEmpty ? (
+                <div className="text-center text-gray-500 dark:text-gray-300 p-4">
+                  No tasks found for the applied filters.
+                </div>
+              ) : (
+                <TaskBoardTable
+                  tasks={filteredTasks}
+                  onTaskClick={handleTaskClick}
+                  onEdit={handleEditTask}
+                />
+              )}
+            </div>
+          </DragDropContext>
+        )}
       </div>
 
       <TaskDetailsDrawer
@@ -125,7 +147,8 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, filters }) => {
 const TaskBoardTable: React.FC<{
   tasks: { [key: string]: Task[] }
   onTaskClick: (task: Task) => void
-}> = ({ tasks, onTaskClick }) => {
+  onEdit: (task: Task) => void
+}> = ({ tasks, onTaskClick, onEdit }) => {
   const columns = ['todo', 'in-progress', 'review', 'done']
 
   return (
@@ -172,10 +195,9 @@ const TaskBoardTable: React.FC<{
                             onClick={() => onTaskClick(task)}
                           >
                             <TaskCard
-                              title={task.title}
-                              assignee={task.assignee}
-                              dueDate={task.dueDate}
-                              status={task.status}
+                              task={task}
+                              onEdit={onEdit}
+                              onTaskClick={onTaskClick}
                             />
                           </div>
                         )}

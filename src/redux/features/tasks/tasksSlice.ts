@@ -10,7 +10,8 @@ import {
 export interface Task {
   id: string
   title: string
-  assignee: string // Assignee field
+  assignee: string
+  description: string
   dueDate: string
   status: string
   userId: number

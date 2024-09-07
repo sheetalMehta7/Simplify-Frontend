@@ -1,8 +1,7 @@
-// src/types/Task.ts
 export interface TaskFromApi {
   id: string
   title: string
-  dueDate: string // Task from API will have date as a string
+  dueDate: string
   description?: string
   assignee?: string
   priority?: string
