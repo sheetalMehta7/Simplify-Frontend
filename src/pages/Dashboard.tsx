@@ -8,16 +8,15 @@ import Loader from '../components/Loader'
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('Dashboard')
   const [activeSubTab, setActiveSubTab] = useState<string>('My Tasks')
-  const [loading, setLoading] = useState<boolean>(false) // Add loading state
+  const [loading, setLoading] = useState<boolean>(false)
 
-  // Simulate loading when switching tabs
   useEffect(() => {
     setLoading(true)
     const timer = setTimeout(() => {
       setLoading(false)
-    }, 1000) // Simulate a 1-second loading time
+    }, 300)
 
-    return () => clearTimeout(timer) // Clear timer on component unmount
+    return () => clearTimeout(timer)
   }, [activeTab])
 
   const handleTabSelect = (tab: string) => {
