@@ -29,14 +29,14 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, filters }) => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [loading, setLoading] = useState(true) // New loading state
+  const [loading, setLoading] = useState(true)
 
   // Fetch tasks and handle loading state
   useEffect(() => {
     const loadTasks = async () => {
-      setLoading(true) // Set loading to true when fetching begins
+      setLoading(true)
       await dispatch(fetchTasks())
-      setLoading(false) // Set loading to false when fetching is complete
+      setLoading(false)
     }
     loadTasks()
   }, [dispatch])
@@ -94,8 +94,9 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, filters }) => {
     <>
       <div className="relative p-4">
         {loading ? (
-          // Display Loader when loading state is true
-          <Loader message="Loading tasks..." />
+          <div className="flex items-center justify-center h-screen">
+            <Loader message="Loading task..." />
+          </div>
         ) : (
           <DragDropContext onDragEnd={onDragEnd}>
             <div className="flex-1 overflow-x-auto">

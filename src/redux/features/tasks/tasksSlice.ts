@@ -62,11 +62,10 @@ export const createNewTask = createAsyncThunk(
       throw new Error('User is not logged in.')
     }
 
-    // Set the assignee to the current user's name or ID
     const taskWithAssignee = {
       ...newTask,
-      assignee: currentUser.name, // Set the assignee to the current user's name
-      userId: currentUser.id, // Optionally store the user ID as well
+      assignee: currentUser.name,
+      userId: currentUser.id,
     }
 
     const task = await createTask(taskWithAssignee)

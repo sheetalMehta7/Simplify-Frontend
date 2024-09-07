@@ -8,7 +8,6 @@ import {
   deleteTaskThunk,
 } from '../../redux/features/tasks/tasksSlice'
 import { AppDispatch } from '../../redux/store'
-import Loader from '../Loader' // Import the Loader component
 
 interface TaskDetailsDrawerProps {
   isOpen: boolean
@@ -24,7 +23,6 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
   const dispatch: AppDispatch = useDispatch()
   const [isEditing, setIsEditing] = useState(false)
   const [editedTask, setEditedTask] = useState<Task | null>(task)
-  const [loading, setLoading] = useState(false) // Add loading state
 
   useEffect(() => {
     if (task) {
@@ -36,9 +34,7 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
 
   const handleEditToggle = async () => {
     if (isEditing) {
-      setLoading(true) // Show loader while updating task
       await dispatch(updateTaskStatus({ taskId: editedTask.id, ...editedTask }))
-      setLoading(false) // Hide loader after update
     }
     setIsEditing(!isEditing)
   }
@@ -54,9 +50,7 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
   }
 
   const handleDelete = async () => {
-    setLoading(true) // Show loader while deleting task
     await dispatch(deleteTaskThunk(editedTask.id))
-    setLoading(false) // Hide loader after deletion
     onClose() // Close the drawer after deletion
   }
 
@@ -92,145 +86,141 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
       </Drawer.Header>
 
       <Drawer.Items className="p-6 md:p-4 space-y-6">
-        {loading ? (
-          <Loader message="Processing task..." />
-        ) : (
-          <>
-            {/* Task Title */}
-            <div className="space-y-2">
-              <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
-                Title
-              </h3>
-              {isEditing ? (
-                <TextInput
-                  name="title"
-                  value={editedTask.title}
-                  onChange={handleInputChange}
-                  placeholder="Enter task title"
-                  className="dark:bg-gray-700"
-                />
-              ) : (
-                <p className="text-gray-700 dark:text-gray-300 text-base md:text-sm">
-                  {task.title}
-                </p>
-              )}
-            </div>
+        <>
+          {/* Task Title */}
+          <div className="space-y-2">
+            <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
+              Title
+            </h3>
+            {isEditing ? (
+              <TextInput
+                name="title"
+                value={editedTask.title}
+                onChange={handleInputChange}
+                placeholder="Enter task title"
+                className="dark:bg-gray-700"
+              />
+            ) : (
+              <p className="text-gray-700 dark:text-gray-300 text-base md:text-sm">
+                {task.title}
+              </p>
+            )}
+          </div>
 
-            {/* Task Description */}
-            <div className="space-y-2">
-              <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
-                Description
-              </h3>
-              {isEditing ? (
-                <TextInput
-                  name="description"
-                  value={editedTask.description || ''}
-                  onChange={handleInputChange}
-                  placeholder="Enter task description"
-                  className="dark:bg-gray-700"
-                />
-              ) : (
-                <p className="text-gray-700 dark:text-gray-300 text-base md:text-sm">
-                  {task.description || 'No description provided'}
-                </p>
-              )}
-            </div>
+          {/* Task Description */}
+          <div className="space-y-2">
+            <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
+              Description
+            </h3>
+            {isEditing ? (
+              <TextInput
+                name="description"
+                value={editedTask.description || ''}
+                onChange={handleInputChange}
+                placeholder="Enter task description"
+                className="dark:bg-gray-700"
+              />
+            ) : (
+              <p className="text-gray-700 dark:text-gray-300 text-base md:text-sm">
+                {task.description || 'No description provided'}
+              </p>
+            )}
+          </div>
 
-            {/* Assignee */}
-            <div className="space-y-2">
-              <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
-                Assignee
-              </h3>
-              {isEditing ? (
-                <TextInput
-                  name="assignee"
-                  value={editedTask.assignee || ''}
-                  onChange={handleInputChange}
-                  placeholder="Assign user"
-                  className="dark:bg-gray-700"
-                />
-              ) : (
-                <p className="text-gray-700 dark:text-gray-300 text-base md:text-sm">
-                  {task.assignee || 'Unassigned'}
-                </p>
-              )}
-            </div>
+          {/* Assignee */}
+          <div className="space-y-2">
+            <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
+              Assignee
+            </h3>
+            {isEditing ? (
+              <TextInput
+                name="assignee"
+                value={editedTask.assignee || ''}
+                onChange={handleInputChange}
+                placeholder="Assign user"
+                className="dark:bg-gray-700"
+              />
+            ) : (
+              <p className="text-gray-700 dark:text-gray-300 text-base md:text-sm">
+                {task.assignee || 'Unassigned'}
+              </p>
+            )}
+          </div>
 
-            {/* Due Date */}
-            <div className="space-y-2">
-              <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
-                Due Date
-              </h3>
-              {isEditing ? (
-                <TextInput
-                  name="dueDate"
-                  type="date"
-                  value={editedTask.dueDate}
-                  onChange={handleInputChange}
-                  className="dark:bg-gray-700"
-                />
-              ) : (
-                <p className="text-gray-700 dark:text-gray-300 text-base md:text-sm">
-                  {new Date(task.dueDate).toLocaleDateString()}
-                </p>
-              )}
-            </div>
+          {/* Due Date */}
+          <div className="space-y-2">
+            <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
+              Due Date
+            </h3>
+            {isEditing ? (
+              <TextInput
+                name="dueDate"
+                type="date"
+                value={editedTask.dueDate}
+                onChange={handleInputChange}
+                className="dark:bg-gray-700"
+              />
+            ) : (
+              <p className="text-gray-700 dark:text-gray-300 text-base md:text-sm">
+                {new Date(task.dueDate).toLocaleDateString()}
+              </p>
+            )}
+          </div>
 
-            {/* Status */}
-            <div className="space-y-2">
-              <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
-                Status
-              </h3>
-              {isEditing ? (
-                <Select
-                  name="status"
-                  value={editedTask.status}
-                  onChange={handleInputChange}
-                  className="dark:bg-gray-700"
-                >
-                  <option value="todo">To-Do</option>
-                  <option value="in-progress">In-Progress</option>
-                  <option value="review">Review</option>
-                  <option value="done">Done</option>
-                </Select>
-              ) : (
-                <Badge
-                  color={statusColors[task.status] || 'gray'}
-                  className="text-sm font-semibold py-1 px-3 md:py-1 md:px-2"
-                >
-                  {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
-                </Badge>
-              )}
-            </div>
-
-            {/* Buttons */}
-            <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-              <Button
-                color={isEditing ? 'success' : 'gray'}
-                onClick={handleEditToggle}
-                className="flex-1 text-sm py-2 sm:text-base sm:py-2.5 transition-colors"
+          {/* Status */}
+          <div className="space-y-2">
+            <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
+              Status
+            </h3>
+            {isEditing ? (
+              <Select
+                name="status"
+                value={editedTask.status}
+                onChange={handleInputChange}
+                className="dark:bg-gray-700"
               >
-                {isEditing ? 'Submit' : 'Edit Task'}
-              </Button>
-              {isEditing && (
-                <Button
-                  color="gray"
-                  onClick={() => setIsEditing(false)}
-                  className="flex-1 text-sm py-2 sm:text-base sm:py-2.5 transition-colors"
-                >
-                  Cancel
-                </Button>
-              )}
-              <Button
-                color="failure"
-                onClick={handleDelete}
-                className="flex-1 text-sm py-2 sm:text-base sm:py-2.5 transition-colors"
+                <option value="todo">To-Do</option>
+                <option value="in-progress">In-Progress</option>
+                <option value="review">Review</option>
+                <option value="done">Done</option>
+              </Select>
+            ) : (
+              <Badge
+                color={statusColors[task.status] || 'gray'}
+                className="text-sm font-semibold py-1 px-3 md:py-1 md:px-2"
               >
-                Delete Task
+                {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+              </Badge>
+            )}
+          </div>
+
+          {/* Buttons */}
+          <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
+            <Button
+              color={isEditing ? 'success' : 'gray'}
+              onClick={handleEditToggle}
+              className="flex-1 text-xs py-1 sm:text-sm sm:py-1 transition-colors"
+            >
+              {isEditing ? 'Submit' : 'Edit Task'}
+            </Button>
+            {isEditing && (
+              <Button
+                color="gray"
+                onClick={() => setIsEditing(false)}
+                className="flex-1 text-xs py-1 sm:text-sm sm:py-1 transition-colors"
+              >
+                Cancel
               </Button>
-            </div>
-          </>
-        )}
+            )}
+            <Button
+              color="failure"
+              onClick={handleDelete}
+              className="flex-1 text-xs py-1 sm:text-sm sm:py-1 transition-colors"
+            >
+              Delete Task
+            </Button>
+          </div>
+        </>
       </Drawer.Items>
     </Drawer>
   )
