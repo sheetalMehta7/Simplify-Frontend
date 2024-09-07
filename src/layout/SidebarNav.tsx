@@ -2,102 +2,136 @@ import React from 'react'
 import { MdDashboard, MdCalendarToday } from 'react-icons/md'
 import { HiClipboardList } from 'react-icons/hi'
 import { RiGitRepositoryCommitsFill } from 'react-icons/ri'
-import { BsKanban, BsFillBarChartLineFill, BsClock } from 'react-icons/bs'
+import { BsKanban, BsFillBarChartLineFill } from 'react-icons/bs'
 import { AiOutlineMail } from 'react-icons/ai'
 import { CgLogOut } from 'react-icons/cg'
+import { useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { logout } from '../redux/features/auth/authSlice'
 
 interface SidebarNavProps {
   onTabSelect: (tab: string) => void
+  onToggle: () => void
+  isShrinked: boolean
 }
 
-export const SidebarNav: React.FC<SidebarNavProps> = ({ onTabSelect }) => {
+interface NavItemProps {
+  icon: React.ReactNode
+  label: string
+  tab: string
+  isShrinked: boolean
+  onTabSelect: (tab: string) => void
+}
+
+const NavItem: React.FC<NavItemProps> = ({
+  icon,
+  label,
+  tab,
+  isShrinked,
+  onTabSelect,
+}) => (
+  <li>
+    <button
+      onClick={() => onTabSelect(tab)}
+      className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left transition-all duration-200"
+    >
+      {icon}
+      {!isShrinked && (
+        <span className="ml-3 text-sm md:text-base">{label}</span>
+      )}
+    </button>
+  </li>
+)
+
+const SidebarNav: React.FC<SidebarNavProps> = ({
+  onTabSelect,
+  onToggle,
+  isShrinked,
+}) => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    // Dispatch the logout action
+    dispatch(logout())
+    navigate('/', { replace: true })
+  }
+
+  const navItems = [
+    {
+      icon: <MdDashboard className="text-xl" />,
+      label: 'Dashboard',
+      tab: 'Dashboard',
+    },
+    {
+      icon: <RiGitRepositoryCommitsFill className="text-xl" />,
+      label: 'Issues',
+      tab: 'Issues',
+    },
+    { icon: <BsKanban className="text-xl" />, label: 'Boards', tab: 'Boards' },
+    {
+      icon: <MdCalendarToday className="text-xl" />,
+      label: 'Calendar',
+      tab: 'Calendar',
+    },
+    {
+      icon: <HiClipboardList className="text-xl" />,
+      label: 'Projects',
+      tab: 'Projects',
+    },
+    {
+      icon: <BsFillBarChartLineFill className="text-xl" />,
+      label: 'Development',
+      tab: 'Development',
+    },
+    {
+      icon: <AiOutlineMail className="text-xl" />,
+      label: 'Marketing',
+      tab: 'Marketing',
+    },
+  ]
+
   return (
-    <aside className="h-full bg-gray-800 text-white flex flex-col">
-      <div className="p-4">
-        <h1 className="text-xl font-bold tracking-wide pl-1">Simplify</h1>
+    <aside
+      className={`fixed top-0 z-30 left-0 h-screen bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200 flex flex-col transition-all duration-300 shadow-lg rounded-r-lg ${
+        isShrinked ? 'w-14' : 'w-52'
+      }`}
+    >
+      <div className="p-4 flex justify-between items-center">
+        {!isShrinked && (
+          <h1 className="text-lg font-bold tracking-wide truncate">Simplify</h1>
+        )}
+        <button onClick={onToggle} className="text-xl p-2">
+          {isShrinked ? '>' : '<'}
+        </button>
       </div>
-      <nav className="flex-1">
+      <nav className="flex-1 space-y-2 overflow-hidden">
         <ul className="space-y-2">
-          <li>
-            <button
-              onClick={() => onTabSelect('Dashboard')}
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
-            >
-              <MdDashboard className="mr-3 text-xl" />
-              Dashboard
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => onTabSelect('Issues')}
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
-            >
-              <RiGitRepositoryCommitsFill className="mr-3 text-xl" />
-              Issues
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => onTabSelect('Boards')}
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
-            >
-              <BsKanban className="mr-3 text-xl" />
-              Boards
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => onTabSelect('Calendar')}
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
-            >
-              <MdCalendarToday className="mr-3 text-xl" />
-              Calendar
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => onTabSelect('Projects')}
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
-            >
-              <HiClipboardList className="mr-3 text-xl" />
-              Projects
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => onTabSelect('Development')}
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
-            >
-              <BsFillBarChartLineFill className="mr-3 text-xl" />
-              Development
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => onTabSelect('Marketing')}
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
-            >
-              <AiOutlineMail className="mr-3 text-xl" />
-              Marketing
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => onTabSelect('Sales')}
-              className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left"
-            >
-              <BsClock className="mr-3 text-xl" />
-              Sales
-            </button>
-          </li>
+          {navItems.map((item) => (
+            <NavItem
+              key={item.tab}
+              icon={item.icon}
+              label={item.label}
+              tab={item.tab}
+              isShrinked={isShrinked}
+              onTabSelect={onTabSelect}
+            />
+          ))}
         </ul>
       </nav>
-      <div className="p-4">
-        <button className="flex items-center p-4 hover:bg-gray-700 rounded-lg w-full text-left">
-          <CgLogOut className="mr-3 text-xl" />
-          Log out
+      <div className="pb-3">
+        <button
+          className="flex items-center justify-center p-4 hover:bg-gray-200 dark:hover:bg-red-700 rounded-lg w-full transition-all duration-300"
+          onClick={handleLogout} // Use the handleLogout function
+        >
+          <CgLogOut className="text-xl" />
+          {!isShrinked && (
+            <span className="ml-3 text-sm md:text-base">Log out</span>
+          )}
         </button>
       </div>
     </aside>
   )
 }
+
+export default SidebarNav

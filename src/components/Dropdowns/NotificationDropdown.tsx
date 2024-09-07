@@ -7,7 +7,6 @@ interface NotificationDropdownProps {
 const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   onClose,
 }) => {
-  // Example notifications list
   const notifications = [
     'New comment on your post',
     'User mentioned you in a comment',
@@ -15,28 +14,35 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   ]
 
   return (
-    <div className="absolute right-0 top-full mt-2 w-64 bg-slate-800 border border-white-300 rounded-lg shadow-lg z-50">
-      <div className="p-4 text-sm">
-        <h3 className=" font-bold mb-2 pl-2 text-yellow-200 ">Notifications</h3>
-        <ul className="space-y-2 ">
-          {notifications.map((notification, index) => (
-            <>
+    <div className="absolute top-5 right-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+      <div className="p-4">
+        <h3 className="font-bold text-gray-900 dark:text-white">
+          Notifications
+        </h3>
+        <ul className="mt-2 space-y-2 divide-y divide-gray-200 dark:divide-gray-700">
+          {notifications.length > 0 ? (
+            notifications.map((notification, index) => (
               <li
                 key={index}
-                className="p-2 hover:bg-slate-700 rounded cursor-pointer"
+                className="py-2 text-sm text-gray-700 dark:text-gray-300"
               >
                 {notification}
               </li>
-              <hr />
-            </>
-          ))}
+            ))
+          ) : (
+            <li className="py-2 text-sm text-gray-700 dark:text-gray-300">
+              No new notifications
+            </li>
+          )}
         </ul>
-        <button
-          className="mt-3 w-full p-1 bg-slate-500 rounded"
-          onClick={onClose}
-        >
-          Clear All
-        </button>
+        <div className="mt-4">
+          <button
+            onClick={onClose}
+            className="w-full text-center text-sm text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 py-2 rounded-md"
+          >
+            Clear All
+          </button>
+        </div>
       </div>
     </div>
   )

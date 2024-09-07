@@ -1,9 +1,12 @@
-import { FC, useState } from 'react'
-import { useFormik } from 'formik'
+import { FC } from 'react'
 import * as Yup from 'yup'
-import { Label, TextInput, Button } from 'flowbite-react'
+import AuthModal from './AuthModal'
 import { useNavigate } from 'react-router-dom'
-import { FaTimes } from 'react-icons/fa'
+import { Button } from 'flowbite-react'
+import { login } from '../../api/authApi'
+import { useDispatch } from 'react-redux'
+import { loginSuccess } from '../../redux/features/auth/authSlice'
+import { setError, clearError } from '../../redux/features/error/errorSlice'
 
 interface LoginModalProps {
   onClose: () => void
@@ -11,8 +14,8 @@ interface LoginModalProps {
 }
 
 const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
-  const [touched, setTouched] = useState<{ [key: string]: boolean }>({})
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   const validationSchema = Yup.object({
     email: Yup.string()
@@ -21,163 +24,71 @@ const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
     password: Yup.string().required('Password is required'),
   })
 
-  const formik = useFormik({
-    initialValues: {
-      email: '',
-      password: '',
-    },
-    validationSchema,
-    onSubmit: (values) => {
-      console.log(values)
+  const handleSubmit = async (values: { email: string; password: string }) => {
+    try {
+      const { token, user } = await login(values.email, values.password)
+
+      // Dispatch loginSuccess action to store user and token in Redux and LocalStorage
+      dispatch(loginSuccess({ user, token }))
+
+      // Redirect to dashboard
       navigate('/dashboard')
-    },
-  })
 
-  const handleSubmit = () => {
-    formik.handleSubmit()
-    setTouched({
-      email: true,
-      password: true,
-    })
-  }
+      // Clear any previous errors
+      dispatch(clearError())
+    } catch (error: any) {
+      console.log('Login error:', error)
 
-  // Handle Enter key press
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault() // Prevent default form submission behavior
-      handleSubmit()
+      if (error.response) {
+        const status = error.response.status
+        if (status === 401) {
+          dispatch(setError('Invalid credentials. Please try again.'))
+        } else if (status === 404) {
+          dispatch(
+            setError('User not found. Please check your email or sign up.'),
+          )
+        } else {
+          dispatch(setError('Login failed. Please try again later.'))
+        }
+      } else {
+        dispatch(setError('Login failed. Please try again.'))
+      }
     }
   }
 
+  // const handleGoogleLogin = async () => {
+  //   try {
+  //     // Simulate Google login and navigate to dashboard
+  //     navigate('/dashboard')
+  //     dispatch(clearError())
+  //   } catch (error: any) {
+  //     dispatch(setError('Google login failed. Please try again.'))
+  //   }
+  // }
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 animate-modal">
-      <div className="relative w-full max-w-md p-8 mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-blue-300 ring-2 ring-blue-500">
-        {/* Logo and Description */}
-        <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Simplify
-          </h1>
-          <p className="mt-1 text-slate-600 dark:text-slate-400 text-sm">
-            Log in to manage your tasks efficiently
-          </p>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={formik.handleSubmit} onKeyDown={handleKeyDown}>
-          <div className="mb-4">
-            <div className="mb-2 block">
-              <Label
-                htmlFor="email"
-                className="text-slate-900 dark:text-white"
-                color={
-                  formik.errors.email && touched.email ? 'failure' : undefined
-                }
-                value="Email"
-              />
-            </div>
-            <TextInput
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              required
-              {...formik.getFieldProps('email')}
-              color={formik.errors.email && touched.email ? 'failure' : 'gray'}
-            />
-            {formik.errors.email && touched.email ? (
-              <p className="text-sm text-red-500">{formik.errors.email}</p>
-            ) : null}
-          </div>
-          <div className="mb-6">
-            <div className="mb-2 block">
-              <Label
-                htmlFor="password"
-                className="text-slate-900 dark:text-white"
-                color={
-                  formik.errors.password && touched.password
-                    ? 'failure'
-                    : undefined
-                }
-                value="Password"
-              />
-            </div>
-            <TextInput
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              required
-              {...formik.getFieldProps('password')}
-              color={
-                formik.errors.password && touched.password ? 'failure' : 'gray'
-              }
-            />
-            {formik.errors.password && touched.password ? (
-              <p className="text-sm text-red-500">{formik.errors.password}</p>
-            ) : null}
-          </div>
-          <Button
-            type="button"
-            color="green"
-            className="w-full py-2 "
-            onClick={handleSubmit}
-          >
-            Log In
-          </Button>
-        </form>
-
-        {/* OR Divider */}
-        <div className="my-4 flex items-center">
-          <div className="h-px flex-grow bg-gray-300 dark:bg-gray-700"></div>
-          <span className="px-2 text-gray-500 dark:text-gray-400 text-sm">
-            OR
-          </span>
-          <div className="h-px flex-grow bg-gray-300 dark:bg-gray-700"></div>
-        </div>
-
-        {/* Google Login */}
-        <Button className="mb-4 flex w-full items-center justify-center rounded-lg bg-blue-600 py-2 text-white transition hover:bg-blue-700 text-sm">
-          <svg className="mr-2 h-5 w-5" viewBox="0 0 48 48">
-            {/* SVG paths */}
-          </svg>
-          Log in with Google
-        </Button>
-
-        {/* Footer Links */}
-        <div className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
-          <p>
-            Don't have an account?{' '}
-            <a
-              className="text-blue-600 hover:underline dark:text-blue-500 cursor-pointer"
-              onClick={onSwitch}
-            >
-              Sign up
-            </a>
-          </p>
-          <p className="mt-2">
-            <a
-              className="text-gray-500 hover:underline dark:text-gray-400 cursor-pointer"
-              href="/"
-            >
-              Privacy Policy
-            </a>{' '}
-            &middot;{' '}
-            <a
-              className="text-gray-500 hover:underline dark:text-gray-400 cursor-pointer"
-              href="/"
-            >
-              Terms of Service
-            </a>
-          </p>
-        </div>
-
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute text-3xl top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 w-8 h-8 flex items-center justify-center rounded-full"
-        >
-          <FaTimes />
-        </button>
-      </div>
-    </div>
+    <AuthModal
+      title="Simplify"
+      description="Log in to manage your tasks efficiently"
+      initialValues={{ email: '', password: '' }}
+      validationSchema={validationSchema}
+      onSubmit={handleSubmit}
+      onClose={onClose}
+      onSwitch={onSwitch}
+      switchText="Don't have an account?"
+      switchLinkText="Sign up"
+      buttonText="Log In"
+      showNameField={false}
+    >
+      <Button
+        type="button"
+        // onClick={handleGoogleLogin}
+        className="mb-4 flex w-full items-center justify-center rounded-lg bg-blue-600 py-2 text-white transition hover:bg-blue-700 text-sm"
+      >
+        <svg className="mr-2 h-5 w-5" viewBox="0 0 48 48"></svg>
+        Log In with Google
+      </Button>
+    </AuthModal>
   )
 }
 

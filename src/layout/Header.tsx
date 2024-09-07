@@ -1,3 +1,4 @@
+// src/components/Header.js
 import { Button, Navbar, Modal } from 'flowbite-react'
 import { useState } from 'react'
 import { DarkThemeToggle } from 'flowbite-react'
@@ -5,7 +6,7 @@ import logo from '../assets/logo.svg'
 import LoginModal from '../components/Modals/LoginModal'
 import SignUpModal from '../components/Modals/SignupModal'
 
-const Header: React.FC = () => {
+const Header = () => {
   const [activeModal, setActiveModal] = useState<'login' | 'signup' | null>(
     null,
   )
@@ -14,7 +15,6 @@ const Header: React.FC = () => {
   const openSignUpModal = () => setActiveModal('signup')
   const closeModal = () => setActiveModal(null)
 
-  // Switch modals
   const switchToSignUp = () => setActiveModal('signup')
   const switchToLogin = () => setActiveModal('login')
 
@@ -42,7 +42,6 @@ const Header: React.FC = () => {
         </Navbar.Collapse>
       </Navbar>
 
-      {/* Login Modal */}
       {activeModal === 'login' && (
         <Modal
           show={true}
@@ -50,14 +49,10 @@ const Header: React.FC = () => {
           size="md"
           className="fixed inset-0 flex items-center justify-center"
         >
-          <LoginModal
-            onClose={closeModal}
-            onSwitch={switchToSignUp} // Pass switch handler
-          />
+          <LoginModal onClose={closeModal} onSwitch={switchToSignUp} />
         </Modal>
       )}
 
-      {/* Sign Up Modal */}
       {activeModal === 'signup' && (
         <Modal
           show={true}
@@ -65,10 +60,7 @@ const Header: React.FC = () => {
           size="md"
           className="fixed inset-0 flex items-center justify-center"
         >
-          <SignUpModal
-            onClose={closeModal}
-            onSwitch={switchToLogin} // Pass switch handler
-          />
+          <SignUpModal onClose={closeModal} onSwitch={switchToLogin} />
         </Modal>
       )}
     </div>
