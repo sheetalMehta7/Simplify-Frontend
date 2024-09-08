@@ -24,10 +24,13 @@ interface TaskCardProps {
 const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [statusChangeOpen, setStatusChangeOpen] = useState(false)
+  const [submenuPosition, setSubmenuPosition] = useState<'left' | 'right'>(
+    'right',
+  ) // Type-safe for submenu positioning
   const dispatch: AppDispatch = useDispatch()
   const menuRef = useRef<HTMLDivElement>(null)
+  const statusRef = useRef<HTMLLIElement>(null) // Now this is correctly set to HTMLLIElement
 
-  // Close menu on outside click
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -52,18 +55,29 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
     setMenuOpen(false)
   }
 
+  const handleMouseEnterStatus = () => {
+    const statusMenuRect = statusRef.current?.getBoundingClientRect()
+    if (statusMenuRect) {
+      const viewportWidth = window.innerWidth
+      if (statusMenuRect.right + 200 > viewportWidth) {
+        setSubmenuPosition('left')
+      } else {
+        setSubmenuPosition('right')
+      }
+    }
+    setStatusChangeOpen(true)
+  }
+
   return (
     <div
       className="relative bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md text-gray-900 dark:text-white cursor-pointer"
-      onClick={() => onTaskClick(task)} // Only trigger when clicking the card, not the menu
+      onClick={() => onTaskClick(task)}
     >
-      {/* Flag Icon */}
       <FaFlag
         className={`absolute top-2 left-2 ${getFlagColor(task.status)}`}
         size={16}
       />
 
-      {/* Three-dot menu */}
       <div className="absolute top-2 right-2" ref={menuRef}>
         <button
           onClick={(e) => {
@@ -95,12 +109,14 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
                   Delete
                 </button>
               </li>
-              <li className="relative group">
+              <li
+                className="relative group"
+                ref={statusRef} // Correctly assigning the ref to the <li> element
+              >
                 <button
                   className="w-full flex items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  onMouseEnter={() => setStatusChangeOpen(true)}
+                  onMouseEnter={handleMouseEnterStatus}
                   onMouseLeave={(e) => {
-                    // Proper type casting to handle closest
                     const relatedTarget = e.relatedTarget as Element
                     if (
                       !relatedTarget ||
@@ -118,9 +134,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
                 </button>
                 {statusChangeOpen && (
                   <div
-                    className="absolute left-full top-0 ml-1 w-40 bg-white dark:bg-gray-800 shadow-lg rounded-lg z-20 status-submenu"
-                    onMouseEnter={() => setStatusChangeOpen(true)} // Keep open on hover
-                    onMouseLeave={() => setStatusChangeOpen(false)} // Close when leaving submenu
+                    className={`absolute ${
+                      submenuPosition === 'right' ? 'left-full' : 'right-full'
+                    } top-0 ml-1 w-40 bg-white dark:bg-gray-800 shadow-lg rounded-lg z-20 status-submenu`}
+                    onMouseEnter={() => setStatusChangeOpen(true)}
+                    onMouseLeave={() => setStatusChangeOpen(false)}
                   >
                     <ul className="py-1">
                       {['todo', 'in-progress', 'review', 'done'].map(
@@ -144,7 +162,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
         )}
       </div>
 
-      {/* Card Content */}
       <div className="ml-8">
         <h3 className="text-sm font-semibold md:text-base lg:text-base">
           {task.title}
@@ -153,7 +170,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
           Assignee: {task.assignee || 'Unassigned'}
         </p>
         <p className="text-xs md:text-xs mb-2">
-          Due Date: {task.dueDate ? formatDate(task.dueDate) : 'No due date'}
+          Due Date:{' '}
+          {task.dueDate
+            ? formatDate(task.dueDate, 'MMM dd, yyyy')
+            : 'No due date'}
         </p>
         <span
           className={`text-xs font-bold py-1 px-2 rounded-full ${getBadgeColor(
@@ -165,6 +185,17 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
       </div>
     </div>
   )
+}
+
+// Modified formatDate to accept a formatStr argument
+function formatDate(dateString: string, _formatStr: string = 'MMM dd, yyyy') {
+  const date = new Date(dateString)
+  const formatter = new Intl.DateTimeFormat(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+  return formatter.format(date)
 }
 
 function getFlagColor(status: string) {
@@ -195,15 +226,6 @@ function getBadgeColor(status: string) {
     default:
       return 'bg-gray-100 text-gray-700 dark:bg-gray-200 dark:text-gray-800'
   }
-}
-
-function formatDate(dateString: string) {
-  const date = new Date(dateString)
-  return date.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
 }
 
 export default TaskCard

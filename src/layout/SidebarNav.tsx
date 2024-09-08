@@ -122,7 +122,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
       <div className="pb-3">
         <button
           className="flex items-center justify-center p-4 hover:bg-gray-200 dark:hover:bg-red-700 rounded-lg w-full transition-all duration-300"
-          onClick={handleLogout} // Use the handleLogout function
+          onClick={handleLogout}
         >
           <CgLogOut className="text-xl" />
           {!isShrinked && (

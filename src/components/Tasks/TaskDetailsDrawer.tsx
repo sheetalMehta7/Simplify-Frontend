@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Drawer, Button, Badge, TextInput, Select } from 'flowbite-react'
-import { FaTimes, FaTasks } from 'react-icons/fa'
+import { Drawer, Button, TextInput, Select } from 'flowbite-react'
+import { FaTimes, FaTasks, FaFlag, FaArrowLeft } from 'react-icons/fa'
 import { Task } from '../../redux/features/tasks/tasksSlice'
 import { useDispatch } from 'react-redux'
 import {
@@ -54,11 +54,12 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
     onClose() // Close the drawer after deletion
   }
 
+  // Define status color mapping for the flag icon
   const statusColors: { [key: string]: string } = {
-    todo: 'yellow',
-    'in-progress': 'blue',
-    review: 'red',
-    done: 'green',
+    todo: 'text-yellow-500',
+    'in-progress': 'text-blue-500',
+    review: 'text-red-500',
+    done: 'text-green-500',
   }
 
   return (
@@ -70,7 +71,17 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
     >
       <Drawer.Header className="p-4 md:p-2 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <FaTasks className="text-blue-600" size={24} />
+          {/* Display the left arrow if editing, otherwise display the home/task icon */}
+          {isEditing ? (
+            <button
+              onClick={() => setIsEditing(false)}
+              className="flex items-center justify-center text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white p-2"
+            >
+              <FaArrowLeft className="w-6 h-6" />
+            </button>
+          ) : (
+            <FaTasks className="text-blue-600" size={24} />
+          )}
           <h2 className="text-lg md:text-base font-bold text-gray-900 dark:text-gray-200">
             Task Details
           </h2>
@@ -185,12 +196,14 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
                 <option value="done">Done</option>
               </Select>
             ) : (
-              <Badge
-                color={statusColors[task.status] || 'gray'}
-                className="text-sm font-semibold py-1 px-3 md:py-1 md:px-2"
-              >
-                {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
-              </Badge>
+              <div className="flex items-center space-x-2">
+                <FaFlag
+                  className={`${statusColors[task.status] || 'text-gray-500'} w-5 h-5`}
+                />
+                <span className="text-base md:text-sm">
+                  {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                </span>
+              </div>
             )}
           </div>
 
@@ -217,7 +230,7 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
               onClick={handleDelete}
               className="flex-1 text-xs py-1 sm:text-sm sm:py-1 transition-colors"
             >
-              Delete Task
+              Delete
             </Button>
           </div>
         </>
