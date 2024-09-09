@@ -7,13 +7,13 @@ export const getAllTasks = async (): Promise<Task[]> => {
   return response.data
 }
 
-// Create a new task
+// Create a new task without userId
 export const createTask = async (task: Partial<Task>): Promise<Task> => {
   const response = await axiosInstance.post('/tasks', task)
   return response.data
 }
 
-// Update a task
+// Update a task without userId
 export const updateTask = async (
   taskId: string,
   task: Partial<Task>,

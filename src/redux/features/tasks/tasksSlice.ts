@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { RootState } from '../../store'
 import {
   getAllTasks,
   createTask,
@@ -51,34 +50,22 @@ export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
   return tasksByStatus
 })
 
-// Thunk to create a new task, automatically assigning the current user as the assignee
+// Thunk to create a new task without userId
 export const createNewTask = createAsyncThunk(
   'tasks/createTask',
-  async (newTask: Partial<Task>, { getState }) => {
-    const state = getState() as RootState
-    const currentUser = state.auth.user
-
-    if (!currentUser) {
-      throw new Error('User is not logged in.')
-    }
-
-    const taskWithAssignee = {
-      ...newTask,
-      assignee: currentUser.name,
-      userId: currentUser.id,
-    }
-
-    const task = await createTask(taskWithAssignee)
+  async (newTask: Partial<Task>) => {
+    const task = await createTask(newTask) // No userId in request
     return task
   },
 )
 
-// Thunk to update a task's status
-export const updateTaskStatus = createAsyncThunk(
-  'tasks/updateTaskStatus',
-  async ({ taskId, status }: { taskId: string; status: string }) => {
-    await updateTask(taskId, { status })
-    return { taskId, status }
+// Thunk to update a task without userId
+export const updateTaskThunk = createAsyncThunk(
+  'tasks/updateTask',
+  async (taskData: Partial<Task>) => {
+    const { id: taskId, ...updatedFields } = taskData
+    const updatedTask = await updateTask(taskId!, updatedFields)
+    return updatedTask
   },
 )
 
@@ -112,32 +99,33 @@ const tasksSlice = createSlice({
       })
       .addCase(createNewTask.fulfilled, (state, action) => {
         const newTask = action.payload
-        const status = newTask.status || 'todo' // Default to "todo" if status is undefined
+        const status = newTask.status || 'todo'
 
         if (!state.tasks[status]) {
           state.tasks[status] = [] // Ensure the status array exists
         }
 
-        state.tasks[status].push(newTask) // Add the task to the appropriate column based on its status
+        state.tasks[status].push(newTask)
       })
-      .addCase(updateTaskStatus.fulfilled, (state, action) => {
-        const { taskId, status } = action.payload
-        let task: Task | undefined
+      .addCase(updateTaskThunk.fulfilled, (state, action) => {
+        const updatedTask = action.payload
+        const oldStatus = updatedTask.status
+        const newStatus = updatedTask.status
 
-        // Find the task across all statuses
+        // Find and update the task across all statuses
         for (const [key, taskList] of Object.entries(state.tasks)) {
-          task = taskList.find((t) => t.id === taskId)
-          if (task) {
-            // Remove from old status
-            state.tasks[key] = taskList.filter((t) => t.id !== taskId)
+          const taskIndex = taskList.findIndex((t) => t.id === updatedTask.id)
+          if (taskIndex !== -1) {
+            // If the task's status has changed, move it to the new status array
+            if (oldStatus !== newStatus) {
+              state.tasks[key] = taskList.filter((t) => t.id !== updatedTask.id)
+              state.tasks[newStatus].push(updatedTask)
+            } else {
+              // Otherwise, just update the task's fields
+              state.tasks[key][taskIndex] = updatedTask
+            }
             break
           }
-        }
-
-        if (task) {
-          // Update the task's status and move it to the new status
-          task.status = status
-          state.tasks[status].push(task)
         }
       })
       .addCase(deleteTaskThunk.fulfilled, (state, action) => {

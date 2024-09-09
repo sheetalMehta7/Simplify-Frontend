@@ -9,7 +9,7 @@ import {
 } from 'react-icons/fa'
 import { useDispatch } from 'react-redux'
 import {
-  updateTaskStatus,
+  updateTaskThunk,
   deleteTaskThunk,
 } from '../../redux/features/tasks/tasksSlice'
 import { Task } from '../../redux/features/tasks/tasksSlice'
@@ -29,7 +29,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
   ) // Type-safe for submenu positioning
   const dispatch: AppDispatch = useDispatch()
   const menuRef = useRef<HTMLDivElement>(null)
-  const statusRef = useRef<HTMLLIElement>(null) // Now this is correctly set to HTMLLIElement
+  const statusRef = useRef<HTMLLIElement>(null)
 
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
@@ -44,8 +44,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
     }
   }, [])
 
+  // Update task status using the latest updateTaskThunk action
   const handleStatusChange = (newStatus: string) => {
-    dispatch(updateTaskStatus({ taskId: task.id, status: newStatus }))
+    dispatch(updateTaskThunk({ id: task.id, status: newStatus }))
     setMenuOpen(false)
     setStatusChangeOpen(false)
   }
@@ -109,10 +110,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
                   Delete
                 </button>
               </li>
-              <li
-                className="relative group"
-                ref={statusRef} // Correctly assigning the ref to the <li> element
-              >
+              <li className="relative group" ref={statusRef}>
                 <button
                   className="w-full flex items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   onMouseEnter={handleMouseEnterStatus}
