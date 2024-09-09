@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux'
 import {
   updateTaskThunk,
   deleteTaskThunk,
+  moveTaskLocally, // <-- Import the local move task action
 } from '../../redux/features/tasks/tasksSlice'
 import { AppDispatch } from '../../redux/store'
 
@@ -45,9 +46,20 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
 
   // Submit changes by dispatching the update action
   const handleEditToggle = async () => {
-    if (isEditing) {
-      // Remove the explicit "id" since it already exists in "editedTask"
-      await dispatch(updateTaskThunk(editedTask)) // editedTask already includes id and other fields
+    if (isEditing && editedTask) {
+      // If the status is changed, optimistically update the task's status locally
+      if (task.status !== editedTask.status) {
+        dispatch(
+          moveTaskLocally({
+            taskId: editedTask.id,
+            oldStatus: task.status,
+            newStatus: editedTask.status,
+          }),
+        )
+      }
+
+      // Dispatch the task update to the server
+      await dispatch(updateTaskThunk(editedTask))
     }
     setIsEditing(!isEditing)
   }

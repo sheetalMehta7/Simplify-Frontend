@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux'
 import {
   updateTaskThunk,
   deleteTaskThunk,
+  moveTaskLocally, // <-- Import the local move task action
 } from '../../redux/features/tasks/tasksSlice'
 import { Task } from '../../redux/features/tasks/tasksSlice'
 import { AppDispatch } from '../../redux/store'
@@ -46,7 +47,18 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
 
   // Update task status using the latest updateTaskThunk action
   const handleStatusChange = (newStatus: string) => {
+    // Optimistically move the task to the new column locally
+    dispatch(
+      moveTaskLocally({
+        taskId: task.id,
+        oldStatus: task.status,
+        newStatus,
+      }),
+    )
+
+    // Dispatch the update to persist the change on the server
     dispatch(updateTaskThunk({ id: task.id, status: newStatus }))
+
     setMenuOpen(false)
     setStatusChangeOpen(false)
   }
@@ -185,7 +197,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
   )
 }
 
-// Modified formatDate to accept a formatStr argument
+// Utility functions to handle task status color
 function formatDate(dateString: string, _formatStr: string = 'MMM dd, yyyy') {
   const date = new Date(dateString)
   const formatter = new Intl.DateTimeFormat(undefined, {

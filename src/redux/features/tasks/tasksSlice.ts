@@ -50,7 +50,7 @@ export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
   return tasksByStatus
 })
 
-// Thunk to create a new task without userId
+// Thunk to create a new task
 export const createNewTask = createAsyncThunk(
   'tasks/createTask',
   async (newTask: Partial<Task>) => {
@@ -59,7 +59,7 @@ export const createNewTask = createAsyncThunk(
   },
 )
 
-// Thunk to update a task without userId
+// Thunk to update a task
 export const updateTaskThunk = createAsyncThunk(
   'tasks/updateTask',
   async (taskData: Partial<Task>) => {
@@ -78,11 +78,26 @@ export const deleteTaskThunk = createAsyncThunk(
   },
 )
 
-// Task slice
 const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
-  reducers: {},
+  reducers: {
+    moveTaskLocally: (state, action) => {
+      const { taskId, oldStatus, newStatus } = action.payload
+
+      const taskToMove = state.tasks[oldStatus].find(
+        (task) => task.id === taskId,
+      )
+      if (taskToMove) {
+        // Remove task from old status
+        state.tasks[oldStatus] = state.tasks[oldStatus].filter(
+          (task) => task.id !== taskId,
+        )
+        // Add task to new status
+        state.tasks[newStatus].push({ ...taskToMove, status: newStatus })
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchTasks.pending, (state) => {
@@ -139,4 +154,5 @@ const tasksSlice = createSlice({
   },
 })
 
+export const { moveTaskLocally } = tasksSlice.actions
 export default tasksSlice.reducer
