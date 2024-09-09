@@ -4,7 +4,7 @@ import { FaTimes, FaTasks, FaFlag, FaArrowLeft } from 'react-icons/fa'
 import { Task } from '../../redux/features/tasks/tasksSlice'
 import { useDispatch } from 'react-redux'
 import {
-  updateTaskStatus,
+  updateTaskThunk,
   deleteTaskThunk,
 } from '../../redux/features/tasks/tasksSlice'
 import { AppDispatch } from '../../redux/store'
@@ -26,19 +26,13 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
 
   useEffect(() => {
     if (task) {
-      setEditedTask(task)
+      setEditedTask(task) // Sync the form state with the task prop
     }
   }, [task])
 
   if (!task || !editedTask) return null
 
-  const handleEditToggle = async () => {
-    if (isEditing) {
-      await dispatch(updateTaskStatus({ taskId: editedTask.id, ...editedTask }))
-    }
-    setIsEditing(!isEditing)
-  }
-
+  // Handle form input changes
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
@@ -49,12 +43,20 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
     })
   }
 
+  // Submit changes by dispatching the update action
+  const handleEditToggle = async () => {
+    if (isEditing) {
+      // Remove the explicit "id" since it already exists in "editedTask"
+      await dispatch(updateTaskThunk(editedTask)) // editedTask already includes id and other fields
+    }
+    setIsEditing(!isEditing)
+  }
+
   const handleDelete = async () => {
     await dispatch(deleteTaskThunk(editedTask.id))
     onClose() // Close the drawer after deletion
   }
 
-  // Define status color mapping for the flag icon
   const statusColors: { [key: string]: string } = {
     todo: 'text-yellow-500',
     'in-progress': 'text-blue-500',
@@ -71,7 +73,6 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
     >
       <Drawer.Header className="p-4 md:p-2 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          {/* Display the left arrow if editing, otherwise display the home/task icon */}
           {isEditing ? (
             <button
               onClick={() => setIsEditing(false)}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   DragDropContext,
   Droppable,
@@ -12,26 +12,26 @@ import TaskDetailsDrawer from '../Tasks/TaskDetailsDrawer'
 import CreateTaskModal from '../Modals/CreateTaskModal'
 import {
   fetchTasks,
-  updateTaskStatus,
+  updateTaskThunk,
   createNewTask,
 } from '../../redux/features/tasks/tasksSlice'
-import { AppDispatch } from '../../redux/store'
+import { AppDispatch, RootState } from '../../redux/store'
 import { Task } from '../../redux/features/tasks/tasksSlice'
 import Loader from '../Loader'
 
 interface TaskBoardProps {
-  tasks: { [key: string]: Task[] }
   filters: { date: string; assignee: string; status: string }
 }
 
-const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, filters }) => {
+const TaskBoard: React.FC<TaskBoardProps> = ({ filters }) => {
   const dispatch: AppDispatch = useDispatch()
+  const tasks = useSelector((state: RootState) => state.tasks.tasks)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  // Fetch tasks and handle loading state
+  // Fetch tasks on component mount
   useEffect(() => {
     const loadTasks = async () => {
       setLoading(true)
@@ -41,6 +41,7 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, filters }) => {
     loadTasks()
   }, [dispatch])
 
+  // Apply filters
   const applyFilters = (tasks: { [key: string]: Task[] }) => {
     const filteredTasks = Object.entries(tasks).reduce(
       (acc: { [key: string]: Task[] }, [status, tasksArray]) => {
@@ -55,21 +56,28 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, filters }) => {
         })
         return acc
       },
-      {},
+      {
+        todo: [],
+        'in-progress': [],
+        review: [],
+        done: [],
+      },
     )
     return filteredTasks
   }
 
-  const filteredTasks = applyFilters(tasks)
+  const filteredTasks = applyFilters(tasks) // Recalculate filteredTasks whenever the tasks state changes
 
-  const onDragEnd = (result: DropResult) => {
+  // Handle drag-and-drop event
+  const onDragEnd = async (result: DropResult) => {
     const { source, destination } = result
     if (!destination || source.droppableId === destination.droppableId) return
 
     const taskId = filteredTasks[source.droppableId][source.index].id
     const newStatus = destination.droppableId
 
-    dispatch(updateTaskStatus({ taskId, status: newStatus }))
+    // Optimistically update the task status in Redux
+    await dispatch(updateTaskThunk({ id: taskId, status: newStatus }))
   }
 
   const handleTaskClick = (task: Task) => {
@@ -92,14 +100,14 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, filters }) => {
 
   return (
     <>
-      <div className="relative p-4">
+      <div className="relative p-4 h-screen">
         {loading ? (
           <div className="flex items-center justify-center h-screen">
             <Loader message="Loading task..." />
           </div>
         ) : (
           <DragDropContext onDragEnd={onDragEnd}>
-            <div className="flex-1 overflow-x-auto">
+            <div className="flex-1 overflow-x-auto min-h-screen">
               {areAllTasksEmpty && areFilteredTasksEmpty ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <p className="text-gray-500 dark:text-gray-300 mb-4">
@@ -178,6 +186,7 @@ const TaskBoardTable: React.FC<{
                         ? 'bg-slate-300'
                         : 'bg-transparent'
                     }`}
+                    style={{ minHeight: 'calc(100vh - 120px)' }}
                   >
                     {tasks[columnId]?.map((task, index) => (
                       <Draggable
