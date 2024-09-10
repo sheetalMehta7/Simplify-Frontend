@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux'
 import {
   updateTaskThunk,
   deleteTaskThunk,
-  moveTaskLocally, // <-- Import the local move task action
+  moveTaskLocally,
 } from '../../redux/features/tasks/tasksSlice'
 import { AppDispatch } from '../../redux/store'
 
@@ -27,13 +27,12 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
 
   useEffect(() => {
     if (task) {
-      setEditedTask(task) // Sync the form state with the task prop
+      setEditedTask(task)
     }
   }, [task])
 
   if (!task || !editedTask) return null
 
-  // Handle form input changes
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
@@ -44,10 +43,8 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
     })
   }
 
-  // Submit changes by dispatching the update action
   const handleEditToggle = async () => {
     if (isEditing && editedTask) {
-      // If the status is changed, optimistically update the task's status locally
       if (task.status !== editedTask.status) {
         dispatch(
           moveTaskLocally({
@@ -57,8 +54,6 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
           }),
         )
       }
-
-      // Dispatch the task update to the server
       await dispatch(updateTaskThunk(editedTask))
     }
     setIsEditing(!isEditing)
@@ -66,7 +61,7 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
 
   const handleDelete = async () => {
     await dispatch(deleteTaskThunk(editedTask.id))
-    onClose() // Close the drawer after deletion
+    onClose()
   }
 
   const statusColors: { [key: string]: string } = {
@@ -217,6 +212,30 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
                   {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
                 </span>
               </div>
+            )}
+          </div>
+
+          {/* Priority - New Field */}
+          <div className="space-y-2">
+            <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
+              Priority
+            </h3>
+            {isEditing ? (
+              <Select
+                name="priority"
+                value={editedTask.priority}
+                onChange={handleInputChange}
+                className="dark:bg-gray-700"
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </Select>
+            ) : (
+              <span className="text-base md:text-sm">
+                {editedTask.priority.charAt(0).toUpperCase() +
+                  editedTask.priority.slice(1)}
+              </span>
             )}
           </div>
 

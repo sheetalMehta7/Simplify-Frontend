@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux'
 import {
   updateTaskThunk,
   deleteTaskThunk,
-  moveTaskLocally, // <-- Import the local move task action
+  moveTaskLocally,
 } from '../../redux/features/tasks/tasksSlice'
 import { Task } from '../../redux/features/tasks/tasksSlice'
 import { AppDispatch } from '../../redux/store'
@@ -27,7 +27,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
   const [statusChangeOpen, setStatusChangeOpen] = useState(false)
   const [submenuPosition, setSubmenuPosition] = useState<'left' | 'right'>(
     'right',
-  ) // Type-safe for submenu positioning
+  )
   const dispatch: AppDispatch = useDispatch()
   const menuRef = useRef<HTMLDivElement>(null)
   const statusRef = useRef<HTMLLIElement>(null)
@@ -45,20 +45,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
     }
   }, [])
 
-  // Update task status using the latest updateTaskThunk action
   const handleStatusChange = (newStatus: string) => {
-    // Optimistically move the task to the new column locally
     dispatch(
-      moveTaskLocally({
-        taskId: task.id,
-        oldStatus: task.status,
-        newStatus,
-      }),
+      moveTaskLocally({ taskId: task.id, oldStatus: task.status, newStatus }),
     )
-
-    // Dispatch the update to persist the change on the server
     dispatch(updateTaskThunk({ id: task.id, status: newStatus }))
-
     setMenuOpen(false)
     setStatusChangeOpen(false)
   }
@@ -70,13 +61,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
 
   const handleMouseEnterStatus = () => {
     const statusMenuRect = statusRef.current?.getBoundingClientRect()
-    if (statusMenuRect) {
-      const viewportWidth = window.innerWidth
-      if (statusMenuRect.right + 200 > viewportWidth) {
-        setSubmenuPosition('left')
-      } else {
-        setSubmenuPosition('right')
-      }
+    const viewportWidth = window.innerWidth
+    if (statusMenuRect && statusMenuRect.right + 200 > viewportWidth) {
+      setSubmenuPosition('left')
+    } else {
+      setSubmenuPosition('right')
     }
     setStatusChangeOpen(true)
   }
@@ -185,19 +174,28 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
             ? formatDate(task.dueDate, 'MMM dd, yyyy')
             : 'No due date'}
         </p>
+
+        {/* Status Badge */}
         <span
-          className={`text-xs font-bold py-1 px-2 rounded-full ${getBadgeColor(
-            task.status,
+          className={`text-xs font-bold py-1 px-2 rounded-full ${getBadgeColor(task.status)}`}
+        >
+          {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+        </span>
+
+        {/* Priority Badge */}
+        <span
+          className={`text-xs font-bold py-1 px-2 rounded-full ml-2 ${getPriorityBadgeColor(
+            task.priority,
           )}`}
         >
-          {task.status}
+          {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
         </span>
       </div>
     </div>
   )
 }
 
-// Utility functions to handle task status color
+// Utility functions to handle task status and priority color
 function formatDate(dateString: string, _formatStr: string = 'MMM dd, yyyy') {
   const date = new Date(dateString)
   const formatter = new Intl.DateTimeFormat(undefined, {
@@ -233,6 +231,19 @@ function getBadgeColor(status: string) {
       return 'bg-orange-100 text-orange-700 dark:bg-orange-200 dark:text-orange-800'
     case 'done':
       return 'bg-green-100 text-green-700 dark:bg-green-200 dark:text-green-800'
+    default:
+      return 'bg-gray-100 text-gray-700 dark:bg-gray-200 dark:text-gray-800'
+  }
+}
+
+function getPriorityBadgeColor(priority: string) {
+  switch (priority) {
+    case 'low':
+      return 'bg-green-100 text-green-700 dark:bg-green-200 dark:text-green-800'
+    case 'normal':
+      return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-200 dark:text-yellow-800'
+    case 'high':
+      return 'bg-red-100 text-red-700 dark:bg-red-200 dark:text-red-800'
     default:
       return 'bg-gray-100 text-gray-700 dark:bg-gray-200 dark:text-gray-800'
   }

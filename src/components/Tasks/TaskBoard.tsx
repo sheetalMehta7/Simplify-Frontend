@@ -15,9 +15,9 @@ import {
   updateTaskThunk,
   createNewTask,
   moveTaskLocally,
+  Task,
 } from '../../redux/features/tasks/tasksSlice'
 import { AppDispatch, RootState } from '../../redux/store'
-import { Task } from '../../redux/features/tasks/tasksSlice'
 import Loader from '../Loader'
 
 interface TaskBoardProps {

@@ -13,6 +13,7 @@ export interface Task {
   description: string
   dueDate: string
   status: string
+  priority: string // Added priority field
   userId: number
 }
 
@@ -59,7 +60,7 @@ export const createNewTask = createAsyncThunk(
   },
 )
 
-// Thunk to update a task
+// Thunk to update a task (including priority)
 export const updateTaskThunk = createAsyncThunk(
   'tasks/updateTask',
   async (taskData: Partial<Task>) => {
@@ -93,7 +94,7 @@ const tasksSlice = createSlice({
         state.tasks[oldStatus] = state.tasks[oldStatus].filter(
           (task) => task.id !== taskId,
         )
-        // Add task to new status
+        // Add task to new status and preserve the priority field
         state.tasks[newStatus].push({ ...taskToMove, status: newStatus })
       }
     },
@@ -110,7 +111,7 @@ const tasksSlice = createSlice({
       })
       .addCase(fetchTasks.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message || 'Error fetching tasks'
+        state.error = action.error.message ?? 'Error fetching tasks'
       })
       .addCase(createNewTask.fulfilled, (state, action) => {
         const newTask = action.payload
@@ -136,7 +137,7 @@ const tasksSlice = createSlice({
               state.tasks[key] = taskList.filter((t) => t.id !== updatedTask.id)
               state.tasks[newStatus].push(updatedTask)
             } else {
-              // Otherwise, just update the task's fields
+              // Otherwise, just update the task's fields including priority
               state.tasks[key][taskIndex] = updatedTask
             }
             break
