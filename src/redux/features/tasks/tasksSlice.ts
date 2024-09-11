@@ -118,7 +118,7 @@ const tasksSlice = createSlice({
         const status = newTask.status || 'todo'
 
         if (!state.tasks[status]) {
-          state.tasks[status] = [] // Ensure the status array exists
+          state.tasks[status] = []
         }
 
         state.tasks[status].push(newTask)

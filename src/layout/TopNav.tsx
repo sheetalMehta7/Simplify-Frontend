@@ -3,6 +3,10 @@ import { IoMdNotificationsOutline, IoMdSearch } from 'react-icons/io'
 import { IoSettingsOutline } from 'react-icons/io5'
 import { CgProfile } from 'react-icons/cg'
 import { DarkThemeToggle, Kbd, TextInput } from 'flowbite-react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchTasks } from '../redux/features/tasks/tasksSlice'
+import { fetchUserProfile } from '../redux/features/user/userSlice'
+import { AppDispatch, RootState } from '../redux/store'
 import UserProfileDropdown from '../components/Dropdowns/UserProfileDropdown'
 import NotificationDropdown from '../components/Dropdowns/NotificationDropdown'
 import SearchModal from '../components/Modals/SearchModal'
@@ -13,58 +17,84 @@ const CgProfileWithRef = React.forwardRef<
 >((props, ref) => <CgProfile ref={ref} {...props} />)
 
 const TopNav: React.FC = () => {
+  const dispatch: AppDispatch = useDispatch()
+
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
-  const [notifications, setNotifications] = useState(2)
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false)
 
   const profileIconRef = useRef<SVGSVGElement>(null)
-  const notificationsIconRef = useRef<SVGSVGElement>(null)
+  const notificationsIconRef = useRef<HTMLDivElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const toggleProfileDropdown = () => setIsProfileOpen((prev) => !prev)
-  const toggleNotificationsDropdown = () =>
-    setIsNotificationsOpen((prev) => !prev)
-
-  const handleNotificationClick = () => {
-    setNotifications(0)
-    toggleNotificationsDropdown()
-  }
-
-  const openSearchModal = () => {
-    setIsSearchModalOpen(true)
-  }
-
-  const closeSearchModal = () => {
-    setIsSearchModalOpen(false)
-  }
+  const profile = useSelector((state: RootState) => state.user.profile)
+  const profileLoading = useSelector((state: RootState) => state.user.loading)
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.shiftKey && event.key === 'K') {
-        event.preventDefault()
-        openSearchModal()
-      }
+    if (isProfileOpen) {
+      dispatch(fetchUserProfile())
     }
+  }, [isProfileOpen, dispatch])
 
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
+  useEffect(() => {
+    dispatch(fetchTasks())
+  }, [dispatch])
+
+  useEffect(() => {
+    const badgeShown = localStorage.getItem('notificationsBadgeShown')
+    if (!badgeShown) {
+      setHasUnreadNotifications(true)
+    }
   }, [])
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        profileIconRef.current &&
-        !profileIconRef.current.contains(event.target as Node) &&
-        notificationsIconRef.current &&
-        !notificationsIconRef.current.contains(event.target as Node)
-      ) {
-        setIsProfileOpen(false)
-        setIsNotificationsOpen(false)
-      }
-    }
+  const tasks = useSelector((state: RootState) => state.tasks.tasks)
 
+  const calculateDaysRemaining = (dueDate: string) => {
+    const currentDate = new Date()
+    const taskDueDate = new Date(dueDate)
+    const timeDifference = taskDueDate.getTime() - currentDate.getTime()
+    return Math.ceil(timeDifference / (1000 * 3600 * 24))
+  }
+
+  const upcomingTasks = Object.values(tasks)
+    .flat()
+    .filter((task) => calculateDaysRemaining(task.dueDate) <= 5)
+    .sort((a, b) => a.priority.localeCompare(b.priority))
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      notificationsIconRef.current &&
+      !notificationsIconRef.current.contains(event.target as Node) &&
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node)
+    ) {
+      setIsNotificationsOpen(false)
+      setIsProfileOpen(false)
+    }
+  }
+
+  const handleNotificationClick = () => {
+    setIsNotificationsOpen((prev) => !prev)
+    if (!isNotificationsOpen) {
+      setIsProfileOpen(false)
+      setHasUnreadNotifications(false)
+      localStorage.setItem('notificationsBadgeShown', 'true')
+    }
+  }
+
+  const handleProfileClick = () => {
+    setIsProfileOpen((prev) => !prev)
+    if (!isProfileOpen) {
+      setIsNotificationsOpen(false)
+    }
+  }
+
+  useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
   }, [])
 
   return (
@@ -74,7 +104,7 @@ const TopNav: React.FC = () => {
           <TextInput
             icon={IoMdSearch}
             placeholder="Search people, projects or tasks"
-            className="w-full bg-gray-200 dark:bg-gray-700 hover: text-gray-900 dark:text-white rounded-lg"
+            className="w-full bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg"
           />
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-500 dark:text-gray-400">
             <Kbd>Ctrl</Kbd> + <Kbd>Shift</Kbd> + <Kbd>K</Kbd>
@@ -85,18 +115,18 @@ const TopNav: React.FC = () => {
           <div
             className="relative flex items-center"
             ref={notificationsIconRef}
+            onClick={handleNotificationClick}
           >
-            <IoMdNotificationsOutline
-              className="text-2xl cursor-pointer"
-              onClick={handleNotificationClick}
-            />
-            {notifications > 0 && (
+            <IoMdNotificationsOutline className="text-2xl cursor-pointer" />
+            {hasUnreadNotifications && (
               <div className="absolute -top-3 -right-3 w-6 h-6 flex items-center justify-center bg-red-600 text-white text-xs font-bold rounded-full">
-                {notifications}
+                {upcomingTasks.length}
               </div>
             )}
             {isNotificationsOpen && (
               <NotificationDropdown
+                taskNotifications={upcomingTasks}
+                dropdownRef={dropdownRef}
                 onClose={() => setIsNotificationsOpen(false)}
               />
             )}
@@ -106,20 +136,25 @@ const TopNav: React.FC = () => {
             <CgProfileWithRef
               className="text-2xl cursor-pointer"
               ref={profileIconRef}
-              onClick={toggleProfileDropdown}
+              onClick={handleProfileClick}
             />
             {isProfileOpen && (
               <UserProfileDropdown
                 isOpen={isProfileOpen}
                 onClose={() => setIsProfileOpen(false)}
                 iconRef={profileIconRef}
+                profile={profile}
+                loading={profileLoading}
               />
             )}
           </div>
         </div>
       </div>
 
-      <SearchModal show={isSearchModalOpen} onClose={closeSearchModal} />
+      <SearchModal
+        show={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+      />
     </>
   )
 }
