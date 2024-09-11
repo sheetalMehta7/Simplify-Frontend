@@ -41,7 +41,7 @@ export const setupAxiosInterceptors = (navigate: (path: string) => void) => {
         store.dispatch(setError('Session expired. You have been logged out.'))
 
         // Wait for logout action to complete
-        await store.dispatch(logout())
+        store.dispatch(logout())
 
         // Navigate to the '/' route after logout
         navigate('/')

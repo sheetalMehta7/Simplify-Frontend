@@ -35,7 +35,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     title: '',
     description: '',
     status: 'todo',
-    priority: 'normal',
+    priority: 'low',
     dueDate: '',
     userId: userId,
   })
@@ -74,8 +74,8 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
   const handleSubmit = () => {
     if (validateForm()) {
-      onSave(taskDetails) // Save task
-      onClose() // Close the modal after saving the task
+      onSave(taskDetails)
+      onClose()
     }
   }
 
@@ -92,7 +92,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               id="title"
               name="title"
               icon={MdTitle}
-              value={taskDetails.title || ''}
+              value={taskDetails.title ?? ''}
               onChange={handleChange}
               color={errors.title ? 'failure' : ''}
               placeholder="Enter task title"
@@ -106,7 +106,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             <Textarea
               id="description"
               name="description"
-              value={taskDetails.description || ''}
+              value={taskDetails.description ?? ''}
               onChange={handleChange}
               placeholder="Enter task description"
               rows={4}
@@ -119,7 +119,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               name="dueDate"
               type="date"
               icon={MdDateRange}
-              value={taskDetails.dueDate || ''}
+              value={taskDetails.dueDate ?? ''}
               onChange={handleChange}
               color={errors.dueDate ? 'failure' : ''}
             />
@@ -132,12 +132,12 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             <Select
               id="priority"
               name="priority"
-              value={taskDetails.priority || 'normal'}
+              value={taskDetails.priority ?? 'low'}
               onChange={handleChange}
               icon={MdPriorityHigh}
               color={errors.priority ? 'failure' : ''}
             >
-              <option value="normal">Normal</option>
+              <option value="low">low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
             </Select>
@@ -150,7 +150,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             <Select
               id="status"
               name="status"
-              value={taskDetails.status || 'todo'}
+              value={taskDetails.status ?? 'todo'}
               onChange={handleChange}
               icon={MdLabel}
               color={errors.status ? 'failure' : ''}
