@@ -13,6 +13,7 @@ export interface Task {
   description: string
   dueDate: string
   status: string
+  priority: string // Added priority field
   userId: number
 }
 
@@ -50,7 +51,7 @@ export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
   return tasksByStatus
 })
 
-// Thunk to create a new task without userId
+// Thunk to create a new task
 export const createNewTask = createAsyncThunk(
   'tasks/createTask',
   async (newTask: Partial<Task>) => {
@@ -59,7 +60,7 @@ export const createNewTask = createAsyncThunk(
   },
 )
 
-// Thunk to update a task without userId
+// Thunk to update a task (including priority)
 export const updateTaskThunk = createAsyncThunk(
   'tasks/updateTask',
   async (taskData: Partial<Task>) => {
@@ -78,11 +79,26 @@ export const deleteTaskThunk = createAsyncThunk(
   },
 )
 
-// Task slice
 const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
-  reducers: {},
+  reducers: {
+    moveTaskLocally: (state, action) => {
+      const { taskId, oldStatus, newStatus } = action.payload
+
+      const taskToMove = state.tasks[oldStatus].find(
+        (task) => task.id === taskId,
+      )
+      if (taskToMove) {
+        // Remove task from old status
+        state.tasks[oldStatus] = state.tasks[oldStatus].filter(
+          (task) => task.id !== taskId,
+        )
+        // Add task to new status and preserve the priority field
+        state.tasks[newStatus].push({ ...taskToMove, status: newStatus })
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchTasks.pending, (state) => {
@@ -95,7 +111,7 @@ const tasksSlice = createSlice({
       })
       .addCase(fetchTasks.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message || 'Error fetching tasks'
+        state.error = action.error.message ?? 'Error fetching tasks'
       })
       .addCase(createNewTask.fulfilled, (state, action) => {
         const newTask = action.payload
@@ -121,7 +137,7 @@ const tasksSlice = createSlice({
               state.tasks[key] = taskList.filter((t) => t.id !== updatedTask.id)
               state.tasks[newStatus].push(updatedTask)
             } else {
-              // Otherwise, just update the task's fields
+              // Otherwise, just update the task's fields including priority
               state.tasks[key][taskIndex] = updatedTask
             }
             break
@@ -139,4 +155,5 @@ const tasksSlice = createSlice({
   },
 })
 
+export const { moveTaskLocally } = tasksSlice.actions
 export default tasksSlice.reducer

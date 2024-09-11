@@ -14,9 +14,10 @@ import {
   fetchTasks,
   updateTaskThunk,
   createNewTask,
+  moveTaskLocally,
+  Task,
 } from '../../redux/features/tasks/tasksSlice'
 import { AppDispatch, RootState } from '../../redux/store'
-import { Task } from '../../redux/features/tasks/tasksSlice'
 import Loader from '../Loader'
 
 interface TaskBoardProps {
@@ -31,7 +32,6 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ filters }) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  // Fetch tasks on component mount
   useEffect(() => {
     const loadTasks = async () => {
       setLoading(true)
@@ -41,7 +41,6 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ filters }) => {
     loadTasks()
   }, [dispatch])
 
-  // Apply filters
   const applyFilters = (tasks: { [key: string]: Task[] }) => {
     const filteredTasks = Object.entries(tasks).reduce(
       (acc: { [key: string]: Task[] }, [status, tasksArray]) => {
@@ -56,17 +55,12 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ filters }) => {
         })
         return acc
       },
-      {
-        todo: [],
-        'in-progress': [],
-        review: [],
-        done: [],
-      },
+      { todo: [], 'in-progress': [], review: [], done: [] },
     )
     return filteredTasks
   }
 
-  const filteredTasks = applyFilters(tasks) // Recalculate filteredTasks whenever the tasks state changes
+  const filteredTasks = applyFilters(tasks)
 
   // Handle drag-and-drop event
   const onDragEnd = async (result: DropResult) => {
@@ -76,8 +70,24 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ filters }) => {
     const taskId = filteredTasks[source.droppableId][source.index].id
     const newStatus = destination.droppableId
 
-    // Optimistically update the task status in Redux
-    await dispatch(updateTaskThunk({ id: taskId, status: newStatus }))
+    // Find the dragged task
+    const draggedTask = tasks[source.droppableId].find(
+      (task) => task.id === taskId,
+    )
+
+    if (!draggedTask) return
+
+    // Optimistically move the task locally
+    dispatch(
+      moveTaskLocally({
+        taskId,
+        oldStatus: source.droppableId,
+        newStatus,
+      }),
+    )
+
+    // Dispatch the task update to the server
+    await dispatch(updateTaskThunk({ ...draggedTask, status: newStatus }))
   }
 
   const handleTaskClick = (task: Task) => {
@@ -103,7 +113,7 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ filters }) => {
       <div className="relative p-4 h-screen">
         {loading ? (
           <div className="flex items-center justify-center h-screen">
-            <Loader message="Loading task..." />
+            <Loader message="Loading tasks..." />
           </div>
         ) : (
           <DragDropContext onDragEnd={onDragEnd}>
