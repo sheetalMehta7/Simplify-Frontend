@@ -1,7 +1,5 @@
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { fetchUserProfile } from '../../redux/features/user/userSlice'
-import { AppDispatch, RootState } from '../../redux/store'
+import React from 'react'
+import { useDispatch } from 'react-redux'
 import { logout } from '../../redux/features/auth/authSlice'
 import { useNavigate } from 'react-router-dom'
 
@@ -9,22 +7,19 @@ interface UserProfileDropdownProps {
   isOpen: boolean
   onClose: () => void
   iconRef: React.RefObject<SVGSVGElement>
+  profile: { name?: string; email?: string } | null
+  loading: boolean
 }
 
 const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
   isOpen,
   onClose,
   iconRef,
+  profile,
+  loading,
 }) => {
-  const dispatch: AppDispatch = useDispatch()
+  const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { profile, loading } = useSelector((state: RootState) => state.user)
-
-  useEffect(() => {
-    if (isOpen) {
-      dispatch(fetchUserProfile())
-    }
-  }, [isOpen, dispatch])
 
   if (!isOpen) return null
 
@@ -36,7 +31,6 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
   }
 
   const handleLogout = () => {
-    // Dispatch the logout action
     dispatch(logout())
     navigate('/', { replace: true })
   }
