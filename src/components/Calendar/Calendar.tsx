@@ -20,10 +20,11 @@ import {
 } from 'react-icons/md'
 import { Button } from 'flowbite-react'
 import { CalendarDrawer } from './CalendarDrawer'
-import AddEventModal from '../Modals/AddEventModal'
-import { useSelector } from 'react-redux'
-import { RootState } from '../../redux/store'
+import CreateTaskModal from '../Modals/CreateTaskModal'
+import { useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '../../redux/store'
 import { Task, TaskFromApi } from '../../interfaces/Task'
+import { createNewTask } from '../../redux/features/tasks/tasksSlice'
 
 const monthsList = [
   'January',
@@ -46,14 +47,17 @@ const CalendarComponent: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isDropdownOpen, setDropdownOpen] = useState(false)
-  const [isAddEventModalOpen, setAddEventModalOpen] = useState(false)
+  const [isCreateTaskModalOpen, setCreateTaskModalOpen] = useState(false)
 
-  // Fetch tasks from Redux store, which is grouped by status (e.g., { todo: [], 'in-progress': [], review: [], done: [] })
+  // Correctly typed dispatch function
+  const dispatch: AppDispatch = useDispatch()
+
+  // Fetch tasks from Redux store, grouped by status (e.g., { todo: [], 'in-progress': [], review: [], done: [] })
   const tasksFromRedux = useSelector((state: RootState) => state.tasks.tasks)
 
   // Convert TaskFromApi (string dates) to Task (Date objects) and flatten the tasks object
   const tasks: Task[] = Object.values(tasksFromRedux)
-    .flat() // Flatten the arrays of tasks grouped by status
+    .flat()
     .map((task: TaskFromApi) => ({
       ...task,
       dueDate: new Date(task.dueDate), // Convert string to Date object
@@ -80,9 +84,16 @@ const CalendarComponent: React.FC = () => {
     setDropdownOpen(false)
   }
 
-  const handleAddEvent = (_newTask: Task) => {
-    // Assuming you will dispatch the task creation to Redux here
-    setAddEventModalOpen(false)
+  const handleAddTask = (newTask: Partial<Task>) => {
+    const taskToDispatch = {
+      ...newTask,
+      dueDate: newTask.dueDate ? newTask.dueDate.toISOString() : undefined, // Convert Date to string
+    }
+
+    // Dispatch the new task to Redux
+    dispatch(createNewTask(taskToDispatch))
+
+    setCreateTaskModalOpen(false)
   }
 
   const handleTodayClick = () => {
@@ -151,7 +162,7 @@ const CalendarComponent: React.FC = () => {
             )}
           </div>
           <button
-            onClick={() => setAddEventModalOpen(true)}
+            onClick={() => setCreateTaskModalOpen(true)} // Show the Create Task modal
             className="p-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600"
           >
             Add Event
@@ -222,12 +233,10 @@ const CalendarComponent: React.FC = () => {
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
       />
-
-      <AddEventModal
-        isOpen={isAddEventModalOpen}
-        onClose={() => setAddEventModalOpen(false)}
-        onSave={handleAddEvent}
-        selectedDate={selectedDate || currentDate}
+      <CreateTaskModal
+        isOpen={isCreateTaskModalOpen}
+        onClose={() => setCreateTaskModalOpen(false)}
+        onSave={handleAddTask}
       />
     </div>
   )

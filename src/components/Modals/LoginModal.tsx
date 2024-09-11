@@ -41,7 +41,7 @@ const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
 
       if (error.response) {
         const status = error.response.status
-        if (status === 401) {
+        if (status === 400) {
           dispatch(setError('Invalid credentials. Please try again.'))
         } else if (status === 404) {
           dispatch(

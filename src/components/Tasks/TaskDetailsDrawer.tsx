@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { Drawer, Button, TextInput, Select } from 'flowbite-react'
 import { FaTimes, FaTasks, FaFlag, FaArrowLeft } from 'react-icons/fa'
-import { Task } from '../../redux/features/tasks/tasksSlice'
 import { useDispatch } from 'react-redux'
 import {
   updateTaskThunk,
   deleteTaskThunk,
   moveTaskLocally,
+  Task,
 } from '../../redux/features/tasks/tasksSlice'
 import { AppDispatch } from '../../redux/store'
 
@@ -76,7 +76,7 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
       position="right"
       open={isOpen}
       onClose={onClose}
-      className="z-50 overflow-y-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg w-full sm:w-2/3 lg:w-1/3"
+      className="z-50 overflow-y-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg w-full sm:w-1/2 lg:w-1/4"
     >
       <Drawer.Header className="p-4 md:p-2 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
         <div className="flex items-center space-x-2">
@@ -98,7 +98,7 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
           color="gray"
           size="sm"
           onClick={onClose}
-          className="flex items-center justify-center"
+          className="flex items-center justify-center w-8 h-8" // Reduced button size
         >
           <FaTimes />
         </Button>
@@ -244,7 +244,7 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
             <Button
               color={isEditing ? 'success' : 'gray'}
               onClick={handleEditToggle}
-              className="flex-1 text-xs py-1 sm:text-sm sm:py-1 transition-colors"
+              className="w-24 text-xs py-1 sm:text-sm sm:py-1 transition-colors" // Set explicit button width
             >
               {isEditing ? 'Submit' : 'Edit Task'}
             </Button>
@@ -252,7 +252,7 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
               <Button
                 color="gray"
                 onClick={() => setIsEditing(false)}
-                className="flex-1 text-xs py-1 sm:text-sm sm:py-1 transition-colors"
+                className="w-24 text-xs py-1 sm:text-sm sm:py-1 transition-colors" // Set explicit button width
               >
                 Cancel
               </Button>
@@ -260,7 +260,7 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
             <Button
               color="failure"
               onClick={handleDelete}
-              className="flex-1 text-xs py-1 sm:text-sm sm:py-1 transition-colors"
+              className="w-24 text-xs py-1 sm:text-sm sm:py-1 transition-colors" // Set explicit button width
             >
               Delete
             </Button>
