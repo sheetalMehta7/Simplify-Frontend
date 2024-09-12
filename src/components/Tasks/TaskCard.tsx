@@ -166,7 +166,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
           {task.title}
         </h3>
         <p className="text-xs md:text-xs mb-1">
-          Assignee: {task.assignee || 'Unassigned'}
+          Assignee: {task.assigneeIds || 'Unassigned'}
         </p>
         <p className="text-xs md:text-xs mb-2">
           Due Date:{' '}

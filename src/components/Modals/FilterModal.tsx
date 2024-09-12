@@ -3,13 +3,18 @@ import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import moment from 'moment'
 import { Modal, Button, TextInput, Select, Label } from 'flowbite-react'
-import { MdPerson, MdDateRange, MdLabel } from 'react-icons/md'
+import { MdPerson, MdDateRange, MdLabel, MdGroup } from 'react-icons/md'
 
 interface FilterDropdownProps {
   isOpen: boolean
   onClose: () => void
-  filters: { date: string; assignee: string; status: string }
-  onApply: (filters: { date: string; assignee: string; status: string }) => void
+  filters: { date: string; assignee: string; status: string; teamId: string }
+  onApply: (filters: {
+    date: string
+    assignee: string
+    status: string
+    teamId: string
+  }) => void
   onClearAll: () => void
 }
 
@@ -22,13 +27,12 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
 }) => {
   const [animationClass, setAnimationClass] = useState('modal-fade-in')
 
-  // Apply fade-out animation before closing the modal
   useEffect(() => {
     if (!isOpen) {
       setAnimationClass('modal-fade-out')
       const timer = setTimeout(() => {
         onClose()
-      }, 500) // Delay to allow fade-out animation to complete
+      }, 500)
       return () => clearTimeout(timer)
     } else {
       setAnimationClass('modal-fade-in')
@@ -42,6 +46,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
       date: filters.date || '',
       assignee: filters.assignee || '',
       status: filters.status || '',
+      teamId: filters.teamId || '',
     },
     validationSchema: Yup.object({
       date: Yup.date()
@@ -55,16 +60,17 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
         }),
       assignee: Yup.string().optional(),
       status: Yup.string().optional(),
+      teamId: Yup.string().optional(),
     }),
     onSubmit: (values) => {
       const hasActiveFilters =
-        !!values.date || !!values.assignee || !!values.status
+        !!values.date || !!values.assignee || !!values.status || !!values.teamId
 
       if (!hasActiveFilters) {
         setShowValidationMessage(true)
       } else {
         setShowValidationMessage(false)
-        onApply(values) // Apply the filters
+        onApply(values)
       }
     },
   })
@@ -77,7 +83,10 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
   }
 
   const hasActiveFilters =
-    !!formik.values.date || !!formik.values.assignee || !!formik.values.status
+    !!formik.values.date ||
+    !!formik.values.assignee ||
+    !!formik.values.status ||
+    !!formik.values.teamId
 
   return (
     <Modal show={isOpen} onClose={onClose} size="lg">
@@ -91,7 +100,6 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
         </Modal.Header>
         <Modal.Body className="bg-white dark:bg-gray-700 rounded-md">
           <form onSubmit={formik.handleSubmit} className="space-y-4">
-            {/* Date Filter */}
             <div>
               <Label
                 htmlFor="date"
@@ -108,7 +116,6 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
                 color={
                   formik.touched.date && formik.errors.date ? 'failure' : ''
                 }
-                placeholder="Select a date"
                 className="dark:bg-gray-700"
               />
               {formik.touched.date && formik.errors.date && (
@@ -118,7 +125,6 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
               )}
             </div>
 
-            {/* Assignee Filter */}
             <div>
               <Label
                 htmlFor="assignee"
@@ -131,12 +137,10 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
                 icon={MdPerson}
                 value={formik.values.assignee}
                 onChange={handleInputChange}
-                placeholder="Enter assignee"
                 className="dark:bg-gray-700 dark:text-gray-100"
               />
             </div>
 
-            {/* Status Filter */}
             <div>
               <Label
                 htmlFor="status"
@@ -159,14 +163,29 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
               </Select>
             </div>
 
-            {/* Validation Message */}
+            <div>
+              <Label
+                htmlFor="teamId"
+                value="Team"
+                className="text-gray-900 dark:text-gray-200"
+              />
+              <TextInput
+                id="teamId"
+                name="teamId"
+                icon={MdGroup}
+                value={formik.values.teamId}
+                onChange={handleInputChange}
+                placeholder="Enter team ID"
+                className="dark:bg-gray-700 dark:text-gray-100"
+              />
+            </div>
+
             {showValidationMessage && (
               <div className="text-red-500 text-sm mt-2">
                 Please select at least one filter before applying.
               </div>
             )}
 
-            {/* Button Group */}
             <div className="flex justify-between space-x-4 mt-4">
               {hasActiveFilters && (
                 <Button color="red" onClick={onClearAll}>

@@ -5,6 +5,8 @@ interface UserProfile {
   id: string
   email: string
   name: string
+  role: string // Role in the team, e.g., 'admin', 'member'
+  teams: { id: string; name: string }[] // Teams the user is part of
 }
 
 interface UserState {
@@ -19,7 +21,7 @@ const initialState: UserState = {
   error: null,
 }
 
-// Thunk to fetch user profile
+// Thunk to fetch user profile, including teams and roles
 export const fetchUserProfile = createAsyncThunk(
   'user/fetchUserProfile',
   async () => {
