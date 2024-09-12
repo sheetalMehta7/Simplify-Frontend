@@ -3,7 +3,7 @@ import { Alert } from 'flowbite-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../redux/store'
 import { clearError } from '../redux/features/error/errorSlice'
-import { FaTimes } from 'react-icons/fa' // Close icon
+import { FaTimes } from 'react-icons/fa'
 
 const FloatingAlert: React.FC = () => {
   const dispatch = useDispatch()

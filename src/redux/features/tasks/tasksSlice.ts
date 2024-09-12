@@ -7,14 +7,16 @@ import {
 } from '../../../api/taskApi'
 
 export interface Task {
+  assignee: string
   id: string
   title: string
-  assignee: string
+  assigneeIds: string[] // Now supports multiple assignees by ID
   description: string
   dueDate: string
   status: string
-  priority: string // Added priority field
-  userId: number
+  priority: string
+  userId: string // Creator ID
+  teamId?: string // Optional team ID for tasks assigned to a team
 }
 
 interface TasksState {
@@ -34,33 +36,37 @@ const initialState: TasksState = {
   error: null,
 }
 
-// Thunk to fetch all tasks
-export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
-  const tasks = await getAllTasks()
-  const tasksByStatus: TasksState['tasks'] = {
-    todo: [],
-    'in-progress': [],
-    review: [],
-    done: [],
-  }
+// Thunk to fetch tasks with optional teamId filtering
+export const fetchTasks = createAsyncThunk(
+  'tasks/fetchTasks',
+  async (teamId?: string) => {
+    const tasks = await getAllTasks(teamId) // Pass teamId if present
+    const tasksByStatus: TasksState['tasks'] = {
+      todo: [],
+      'in-progress': [],
+      review: [],
+      done: [],
+    }
 
-  tasks.forEach((task: Task) => {
-    tasksByStatus[task.status].push(task)
-  })
+    // Categorize tasks by status
+    tasks.forEach((task: Task) => {
+      tasksByStatus[task.status].push(task)
+    })
 
-  return tasksByStatus
-})
+    return tasksByStatus
+  },
+)
 
-// Thunk to create a new task
+// Thunk to create a new task for either personal or team board
 export const createNewTask = createAsyncThunk(
   'tasks/createTask',
   async (newTask: Partial<Task>) => {
-    const task = await createTask(newTask) // No userId in request
+    const task = await createTask(newTask) // The API will handle personal/team tasks based on presence of teamId
     return task
   },
 )
 
-// Thunk to update a task (including priority)
+// Thunk to update a task
 export const updateTaskThunk = createAsyncThunk(
   'tasks/updateTask',
   async (taskData: Partial<Task>) => {
@@ -90,11 +96,9 @@ const tasksSlice = createSlice({
         (task) => task.id === taskId,
       )
       if (taskToMove) {
-        // Remove task from old status
         state.tasks[oldStatus] = state.tasks[oldStatus].filter(
           (task) => task.id !== taskId,
         )
-        // Add task to new status and preserve the priority field
         state.tasks[newStatus].push({ ...taskToMove, status: newStatus })
       }
     },
@@ -116,11 +120,6 @@ const tasksSlice = createSlice({
       .addCase(createNewTask.fulfilled, (state, action) => {
         const newTask = action.payload
         const status = newTask.status || 'todo'
-
-        if (!state.tasks[status]) {
-          state.tasks[status] = []
-        }
-
         state.tasks[status].push(newTask)
       })
       .addCase(updateTaskThunk.fulfilled, (state, action) => {
@@ -128,16 +127,13 @@ const tasksSlice = createSlice({
         const oldStatus = updatedTask.status
         const newStatus = updatedTask.status
 
-        // Find and update the task across all statuses
         for (const [key, taskList] of Object.entries(state.tasks)) {
           const taskIndex = taskList.findIndex((t) => t.id === updatedTask.id)
           if (taskIndex !== -1) {
-            // If the task's status has changed, move it to the new status array
             if (oldStatus !== newStatus) {
               state.tasks[key] = taskList.filter((t) => t.id !== updatedTask.id)
               state.tasks[newStatus].push(updatedTask)
             } else {
-              // Otherwise, just update the task's fields including priority
               state.tasks[key][taskIndex] = updatedTask
             }
             break

@@ -15,21 +15,27 @@ interface Task {
   status: string
   priority: string
   dueDate?: string
-  userId: number
+  userId: string
+  assigneeid?: string
+  teamId?: string // Optional team field for team tasks
 }
 
 interface CreateTaskModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: (task: Partial<Task>) => void
-  userId: number
+  userId: string
+  userName: string
+  teamId?: string // Optional team field
 }
 
-export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
+const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   isOpen,
   onClose,
   onSave,
   userId,
+  userName,
+  teamId,
 }) => {
   const [taskDetails, setTaskDetails] = useState<Partial<Task>>({
     title: '',
@@ -38,6 +44,8 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     priority: 'low',
     dueDate: '',
     userId: userId,
+    assigneeid: userId,
+    teamId: teamId || '',
   })
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
@@ -49,19 +57,16 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   ) => {
     const { name, value } = e.target
     setTaskDetails((prevDetails) => ({ ...prevDetails, [name]: value }))
-    setErrors((prevErrors) => ({ ...prevErrors, [name]: '' })) // Clear errors on input change
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: '' }))
   }
 
   const validateForm = () => {
     const { title, dueDate, priority, status } = taskDetails
     const newErrors: { [key: string]: string } = {}
 
-    // Validation rules for required fields
     if (!title) newErrors.title = 'Title is required'
     if (!priority) newErrors.priority = 'Priority is required'
     if (!status) newErrors.status = 'Status is required'
-
-    // Validate dueDate is in the future, if provided
     if (!dueDate) {
       newErrors.dueDate = 'Due Date is required'
     } else if (new Date(dueDate) < new Date()) {
@@ -137,7 +142,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               icon={MdPriorityHigh}
               color={errors.priority ? 'failure' : ''}
             >
-              <option value="low">low</option>
+              <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
             </Select>
@@ -164,6 +169,21 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               <p className="text-red-500 text-sm mt-1">{errors.status}</p>
             )}
           </div>
+          <div>
+            <Label htmlFor="assignee" value="Assigned To" />
+            <TextInput
+              id="assignee"
+              name="assignee"
+              value={userName}
+              disabled
+            />
+          </div>
+          {teamId && (
+            <div>
+              <Label htmlFor="teamId" value="Assigned Team" />
+              <TextInput id="teamId" name="teamId" value={teamId} disabled />
+            </div>
+          )}
         </div>
       </Modal.Body>
       <Modal.Footer>

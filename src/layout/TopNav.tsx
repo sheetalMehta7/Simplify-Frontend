@@ -37,12 +37,14 @@ const TopNav: React.FC = () => {
     }
   }, [isProfileOpen, dispatch])
 
+  // Fetch tasks when component mounts
   useEffect(() => {
     dispatch(fetchTasks())
   }, [dispatch])
 
+  // Initialize notification badge visibility based on session storage
   useEffect(() => {
-    const badgeShown = localStorage.getItem('notificationsBadgeShown')
+    const badgeShown = sessionStorage.getItem('notificationsBadgeShown')
     if (!badgeShown) {
       setHasUnreadNotifications(true)
     }
@@ -50,6 +52,7 @@ const TopNav: React.FC = () => {
 
   const tasks = useSelector((state: RootState) => state.tasks.tasks)
 
+  // Calculate remaining days for a task's due date
   const calculateDaysRemaining = (dueDate: string) => {
     const currentDate = new Date()
     const taskDueDate = new Date(dueDate)
@@ -57,10 +60,15 @@ const TopNav: React.FC = () => {
     return Math.ceil(timeDifference / (1000 * 3600 * 24))
   }
 
-  const upcomingTasks = Object.values(tasks)
-    .flat()
-    .filter((task) => calculateDaysRemaining(task.dueDate) <= 5)
-    .sort((a, b) => a.priority.localeCompare(b.priority))
+  // Update unread notifications based on task deadlines
+  useEffect(() => {
+    const upcomingTasks = Object.values(tasks)
+      .flat()
+      .filter((task) => calculateDaysRemaining(task.dueDate) <= 5)
+      .sort((a, b) => a.priority.localeCompare(b.priority))
+
+    setHasUnreadNotifications(upcomingTasks.length > 0)
+  }, [tasks])
 
   const handleClickOutside = (event: MouseEvent) => {
     if (
@@ -74,15 +82,18 @@ const TopNav: React.FC = () => {
     }
   }
 
+  // Handle notification icon click
   const handleNotificationClick = () => {
     setIsNotificationsOpen((prev) => !prev)
     if (!isNotificationsOpen) {
       setIsProfileOpen(false)
       setHasUnreadNotifications(false)
-      localStorage.setItem('notificationsBadgeShown', 'true')
+      // Update session storage to mark that the badge has been shown
+      sessionStorage.setItem('notificationsBadgeShown', 'true')
     }
   }
 
+  // Handle profile icon click
   const handleProfileClick = () => {
     setIsProfileOpen((prev) => !prev)
     if (!isProfileOpen) {
@@ -120,12 +131,19 @@ const TopNav: React.FC = () => {
             <IoMdNotificationsOutline className="text-2xl cursor-pointer" />
             {hasUnreadNotifications && (
               <div className="absolute -top-3 -right-3 w-6 h-6 flex items-center justify-center bg-red-600 text-white text-xs font-bold rounded-full">
-                {upcomingTasks.length}
+                {
+                  Object.values(tasks)
+                    .flat()
+                    .filter((task) => calculateDaysRemaining(task.dueDate) <= 5)
+                    .length
+                }
               </div>
             )}
             {isNotificationsOpen && (
               <NotificationDropdown
-                taskNotifications={upcomingTasks}
+                taskNotifications={Object.values(tasks)
+                  .flat()
+                  .filter((task) => calculateDaysRemaining(task.dueDate) <= 5)}
                 dropdownRef={dropdownRef}
                 onClose={() => setIsNotificationsOpen(false)}
               />

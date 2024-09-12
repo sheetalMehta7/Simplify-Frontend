@@ -76,7 +76,7 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
       position="right"
       open={isOpen}
       onClose={onClose}
-      className="z-50 overflow-y-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg w-full sm:w-1/2 lg:w-1/4"
+      className="z-50 overflow-y-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg w-full sm:w-1/2 lg:w-1/3"
     >
       <Drawer.Header className="p-4 md:p-2 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
         <div className="flex items-center space-x-2">
@@ -106,7 +106,6 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
 
       <Drawer.Items className="p-6 md:p-4 space-y-6">
         <>
-          {/* Task Title */}
           <div className="space-y-2">
             <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
               Title
@@ -126,7 +125,6 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
             )}
           </div>
 
-          {/* Task Description */}
           <div className="space-y-2">
             <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
               Description
@@ -146,7 +144,6 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
             )}
           </div>
 
-          {/* Assignee */}
           <div className="space-y-2">
             <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
               Assignee
@@ -154,19 +151,18 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
             {isEditing ? (
               <TextInput
                 name="assignee"
-                value={editedTask.assignee || ''}
+                value={editedTask.assigneeIds || ''}
                 onChange={handleInputChange}
                 placeholder="Assign user"
                 className="dark:bg-gray-700"
               />
             ) : (
               <p className="text-gray-700 dark:text-gray-300 text-base md:text-sm">
-                {task.assignee || 'Unassigned'}
+                {task.assigneeIds || 'Unassigned'}
               </p>
             )}
           </div>
 
-          {/* Due Date */}
           <div className="space-y-2">
             <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
               Due Date
@@ -186,7 +182,6 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
             )}
           </div>
 
-          {/* Status */}
           <div className="space-y-2">
             <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
               Status
@@ -215,7 +210,6 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
             )}
           </div>
 
-          {/* Priority - New Field */}
           <div className="space-y-2">
             <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
               Priority
@@ -239,12 +233,11 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
             )}
           </div>
 
-          {/* Buttons */}
           <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
             <Button
               color={isEditing ? 'success' : 'gray'}
               onClick={handleEditToggle}
-              className="w-24 text-xs py-1 sm:text-sm sm:py-1 transition-colors" // Set explicit button width
+              className="w-24 text-xs py-1 sm:text-sm sm:py-1 transition-colors"
             >
               {isEditing ? 'Submit' : 'Edit Task'}
             </Button>
@@ -252,7 +245,7 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
               <Button
                 color="gray"
                 onClick={() => setIsEditing(false)}
-                className="w-24 text-xs py-1 sm:text-sm sm:py-1 transition-colors" // Set explicit button width
+                className="w-24 text-xs py-1 sm:text-sm sm:py-1 transition-colors"
               >
                 Cancel
               </Button>
@@ -260,7 +253,7 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
             <Button
               color="failure"
               onClick={handleDelete}
-              className="w-24 text-xs py-1 sm:text-sm sm:py-1 transition-colors" // Set explicit button width
+              className="w-24 text-xs py-1 sm:text-sm sm:py-1 transition-colors"
             >
               Delete
             </Button>
