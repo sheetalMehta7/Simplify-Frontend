@@ -3,31 +3,38 @@ import { useDispatch, useSelector } from 'react-redux'
 import {
   fetchTasks,
   updateTaskThunk,
-  createNewTask,
   moveTaskLocally,
   Task,
+  createNewTask,
 } from '../../redux/features/tasks/tasksSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import Loader from '../Loader'
-import CreateTaskModal from '../Modals/CreateTaskModal'
 import TaskBoardCommon from './TaskBoardCommon'
 import { DropResult } from 'react-beautiful-dnd'
+import CreateTaskModal from '../Modals/CreateTaskModal'
 
 interface TaskBoardProps {
-  filters: { date: string; assignee: string; status: string; teamId: string }
+  filters: { date: string; assignee: string; status: string }
 }
 
 const PersonalTaskBoard: React.FC<TaskBoardProps> = ({ filters }) => {
   const dispatch: AppDispatch = useDispatch()
-  const tasks = useSelector((state: RootState) => state.tasks.tasks)
+  const personalTasks = useSelector(
+    (state: RootState) => state.tasks.personalTasks,
+  )
   const user = useSelector((state: RootState) => state.user.profile)
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+
+  // Log the personalTasks to inspect the structure
+  useEffect(() => {
+    console.log('Personal Tasks:', personalTasks)
+  }, [personalTasks])
 
   useEffect(() => {
     const loadTasks = async () => {
       setLoading(true)
-      await dispatch(fetchTasks())
+      await dispatch(fetchTasks()) // Fetch tasks without teamId to get only personal tasks
       setLoading(false)
     }
     loadTasks()
@@ -43,8 +50,7 @@ const PersonalTaskBoard: React.FC<TaskBoardProps> = ({ filters }) => {
             !filters.assignee || task.assignee === filters.assignee
           const matchesStatus =
             !filters.status || task.status === filters.status
-          const matchesTeam = !filters.teamId || task.teamId === filters.teamId
-          return matchesDate && matchesAssignee && matchesStatus && matchesTeam
+          return matchesDate && matchesAssignee && matchesStatus
         })
         return acc
       },
@@ -53,7 +59,7 @@ const PersonalTaskBoard: React.FC<TaskBoardProps> = ({ filters }) => {
     return filteredTasks
   }
 
-  const filteredTasks = applyFilters(tasks)
+  const filteredTasks = applyFilters(personalTasks)
 
   const onDragEnd = async (result: DropResult) => {
     const { source, destination } = result
@@ -62,12 +68,7 @@ const PersonalTaskBoard: React.FC<TaskBoardProps> = ({ filters }) => {
     const taskId = filteredTasks[source.droppableId][source.index].id
     const newStatus = destination.droppableId
 
-    const draggedTask = tasks[source.droppableId].find(
-      (task) => task.id === taskId,
-    )
-
-    if (!draggedTask) return
-
+    // Optimistically update the task locally
     dispatch(
       moveTaskLocally({
         taskId,
@@ -76,7 +77,22 @@ const PersonalTaskBoard: React.FC<TaskBoardProps> = ({ filters }) => {
       }),
     )
 
+    const draggedTask = personalTasks[source.droppableId].find(
+      (task) => task.id === taskId,
+    )
+    if (!draggedTask) return
+
     await dispatch(updateTaskThunk({ ...draggedTask, status: newStatus }))
+  }
+
+  const handleCreateTask = (newTask: Partial<Task>) => {
+    dispatch(
+      createNewTask({
+        ...newTask,
+        teamId: undefined, // Ensure it's personal
+      }),
+    )
+    setIsCreateModalOpen(false)
   }
 
   return (
@@ -86,25 +102,25 @@ const PersonalTaskBoard: React.FC<TaskBoardProps> = ({ filters }) => {
           <Loader message="Loading tasks..." />
         </div>
       ) : (
-        <TaskBoardCommon
-          tasks={filteredTasks}
-          onCreateTask={() => setIsCreateModalOpen(true)}
-          onTaskClick={() => {}}
-          onEditTask={() => {}}
-          onDragEnd={onDragEnd}
-        />
-      )}
-
-      {user && (
-        <CreateTaskModal
-          isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
-          onSave={(task) =>
-            dispatch(createNewTask({ ...task, userId: user.id }))
-          }
-          userId={user.id}
-          userName={user.name}
-        />
+        <>
+          <TaskBoardCommon
+            tasks={filteredTasks}
+            onCreateTask={() => setIsCreateModalOpen(true)}
+            onTaskClick={(task) => console.log('Task clicked:', task)}
+            onEditTask={(task) => console.log('Edit task:', task)}
+            onDragEnd={onDragEnd}
+          />
+          {/* Create Task Modal */}
+          {user && (
+            <CreateTaskModal
+              isOpen={isCreateModalOpen}
+              onClose={() => setIsCreateModalOpen(false)}
+              onSave={handleCreateTask}
+              userId={user.id}
+              userName={user.name} // Pass userName from Redux store
+            />
+          )}
+        </>
       )}
     </>
   )

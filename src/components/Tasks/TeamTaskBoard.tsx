@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   createNewTask,
+  fetchTasks,
   moveTaskLocally,
   Task,
 } from '../../redux/features/tasks/tasksSlice'
@@ -14,77 +15,86 @@ interface TeamTaskBoardProps {
   teamId: string
 }
 
+// Define the correct structure for the task board columns
+interface TaskBoardColumns {
+  todo: Task[]
+  'in-progress': Task[]
+  review: Task[]
+  done: Task[]
+}
+
 const TeamTaskBoard: React.FC<TeamTaskBoardProps> = ({ teamId }) => {
   const dispatch: AppDispatch = useDispatch()
   const user = useSelector((state: RootState) => state.user.profile)
 
-  const [tasks, setTasks] = useState<{ [key: string]: Task[] }>({
-    todo: [],
-    'in-progress': [],
-    review: [],
-    done: [],
-  })
+  // Fetch tasks specifically for the given teamId
+  const tasks: TaskBoardColumns = useSelector(
+    (state: RootState) =>
+      state.tasks.teamTasks?.[teamId] ?? {
+        todo: [],
+        'in-progress': [],
+        review: [],
+        done: [],
+      },
+  )
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
-  const onDragEnd = async (result: DropResult) => {
+  // Convert tasks to match { [key: string]: Task[] }
+  const taskMap: { [key: string]: Task[] } = {
+    ...tasks,
+  }
+
+  // Fetch team tasks when the component mounts or when teamId changes
+  useEffect(() => {
+    if (teamId) {
+      dispatch(fetchTasks(teamId)) // Fetch tasks by teamId
+    }
+  }, [dispatch, teamId])
+
+  const onDragEnd = (result: DropResult) => {
     const { source, destination } = result
     if (!destination || source.droppableId === destination.droppableId) return
 
-    const taskId = tasks[source.droppableId][source.index].id
-    const newStatus = destination.droppableId
+    const sourceStatus = source.droppableId as keyof TaskBoardColumns
+    const destinationStatus = destination.droppableId as keyof TaskBoardColumns
 
-    const draggedTask = tasks[source.droppableId].find(
+    const taskId = taskMap[sourceStatus]?.[source.index]?.id
+    if (!taskId) return
+
+    const draggedTask = taskMap[sourceStatus]?.find(
       (task) => task.id === taskId,
     )
-
     if (!draggedTask) return
 
-    setTasks((prevTasks) => ({
-      ...prevTasks,
-      [source.droppableId]: prevTasks[source.droppableId].filter(
-        (task) => task.id !== taskId,
-      ),
-      [newStatus]: [
-        ...prevTasks[newStatus],
-        { ...draggedTask, status: newStatus },
-      ],
-    }))
-
+    // Optimistically update the task locally
     dispatch(
       moveTaskLocally({
         taskId,
-        oldStatus: source.droppableId,
-        newStatus,
+        oldStatus: sourceStatus,
+        newStatus: destinationStatus,
       }),
     )
   }
 
   const handleCreateTask = (task: Partial<Task>) => {
     const newTask = { ...task, teamId } as Task
-
-    setTasks((prevTasks) => ({
-      ...prevTasks,
-      todo: [...prevTasks.todo, newTask],
-    }))
-
-    dispatch(createNewTask(newTask))
-  }
-
-  const openCreateTaskModal = () => {
-    setIsCreateModalOpen(true)
+    dispatch(createNewTask(newTask)) // Dispatch a new task creation specific to the team
+    setIsCreateModalOpen(false)
   }
 
   return (
     <>
+      {/* Task Board */}
       <TaskBoardCommon
-        tasks={tasks}
-        onCreateTask={openCreateTaskModal}
+        tasks={taskMap} // Now the tasks have the correct { [key: string]: Task[] } type
+        onCreateTask={() => setIsCreateModalOpen(true)}
         onTaskClick={() => {}}
         onEditTask={() => {}}
         onDragEnd={onDragEnd}
       />
 
+      {/* Create Task Modal */}
       {user && (
         <CreateTaskModal
           isOpen={isCreateModalOpen}
@@ -92,7 +102,7 @@ const TeamTaskBoard: React.FC<TeamTaskBoardProps> = ({ teamId }) => {
           onSave={handleCreateTask}
           userId={user.id}
           userName={user.name}
-          teamId={teamId}
+          teamId={teamId} // Pass teamId for team task creation
         />
       )}
     </>

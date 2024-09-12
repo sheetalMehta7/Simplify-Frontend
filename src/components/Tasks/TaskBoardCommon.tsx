@@ -10,7 +10,7 @@ import TaskCard from './TaskCard'
 import { Task } from '../../redux/features/tasks/tasksSlice'
 
 interface TaskBoardCommonProps {
-  tasks: { [key: string]: Task[] }
+  tasks: { [key: string]: Task[] } // Define the structure for tasks
   onCreateTask: () => void
   onTaskClick: (task: Task) => void
   onEditTask: (task: Task) => void
@@ -18,7 +18,7 @@ interface TaskBoardCommonProps {
 }
 
 const TaskBoardCommon: React.FC<TaskBoardCommonProps> = ({
-  tasks,
+  tasks = { todo: [], 'in-progress': [], review: [], done: [] }, // Fallback for empty tasks
   onCreateTask,
   onTaskClick,
   onEditTask,
@@ -26,9 +26,17 @@ const TaskBoardCommon: React.FC<TaskBoardCommonProps> = ({
 }) => {
   const columns = ['todo', 'in-progress', 'review', 'done']
 
-  const areAllTasksEmpty = Object.values(tasks).every(
-    (taskList) => taskList.length === 0,
-  )
+  // Log the tasks to check the structure
+  console.log('Task Data:', tasks)
+
+  const areAllTasksEmpty =
+    tasks &&
+    Object.values(tasks).every(
+      (taskList) => Array.isArray(taskList) && taskList.length === 0,
+    )
+
+  // Log the result of the empty check for debugging
+  console.log('Are all tasks empty?', areAllTasksEmpty)
 
   return (
     <div className="relative p-4 h-screen">

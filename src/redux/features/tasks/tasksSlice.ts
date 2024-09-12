@@ -20,13 +20,21 @@ export interface Task {
 }
 
 interface TasksState {
-  tasks: { [key: string]: Task[] }
+  [x: string]: any
+  personalTasks: { [key: string]: Task[] }
+  teamTasks: { [key: string]: Task[] }
   loading: boolean
   error: string | null
 }
 
 const initialState: TasksState = {
-  tasks: {
+  personalTasks: {
+    todo: [],
+    'in-progress': [],
+    review: [],
+    done: [],
+  },
+  teamTasks: {
     todo: [],
     'in-progress': [],
     review: [],
@@ -41,16 +49,30 @@ export const fetchTasks = createAsyncThunk(
   'tasks/fetchTasks',
   async (teamId?: string) => {
     const tasks = await getAllTasks(teamId) // Pass teamId if present
-    const tasksByStatus: TasksState['tasks'] = {
-      todo: [],
-      'in-progress': [],
-      review: [],
-      done: [],
+    const tasksByStatus: TasksState = {
+      personalTasks: {
+        todo: [],
+        'in-progress': [],
+        review: [],
+        done: [],
+      },
+      teamTasks: {
+        todo: [],
+        'in-progress': [],
+        review: [],
+        done: [],
+      },
+      loading: false,
+      error: null,
     }
 
     // Categorize tasks by status
     tasks.forEach((task: Task) => {
-      tasksByStatus[task.status].push(task)
+      if (task.teamId) {
+        tasksByStatus.teamTasks[task.status].push(task)
+      } else {
+        tasksByStatus.personalTasks[task.status].push(task)
+      }
     })
 
     return tasksByStatus
@@ -90,16 +112,17 @@ const tasksSlice = createSlice({
   initialState,
   reducers: {
     moveTaskLocally: (state, action) => {
-      const { taskId, oldStatus, newStatus } = action.payload
+      const { taskId, oldStatus, newStatus, teamId } = action.payload
+      const taskCategory = teamId ? state.teamTasks : state.personalTasks
 
-      const taskToMove = state.tasks[oldStatus].find(
+      const taskToMove = taskCategory[oldStatus].find(
         (task) => task.id === taskId,
       )
       if (taskToMove) {
-        state.tasks[oldStatus] = state.tasks[oldStatus].filter(
+        taskCategory[oldStatus] = taskCategory[oldStatus].filter(
           (task) => task.id !== taskId,
         )
-        state.tasks[newStatus].push({ ...taskToMove, status: newStatus })
+        taskCategory[newStatus].push({ ...taskToMove, status: newStatus })
       }
     },
   },
@@ -111,7 +134,8 @@ const tasksSlice = createSlice({
       })
       .addCase(fetchTasks.fulfilled, (state, action) => {
         state.loading = false
-        state.tasks = action.payload
+        state.personalTasks = action.payload.personalTasks
+        state.teamTasks = action.payload.teamTasks
       })
       .addCase(fetchTasks.rejected, (state, action) => {
         state.loading = false
@@ -120,21 +144,30 @@ const tasksSlice = createSlice({
       .addCase(createNewTask.fulfilled, (state, action) => {
         const newTask = action.payload
         const status = newTask.status || 'todo'
-        state.tasks[status].push(newTask)
+        if (newTask.teamId) {
+          state.teamTasks[status].push(newTask)
+        } else {
+          state.personalTasks[status].push(newTask)
+        }
       })
       .addCase(updateTaskThunk.fulfilled, (state, action) => {
         const updatedTask = action.payload
         const oldStatus = updatedTask.status
         const newStatus = updatedTask.status
+        const taskCategory = updatedTask.teamId
+          ? state.teamTasks
+          : state.personalTasks
 
-        for (const [key, taskList] of Object.entries(state.tasks)) {
+        for (const [key, taskList] of Object.entries(taskCategory)) {
           const taskIndex = taskList.findIndex((t) => t.id === updatedTask.id)
           if (taskIndex !== -1) {
             if (oldStatus !== newStatus) {
-              state.tasks[key] = taskList.filter((t) => t.id !== updatedTask.id)
-              state.tasks[newStatus].push(updatedTask)
+              taskCategory[key] = taskList.filter(
+                (t) => t.id !== updatedTask.id,
+              )
+              taskCategory[newStatus].push(updatedTask)
             } else {
-              state.tasks[key][taskIndex] = updatedTask
+              taskCategory[key][taskIndex] = updatedTask
             }
             break
           }
@@ -142,8 +175,13 @@ const tasksSlice = createSlice({
       })
       .addCase(deleteTaskThunk.fulfilled, (state, action) => {
         const taskId = action.payload
-        Object.keys(state.tasks).forEach((status) => {
-          state.tasks[status] = state.tasks[status].filter(
+        Object.keys(state.personalTasks).forEach((status) => {
+          state.personalTasks[status] = state.personalTasks[status].filter(
+            (task) => task.id !== taskId,
+          )
+        })
+        Object.keys(state.teamTasks).forEach((status) => {
+          state.teamTasks[status] = state.teamTasks[status].filter(
             (task) => task.id !== taskId,
           )
         })
