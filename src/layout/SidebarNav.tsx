@@ -2,9 +2,10 @@ import React from 'react'
 import { MdDashboard, MdCalendarToday } from 'react-icons/md'
 import { HiClipboardList } from 'react-icons/hi'
 import { RiGitRepositoryCommitsFill } from 'react-icons/ri'
-import { BsKanban, BsFillBarChartLineFill } from 'react-icons/bs'
+import { BsFillBarChartLineFill } from 'react-icons/bs'
 import { AiOutlineMail } from 'react-icons/ai'
 import { CgLogOut } from 'react-icons/cg'
+import { FaTeamspeak } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { logout } from '../redux/features/auth/authSlice'
@@ -15,34 +16,6 @@ interface SidebarNavProps {
   isShrinked: boolean
 }
 
-interface NavItemProps {
-  icon: React.ReactNode
-  label: string
-  tab: string
-  isShrinked: boolean
-  onTabSelect: (tab: string) => void
-}
-
-const NavItem: React.FC<NavItemProps> = ({
-  icon,
-  label,
-  tab,
-  isShrinked,
-  onTabSelect,
-}) => (
-  <li>
-    <button
-      onClick={() => onTabSelect(tab)}
-      className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left transition-all duration-200"
-    >
-      {icon}
-      {!isShrinked && (
-        <span className="ml-3 text-sm md:text-base">{label}</span>
-      )}
-    </button>
-  </li>
-)
-
 const SidebarNav: React.FC<SidebarNavProps> = ({
   onTabSelect,
   onToggle,
@@ -52,7 +25,6 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
   const navigate = useNavigate()
 
   const handleLogout = () => {
-    // Dispatch the logout action
     dispatch(logout())
     navigate('/', { replace: true })
   }
@@ -68,7 +40,11 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
       label: 'Issues',
       tab: 'Issues',
     },
-    { icon: <BsKanban className="text-xl" />, label: 'Boards', tab: 'Boards' },
+    {
+      icon: <FaTeamspeak className="text-xl" />,
+      label: 'Teams Board',
+      tab: 'TeamsBoard',
+    }, // Team Tasks added to the sidebar, replacing "Boards"
     {
       icon: <MdCalendarToday className="text-xl" />,
       label: 'Calendar',
@@ -108,14 +84,19 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
       <nav className="flex-1 space-y-2 overflow-hidden">
         <ul className="space-y-2">
           {navItems.map((item) => (
-            <NavItem
-              key={item.tab}
-              icon={item.icon}
-              label={item.label}
-              tab={item.tab}
-              isShrinked={isShrinked}
-              onTabSelect={onTabSelect}
-            />
+            <li key={item.tab}>
+              <button
+                onClick={() => onTabSelect(item.tab)}
+                className="flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left transition-all duration-200"
+              >
+                {item.icon}
+                {!isShrinked && (
+                  <span className="ml-3 text-sm md:text-base">
+                    {item.label}
+                  </span>
+                )}
+              </button>
+            </li>
           ))}
         </ul>
       </nav>

@@ -44,8 +44,8 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     priority: 'low',
     dueDate: '',
     userId: userId,
-    assigneeid: userId,
-    teamId: teamId || '',
+    assigneeid: userId, // Assignee is the current user by default
+    teamId: teamId || '', // Optional teamId if it's a team task
   })
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
@@ -79,6 +79,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
   const handleSubmit = () => {
     if (validateForm()) {
+      // Save task and close modal
       onSave(taskDetails)
       onClose()
     }

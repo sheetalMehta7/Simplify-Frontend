@@ -4,7 +4,7 @@ import { IoSettingsOutline } from 'react-icons/io5'
 import { CgProfile } from 'react-icons/cg'
 import { DarkThemeToggle, Kbd, TextInput } from 'flowbite-react'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchTasks } from '../redux/features/tasks/tasksSlice'
+import { fetchTasks, Task } from '../redux/features/tasks/tasksSlice'
 import { fetchUserProfile } from '../redux/features/user/userSlice'
 import { AppDispatch, RootState } from '../redux/store'
 import UserProfileDropdown from '../components/Dropdowns/UserProfileDropdown'
@@ -50,7 +50,16 @@ const TopNav: React.FC = () => {
     }
   }, [])
 
-  const tasks = useSelector((state: RootState) => state.tasks.tasks)
+  const tasks: { [key: string]: Task[] } = useSelector((state: RootState) => {
+    return (
+      state.tasks.personalTasks || {
+        todo: [],
+        'in-progress': [],
+        review: [],
+        done: [],
+      }
+    )
+  })
 
   // Calculate remaining days for a task's due date
   const calculateDaysRemaining = (dueDate: string) => {
@@ -62,8 +71,8 @@ const TopNav: React.FC = () => {
 
   // Update unread notifications based on task deadlines
   useEffect(() => {
-    const upcomingTasks = Object.values(tasks)
-      .flat()
+    const upcomingTasks = (Object.values(tasks) as Task[][])
+      .flat() // Flatten tasks by statuses
       .filter((task) => calculateDaysRemaining(task.dueDate) <= 5)
       .sort((a, b) => a.priority.localeCompare(b.priority))
 
@@ -132,18 +141,21 @@ const TopNav: React.FC = () => {
             {hasUnreadNotifications && (
               <div className="absolute -top-3 -right-3 w-6 h-6 flex items-center justify-center bg-red-600 text-white text-xs font-bold rounded-full">
                 {
-                  Object.values(tasks)
+                  (Object.values(tasks) as Task[][])
                     .flat()
-                    .filter((task) => calculateDaysRemaining(task.dueDate) <= 5)
-                    .length
+                    .filter(
+                      (task: Task) => calculateDaysRemaining(task.dueDate) <= 5,
+                    ).length
                 }
               </div>
             )}
             {isNotificationsOpen && (
               <NotificationDropdown
-                taskNotifications={Object.values(tasks)
+                taskNotifications={(Object.values(tasks) as Task[][])
                   .flat()
-                  .filter((task) => calculateDaysRemaining(task.dueDate) <= 5)}
+                  .filter(
+                    (task: Task) => calculateDaysRemaining(task.dueDate) <= 5,
+                  )}
                 dropdownRef={dropdownRef}
                 onClose={() => setIsNotificationsOpen(false)}
               />

@@ -98,7 +98,7 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
           color="gray"
           size="sm"
           onClick={onClose}
-          className="flex items-center justify-center w-8 h-8" // Reduced button size
+          className="flex items-center justify-center w-8 h-8"
         >
           <FaTimes />
         </Button>

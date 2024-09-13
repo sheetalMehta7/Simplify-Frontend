@@ -53,7 +53,9 @@ const CalendarComponent: React.FC = () => {
   const dispatch: AppDispatch = useDispatch()
 
   // Fetch tasks from Redux store, grouped by status (e.g., { todo: [], 'in-progress': [], review: [], done: [] })
-  const tasksFromRedux = useSelector((state: RootState) => state.tasks.tasks)
+  const tasksFromRedux: { [key: string]: TaskFromApi[] } = useSelector(
+    (state: RootState) => state.tasks.personalTasks,
+  )
 
   // Convert TaskFromApi (string dates) to Task (Date objects) and flatten the tasks object
   const tasks: Task[] = Object.values(tasksFromRedux)
