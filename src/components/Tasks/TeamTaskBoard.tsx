@@ -1,111 +1,248 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
-  createNewTask,
-  fetchTasks,
-  moveTaskLocally,
-  Task,
-} from '../../redux/features/tasks/tasksSlice'
-import { AppDispatch, RootState } from '../../redux/store'
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from 'react-beautiful-dnd'
+import { Table, Button } from 'flowbite-react'
+import TaskCard from './TaskCard'
+import TaskDetailsDrawer from '../Tasks/TaskDetailsDrawer'
 import CreateTaskModal from '../Modals/CreateTaskModal'
-import TaskBoardCommon from './TaskBoardCommon'
-import { DropResult } from 'react-beautiful-dnd'
+import {
+  fetchTasks,
+  updateTaskThunk,
+  createNewTask,
+  moveTaskLocally,
+} from '../../redux/features/tasks/tasksSlice'
+import {
+  fetchTeamMembers,
+  fetchTeamDetails,
+} from '../../redux/features/teams/teamSlice'
+import { AppDispatch, RootState } from '../../redux/store'
+import { Task } from '../../redux/features/tasks/tasksSlice'
+import Loader from '../Loader'
 
 interface TeamTaskBoardProps {
   teamId: string
+  filters?: { date: string; assignee: string; status: string } // Optional filters
 }
 
-// Define the correct structure for the task board columns
-interface TaskBoardColumns {
-  todo: Task[]
-  'in-progress': Task[]
-  review: Task[]
-  done: Task[]
-}
-
-const TeamTaskBoard: React.FC<TeamTaskBoardProps> = ({ teamId }) => {
+const TeamTaskBoard: React.FC<TeamTaskBoardProps> = ({
+  teamId,
+  filters = { date: '', assignee: '', status: '' }, // Default values for filters
+}) => {
   const dispatch: AppDispatch = useDispatch()
-  const user = useSelector((state: RootState) => state.user.profile)
-
-  // Fetch tasks specifically for the given teamId
-  const tasks: TaskBoardColumns = useSelector(
-    (state: RootState) =>
-      state.tasks.teamTasks?.[teamId] ?? {
-        todo: [],
-        'in-progress': [],
-        review: [],
-        done: [],
-      },
+  const teamTasks = useSelector(
+    (state: RootState) => state.tasks.teamTasks[teamId], // Fetching team-specific tasks
   )
-
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  // Convert tasks to match { [key: string]: Task[] }
-  const taskMap: { [key: string]: Task[] } = {
-    ...tasks,
-  }
-
-  // Fetch team tasks when the component mounts or when teamId changes
   useEffect(() => {
-    if (teamId) {
-      dispatch(fetchTasks(teamId)) // Fetch tasks by teamId
+    const loadTasks = async () => {
+      setLoading(true)
+      await dispatch(fetchTeamDetails(teamId))
+      await dispatch(fetchTasks({ teamId }))
+      await dispatch(fetchTeamMembers(teamId))
+      setLoading(false)
     }
+    loadTasks()
   }, [dispatch, teamId])
 
-  const onDragEnd = (result: DropResult) => {
+  // Apply filters to tasks
+  const applyFilters = (tasks: { [key: string]: Task[] }) => {
+    const filteredTasks = Object.entries(tasks).reduce(
+      (acc: { [key: string]: Task[] }, [status, tasksArray]) => {
+        acc[status] = tasksArray.filter((task) => {
+          const matchesDate =
+            !filters?.date || task.dueDate.startsWith(filters.date) // Gracefully handle undefined filters
+          const matchesAssignee =
+            !filters?.assignee || task.assignee === filters.assignee
+          const matchesStatus =
+            !filters?.status || task.status === filters.status
+          return matchesDate && matchesAssignee && matchesStatus
+        })
+        return acc
+      },
+      { todo: [], 'in-progress': [], review: [], done: [] },
+    )
+    return filteredTasks
+  }
+
+  const filteredTasks = applyFilters(teamTasks)
+
+  // Handle drag-and-drop event
+  const onDragEnd = async (result: DropResult) => {
     const { source, destination } = result
     if (!destination || source.droppableId === destination.droppableId) return
 
-    const sourceStatus = source.droppableId as keyof TaskBoardColumns
-    const destinationStatus = destination.droppableId as keyof TaskBoardColumns
+    const taskId = filteredTasks[source.droppableId][source.index].id
+    const newStatus = destination.droppableId
 
-    const taskId = taskMap[sourceStatus]?.[source.index]?.id
-    if (!taskId) return
-
-    const draggedTask = taskMap[sourceStatus]?.find(
+    const draggedTask = teamTasks[source.droppableId].find(
       (task) => task.id === taskId,
     )
+
     if (!draggedTask) return
 
-    // Optimistically update the task locally
     dispatch(
       moveTaskLocally({
         taskId,
-        oldStatus: sourceStatus,
-        newStatus: destinationStatus,
+        oldStatus: source.droppableId,
+        newStatus,
       }),
     )
+
+    await dispatch(updateTaskThunk({ ...draggedTask, status: newStatus }))
   }
 
-  const handleCreateTask = (task: Partial<Task>) => {
-    const newTask = { ...task, teamId } as Task
-    dispatch(createNewTask(newTask)) // Dispatch a new task creation specific to the team
-    setIsCreateModalOpen(false)
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task)
+    setIsDrawerOpen(true)
   }
+
+  const handleEditTask = (task: Task) => {
+    setSelectedTask(task)
+    setIsDrawerOpen(true)
+  }
+
+  const areAllTasksEmpty = Object.values(teamTasks).every(
+    (taskList) => taskList.length === 0,
+  )
+  const areFilteredTasksEmpty = Object.values(filteredTasks).every(
+    (taskList) => taskList.length === 0,
+  )
 
   return (
     <>
-      {/* Task Board */}
-      <TaskBoardCommon
-        tasks={taskMap} // Now the tasks have the correct { [key: string]: Task[] } type
-        onCreateTask={() => setIsCreateModalOpen(true)}
-        onTaskClick={() => {}}
-        onEditTask={() => {}}
-        onDragEnd={onDragEnd}
+      <div className="relative p-4 h-screen">
+        {loading ? (
+          <div className="flex items-center justify-center h-screen">
+            <Loader message="Loading tasks..." />
+          </div>
+        ) : (
+          <DragDropContext onDragEnd={onDragEnd}>
+            <div className="flex-1 overflow-x-auto min-h-screen">
+              {areAllTasksEmpty && areFilteredTasksEmpty ? (
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <p className="text-gray-500 dark:text-gray-300 mb-4">
+                    No tasks available. You can create a new task to get
+                    started.
+                  </p>
+                  <Button
+                    onClick={() => setIsCreateModalOpen(true)}
+                    color="blue"
+                  >
+                    Create Task
+                  </Button>
+                </div>
+              ) : areFilteredTasksEmpty ? (
+                <div className="text-center text-gray-500 dark:text-gray-300 p-4">
+                  No tasks found for the applied filters.
+                </div>
+              ) : (
+                <TaskBoardTable
+                  tasks={filteredTasks}
+                  onTaskClick={handleTaskClick}
+                  onEdit={handleEditTask}
+                />
+              )}
+            </div>
+          </DragDropContext>
+        )}
+      </div>
+
+      <TaskDetailsDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        task={selectedTask}
       />
 
-      {/* Create Task Modal */}
-      {user && (
-        <CreateTaskModal
-          isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
-          onSave={handleCreateTask}
-          userId={user.id}
-          userName={user.name}
-          teamId={teamId} // Pass teamId for team task creation
-        />
-      )}
+      <CreateTaskModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSave={(task) => dispatch(createNewTask({ ...task, teamId }))}
+        userId="1"
+        userName="John Doe"
+        teamId={teamId} // Include teamId when creating a task
+      />
     </>
+  )
+}
+
+const TaskBoardTable: React.FC<{
+  tasks: { [key: string]: Task[] }
+  onTaskClick: (task: Task) => void
+  onEdit: (task: Task) => void
+}> = ({ tasks, onTaskClick, onEdit }) => {
+  const columns = ['todo', 'in-progress', 'review', 'done']
+
+  return (
+    <Table className="min-w-full table-auto h-full">
+      <Table.Head className="text-center">
+        {['To-Do', 'In-Progress', 'Review', 'Done'].map((header) => (
+          <Table.HeadCell key={header} className="w-1/4 p-2 text-xs md:text-sm">
+            {header}
+          </Table.HeadCell>
+        ))}
+      </Table.Head>
+      <Table.Body className="h-full divide-y">
+        <Table.Row className="h-full">
+          {columns.map((columnId) => (
+            <Table.Cell
+              key={columnId}
+              className="h-full p-2 align-top border dark:border-white border-black rounded-md"
+            >
+              <Droppable droppableId={columnId}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`min-h-[400px] p-2 rounded-lg transition-colors ${
+                      snapshot.isDraggingOver
+                        ? 'bg-slate-300'
+                        : 'bg-transparent'
+                    }`}
+                    style={{ minHeight: 'calc(100vh - 120px)' }}
+                  >
+                    {tasks[columnId]?.map((task, index) => (
+                      <Draggable
+                        key={task.id.toString()}
+                        draggableId={task.id.toString()}
+                        index={index}
+                      >
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={`bg-gray-100 dark:bg-gray-800 p-2 rounded-lg mb-2 shadow-sm hover:shadow-md transition-transform ${
+                              snapshot.isDragging ? 'transform scale-105' : ''
+                            }`}
+                            onClick={() => onTaskClick(task)}
+                          >
+                            <TaskCard
+                              task={task}
+                              onEdit={onEdit}
+                              onTaskClick={onTaskClick}
+                            />
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </Table.Cell>
+          ))}
+        </Table.Row>
+      </Table.Body>
+    </Table>
   )
 }
 

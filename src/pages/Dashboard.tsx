@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import DashboardLayout from '../layout/DashboardLayout'
 import DashboardTabs from '../components/DashboardTabs'
-import TaskBoardCommon from '../components/Tasks/TaskBoardCommon'
+import TaskBoardCommon from '../components/Tasks/PersonalTaskBoard'
 import { useDispatch, useSelector } from 'react-redux'
 import { Outlet } from 'react-router-dom'
 import Calendar from '../components/Calendar/Calendar'
