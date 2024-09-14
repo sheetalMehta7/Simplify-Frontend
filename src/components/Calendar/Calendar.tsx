@@ -67,7 +67,9 @@ const CalendarComponent: React.FC = () => {
 
   // Handle date change and open drawer if a task exists on the selected date
   const handleDateChange = (date: Date) => {
+    // Set the selected date without modifying the time
     setSelectedDate(date)
+
     const task = tasks.find(
       (task) => task.dueDate.toDateString() === date.toDateString(),
     )
@@ -164,7 +166,7 @@ const CalendarComponent: React.FC = () => {
             )}
           </div>
           <button
-            onClick={() => setCreateTaskModalOpen(true)} // Show the Create Task modal
+            onClick={() => setCreateTaskModalOpen(true)}
             className="p-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600"
           >
             Add Event
@@ -181,8 +183,11 @@ const CalendarComponent: React.FC = () => {
       </header>
 
       <div className="grid grid-cols-7 gap-1 sm:gap-2 lg:gap-4 text-center text-xs sm:text-sm font-medium mt-4 mx-2 sm:mx-4">
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
-          <div key={day} className="py-2 text-gray-500 dark:text-gray-400">
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
+          <div
+            key={`${day}-${index}`}
+            className="py-2 text-gray-500 dark:text-gray-400"
+          >
             {day}
           </div>
         ))}
@@ -239,6 +244,8 @@ const CalendarComponent: React.FC = () => {
         isOpen={isCreateTaskModalOpen}
         onClose={() => setCreateTaskModalOpen(false)}
         onSave={handleAddTask}
+        teamId={selectedTask?.teamId}
+        dueDate={selectedDate}
       />
     </div>
   )

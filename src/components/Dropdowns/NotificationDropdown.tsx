@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaBell } from 'react-icons/fa'
+import { LuBellRing } from 'react-icons/lu'
 import { Task } from '../../redux/features/tasks/tasksSlice'
 
 interface NotificationDropdownProps {
@@ -24,6 +24,11 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     return Math.ceil(timeDifference / (1000 * 3600 * 24))
   }
 
+  // Filter out tasks that are past due
+  const upcomingTasks = taskNotifications.filter(
+    (task) => getDaysRemaining(task.dueDate) >= 0,
+  )
+
   return (
     <div
       ref={dropdownRef}
@@ -34,13 +39,25 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
           Notifications
         </h3>
         <ul className="mt-2 space-y-2 divide-y divide-gray-200 dark:divide-gray-700">
-          {taskNotifications.length > 0 ? (
-            taskNotifications.map((task) => {
+          {upcomingTasks.length > 0 ? (
+            upcomingTasks.map((task) => {
               const daysRemaining = getDaysRemaining(task.dueDate)
+
+              // Determine bell icon style based on due date
+              let bellClass = 'text-gray-500 dark:text-gray-300'
+              if (daysRemaining === 0) {
+                // Use LuBellRing icon and make it red if task is due today
+                bellClass = 'text-red-500'
+              }
+
+              if (daysRemaining === 2) {
+                // Use LuBellRing icon and make it red if task is due today
+                bellClass = 'text-yellow-300'
+              }
 
               // Conditional class for highlighting the due date
               let dueDateClass = 'text-gray-500'
-              if (daysRemaining === 1) {
+              if (daysRemaining === 0) {
                 dueDateClass = 'text-red-500'
               } else if (daysRemaining === 2) {
                 dueDateClass = 'text-yellow-300'
@@ -52,11 +69,14 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                   className="flex items-center py-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
                   onClick={() => handleNotificationItemClick(task.id)}
                 >
-                  <FaBell className="h-5 w-5 text-gray-500 dark:text-gray-300 mr-2" />
+                  <LuBellRing className={`h-5 w-5 mr-2 ${bellClass}`} />{' '}
+                  {/* LuBellRing icon */}
                   <div>
                     <p>{task.title}</p>
                     <p className={`text-xs ${dueDateClass}`}>
-                      Due in {daysRemaining} day{daysRemaining > 1 ? 's' : ''}
+                      {daysRemaining === 0
+                        ? 'Due today'
+                        : `Due in ${daysRemaining} day${daysRemaining > 1 ? 's' : ''}`}
                     </p>
                   </div>
                 </li>
