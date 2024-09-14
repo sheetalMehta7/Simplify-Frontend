@@ -158,7 +158,6 @@ const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSave={(task) => dispatch(createNewTask(task))}
-        userId="1"
         userName="John Doe"
       />
     </>

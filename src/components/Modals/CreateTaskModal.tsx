@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Modal,
   Button,
@@ -8,6 +8,7 @@ import {
   Label,
 } from 'flowbite-react'
 import { MdTitle, MdDateRange, MdPriorityHigh, MdLabel } from 'react-icons/md'
+import { format } from 'date-fns'
 
 interface Task {
   title: string
@@ -15,40 +16,55 @@ interface Task {
   status: string
   priority: string
   dueDate?: string
-  userId: string
-  assigneeid?: string
-  teamId?: string // Optional team field for team tasks
+  assigneeName: string
+  teamId?: string
 }
 
 interface CreateTaskModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: (task: Partial<Task>) => void
-  userId: string
-  userName: string
-  teamId?: string // Optional team field
+  teamId?: string
+  dueDate?: Date | null
 }
 
 const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   isOpen,
   onClose,
   onSave,
-  userId,
-  userName,
   teamId,
+  dueDate,
 }) => {
   const [taskDetails, setTaskDetails] = useState<Partial<Task>>({
     title: '',
     description: '',
     status: 'todo',
     priority: 'low',
-    dueDate: '',
-    userId: userId,
-    assigneeid: userId, // Assignee is the current user by default
+    dueDate: dueDate ? format(dueDate, 'yyyy-MM-dd') : '', // Format the date using date-fns
+    assigneeName: '', // Placeholder, will be populated with userName
     teamId: teamId || '', // Optional teamId if it's a team task
   })
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+    if (user && user.name) {
+      setTaskDetails((prevDetails) => ({
+        ...prevDetails,
+        assigneeName: user.name, // Set the assigneeName to the user's name
+      }))
+    }
+  }, [])
+
+  useEffect(() => {
+    if (dueDate) {
+      setTaskDetails((prevDetails) => ({
+        ...prevDetails,
+        dueDate: format(dueDate, 'yyyy-MM-dd'), // Ensure only the date part is used with proper formatting
+      }))
+    }
+  }, [dueDate])
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -79,8 +95,14 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
   const handleSubmit = () => {
     if (validateForm()) {
-      // Save task and close modal
-      onSave(taskDetails)
+      const finalTaskDetails = {
+        ...taskDetails,
+        assigneeName: taskDetails.teamId
+          ? taskDetails.assigneeName
+          : taskDetails.assigneeName,
+      }
+
+      onSave(finalTaskDetails) // Save task and close modal
       onClose()
     }
   }
@@ -175,7 +197,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             <TextInput
               id="assignee"
               name="assignee"
-              value={userName}
+              value={taskDetails.assigneeName}
               disabled
             />
           </div>

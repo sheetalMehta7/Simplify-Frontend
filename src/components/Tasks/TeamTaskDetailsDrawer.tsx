@@ -49,8 +49,8 @@ const TeamTaskDetailsDrawer: React.FC<TeamTaskDetailsDrawerProps> = ({
         dispatch(
           moveTeamTaskLocally({
             taskId: editedTask.id,
-            oldStatus: task.status || 'todo',
-            newStatus: editedTask.status || 'todo',
+            oldStatus: task.status || 'todo', // Default to 'todo' if status is undefined
+            newStatus: editedTask.status || 'todo', // Default to 'todo'
           }),
         )
       }
@@ -61,9 +61,7 @@ const TeamTaskDetailsDrawer: React.FC<TeamTaskDetailsDrawerProps> = ({
           data: {
             title: editedTask.title,
             description: editedTask.description,
-            dueDate: editedTask.dueDate
-              ? new Date(editedTask.dueDate).toISOString()
-              : undefined,
+            dueDate: editedTask.dueDate,
             status: editedTask.status,
             priority: editedTask.priority,
             assigneeIds: editedTask.assigneeIds,

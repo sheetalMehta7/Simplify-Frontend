@@ -1,19 +1,27 @@
-export interface TaskFromApi {
+export interface TeamTaskFromApi {
   id: string
   title: string
   dueDate: string
   description?: string
-  assignee?: string
+  assigneeIds: string[]
   priority?: string
   status?: string
+  teamId: string
 }
 
-export interface Task {
+export interface TeamTask {
   id: string
   title: string
   dueDate: Date
   description?: string
-  assignee?: string
+  assigneeIds: string[]
   priority?: string
   status?: string
+  teamId: string
+}
+
+export interface Team {
+  id: string
+  name: string
+  description?: string
 }

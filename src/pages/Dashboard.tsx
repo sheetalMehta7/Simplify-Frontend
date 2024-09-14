@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import DashboardLayout from '../layout/DashboardLayout'
 import DashboardTabs from '../components/DashboardTabs'
-import TaskBoardCommon from '../components/Tasks/PersonalTaskBoard'
+import TeamTaskBoard from '../components/Tasks/TeamTaskBoard' // Import TeamTaskBoard
 import { useDispatch, useSelector } from 'react-redux'
 import { Outlet } from 'react-router-dom'
 import Calendar from '../components/Calendar/Calendar'
 import Loader from '../components/Loader'
 import { RootState, AppDispatch } from '../redux/store'
-import { fetchTasks } from '../redux/features/tasks/tasksSlice'
+// import { fetchTeamTasks } from '../redux/features/teams/teamTaskSlice'
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('Dashboard')
   const [loading, setLoading] = useState<boolean>(false)
   const dispatch = useDispatch<AppDispatch>()
-  const teamTasks = useSelector((state: RootState) => state.tasks.teamTasks)
+  // const teamTasks = useSelector((state: RootState) => state.teamTasks.tasks) // Select team tasks from the store
 
   useEffect(() => {
     setLoading(true)
@@ -25,8 +25,9 @@ const Dashboard: React.FC = () => {
 
   const handleTabSelect = async (tab: string) => {
     setActiveTab(tab)
-    if (tab === 'TeamTasks') {
-      await dispatch(fetchTasks({ teamId: 'team' })) // Fetch team tasks when "Team Tasks" is selected
+    if (tab === 'TeamsBoard') {
+      // Fetch team tasks when "TeamsBoard" tab is selected
+      await dispatch(fetchTeamTasks()) // Fetch team tasks
     }
   }
 
@@ -51,13 +52,7 @@ const Dashboard: React.FC = () => {
         )
       case 'TeamsBoard':
         return (
-          <TaskBoardCommon
-            tasks={teamTasks}
-            onCreateTask={() => {}}
-            onTaskClick={() => {}}
-            onEditTask={() => {}}
-            onDragEnd={() => {}}
-          />
+          <TeamTaskBoard filters={{ date: '', assignee: '', status: '' }} />
         )
       case 'Calendar':
         return <Calendar />
