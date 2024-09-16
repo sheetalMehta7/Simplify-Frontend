@@ -8,7 +8,7 @@ import { MdCheck } from 'react-icons/md'
 
 interface EditTeamModalProps {
   isOpen: boolean
-  onClose: () => void
+  onClose: (teamUpdated?: boolean) => void // Modify to accept the `teamUpdated` flag.
   team: { id: string; name: string; description?: string; members: string[] }
 }
 
@@ -19,17 +19,15 @@ const EditTeamModal: React.FC<EditTeamModalProps> = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const users = useSelector((state: RootState) => state.user.users)
-  const loadingUsers = useSelector((state: RootState) => state.user.loading)
 
   const [teamName, setTeamName] = useState(team.name)
   const [description, setDescription] = useState(team.description || '')
-  const [selectedMembers, setSelectedMembers] = useState<string[]>(team.members) // Pre-select members
-  const [showMoreUsers, setShowMoreUsers] = useState(false) // Toggle for showing more members
+  const [selectedMembers, setSelectedMembers] = useState<string[]>(team.members)
+  const [showMoreUsers, setShowMoreUsers] = useState(false)
 
-  // Fetch users when the modal opens
   useEffect(() => {
     if (isOpen) {
-      dispatch(fetchAllUsers()) // Fetch all users when modal is open
+      dispatch(fetchAllUsers())
     }
   }, [dispatch, isOpen])
 
@@ -37,15 +35,15 @@ const EditTeamModal: React.FC<EditTeamModalProps> = ({
     if (teamName.trim()) {
       await dispatch(
         updateTeamThunk({
-          teamId: team.id, // Pass the teamId separately
+          teamId: team.id,
           data: {
             name: teamName,
             description,
-            members: selectedMembers, // Pass selected members for the update
+            members: selectedMembers,
           },
         }),
       )
-      onClose()
+      onClose(true) // Trigger modal close and refresh
     }
   }
 
@@ -60,7 +58,7 @@ const EditTeamModal: React.FC<EditTeamModalProps> = ({
   const isSelected = (userId: string) => selectedMembers.includes(userId)
 
   return (
-    <Modal show={isOpen} onClose={onClose} size="lg">
+    <Modal show={isOpen} onClose={() => onClose(false)}>
       <Modal.Header className="bg-white dark:bg-gray-800">
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
           Edit Team
@@ -133,14 +131,14 @@ const EditTeamModal: React.FC<EditTeamModalProps> = ({
                   onClick={() => handleSelectMember(user.id)}
                 >
                   <div
-                    className={`relative w-12 h-12 rounded-full overflow-hidden transform transition-transform duration-200 ${
+                    className={`relative rounded-full overflow-hidden transform transition-transform duration-200 ${
                       isSelected(user.id) ? 'opacity-75' : ''
                     } hover:scale-105`}
                   >
                     <img
                       src={`https://ui-avatars.com/api/?name=${user.name}&background=random`}
                       alt={`Avatar of ${user.name}`}
-                      className="w-full h-full rounded-full"
+                      className="w-12 h-12 rounded-full"
                     />
                     {isSelected(user.id) && (
                       <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center rounded-full">
@@ -160,7 +158,7 @@ const EditTeamModal: React.FC<EditTeamModalProps> = ({
         <Button color="blue" onClick={handleUpdateTeam}>
           Update
         </Button>
-        <Button color="gray" onClick={onClose}>
+        <Button color="gray" onClick={() => onClose(false)}>
           Cancel
         </Button>
       </Modal.Footer>

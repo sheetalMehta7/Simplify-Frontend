@@ -8,6 +8,7 @@ import {
 import Loader from '../../Loader'
 import CreateTeamModal from '../../Modals/CreateTeamModal'
 import EditTeamModal from '../../Modals/EditTeamModal'
+import ConfirmModal from '../../Modals/ConfirmModal'
 import { Button } from 'flowbite-react'
 import { MdEdit, MdDelete } from 'react-icons/md'
 
@@ -18,6 +19,8 @@ const Teams: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState<any>(null)
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
+  const [teamToDelete, setTeamToDelete] = useState<string | null>(null)
 
   useEffect(() => {
     dispatch(fetchTeams())
@@ -32,23 +35,38 @@ const Teams: React.FC = () => {
   }
 
   const openEditModal = (team: any) => {
-    // Extract members as an array of user ids to pass into the modal
     const teamWithMembers = {
       ...team,
-      members: team.members.map((member: any) => member.user.id), // Extract user IDs from members
+      members: team.members.map((member: any) => member.user.id),
     }
     setSelectedTeam(teamWithMembers)
     setIsEditModalOpen(true)
   }
 
-  const closeEditModal = () => {
+  const closeEditModal = async (teamUpdated: boolean = false) => {
     setIsEditModalOpen(false)
     setSelectedTeam(null)
+
+    // If a team has been updated, refresh the teams list.
+    if (teamUpdated) {
+      dispatch(fetchTeams()) // Re-fetch updated team data.
+    }
   }
 
-  const handleDeleteTeam = (teamId: string) => {
-    if (window.confirm('Are you sure you want to delete this team?')) {
-      dispatch(deleteTeamThunk(teamId)) // Dispatch delete action
+  const openConfirmModal = (teamId: string) => {
+    setTeamToDelete(teamId)
+    setIsConfirmModalOpen(true)
+  }
+
+  const closeConfirmModal = () => {
+    setIsConfirmModalOpen(false)
+    setTeamToDelete(null)
+  }
+
+  const handleDeleteTeam = () => {
+    if (teamToDelete) {
+      dispatch(deleteTeamThunk(teamToDelete))
+      closeConfirmModal()
     }
   }
 
@@ -91,7 +109,7 @@ const Teams: React.FC = () => {
                         Edit
                       </Button>
                       <Button
-                        onClick={() => handleDeleteTeam(team.id)}
+                        onClick={() => openConfirmModal(team.id)}
                         color="red"
                         size="xs"
                         className="flex items-center"
@@ -113,10 +131,18 @@ const Teams: React.FC = () => {
       {selectedTeam && (
         <EditTeamModal
           isOpen={isEditModalOpen}
-          onClose={closeEditModal}
-          team={selectedTeam} // Pass the team with extracted member IDs
+          onClose={closeEditModal} // Pass the close function that triggers refresh on update.
+          team={selectedTeam}
         />
       )}
+
+      {/* Confirm Delete Modal */}
+      <ConfirmModal
+        isOpen={isConfirmModalOpen}
+        onClose={closeConfirmModal}
+        onConfirm={handleDeleteTeam}
+        message="Are you sure you want to delete this team? This action cannot be undone."
+      />
     </div>
   )
 }
