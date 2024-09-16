@@ -12,9 +12,9 @@ import {
   updateTaskThunk,
   deleteTaskThunk,
   moveTaskLocally,
-} from '../../redux/features/tasks/tasksSlice'
-import { Task } from '../../redux/features/tasks/tasksSlice'
-import { AppDispatch } from '../../redux/store'
+} from '../../../redux/features/tasks/tasksSlice'
+import { Task } from '../../../redux/features/tasks/tasksSlice'
+import { AppDispatch } from '../../../redux/store'
 
 interface TaskCardProps {
   task: Task

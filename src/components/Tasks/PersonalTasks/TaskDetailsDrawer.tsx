@@ -3,27 +3,27 @@ import { Drawer, Button, TextInput, Select } from 'flowbite-react'
 import { FaTimes, FaTasks, FaFlag, FaArrowLeft } from 'react-icons/fa'
 import { useDispatch } from 'react-redux'
 import {
-  updateTeamTaskThunk,
-  deleteTeamTaskThunk,
-  moveTeamTaskLocally,
-} from '../../redux/features/teams/teamTaskSlice'
-import { TeamTask } from '../../interfaces/Task'
-import { AppDispatch } from '../../redux/store'
+  updateTaskThunk,
+  deleteTaskThunk,
+  moveTaskLocally,
+  Task,
+} from '../../../redux/features/tasks/tasksSlice'
+import { AppDispatch } from '../../../redux/store'
 
-interface TeamTaskDetailsDrawerProps {
+interface TaskDetailsDrawerProps {
   isOpen: boolean
   onClose: () => void
-  task: TeamTask | null
+  task: Task | null
 }
 
-const TeamTaskDetailsDrawer: React.FC<TeamTaskDetailsDrawerProps> = ({
+const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
   isOpen,
   onClose,
   task,
 }) => {
   const dispatch: AppDispatch = useDispatch()
   const [isEditing, setIsEditing] = useState(false)
-  const [editedTask, setEditedTask] = useState<TeamTask | null>(task)
+  const [editedTask, setEditedTask] = useState<Task | null>(task)
 
   useEffect(() => {
     if (task) {
@@ -47,37 +47,20 @@ const TeamTaskDetailsDrawer: React.FC<TeamTaskDetailsDrawerProps> = ({
     if (isEditing && editedTask) {
       if (task.status !== editedTask.status) {
         dispatch(
-          moveTeamTaskLocally({
+          moveTaskLocally({
             taskId: editedTask.id,
-            oldStatus: task.status || 'todo',
-            newStatus: editedTask.status || 'todo',
+            oldStatus: task.status,
+            newStatus: editedTask.status,
           }),
         )
       }
-      await dispatch(
-        updateTeamTaskThunk({
-          teamId: task.teamId,
-          taskId: task.id,
-          data: {
-            title: editedTask.title,
-            description: editedTask.description,
-            dueDate: editedTask.dueDate
-              ? new Date(editedTask.dueDate).toISOString()
-              : undefined,
-            status: editedTask.status,
-            priority: editedTask.priority,
-            assigneeIds: editedTask.assigneeIds,
-          },
-        }),
-      )
+      await dispatch(updateTaskThunk(editedTask))
     }
     setIsEditing(!isEditing)
   }
 
   const handleDelete = async () => {
-    await dispatch(
-      deleteTeamTaskThunk({ teamId: editedTask.teamId, taskId: editedTask.id }),
-    )
+    await dispatch(deleteTaskThunk(editedTask.id))
     onClose()
   }
 
@@ -108,7 +91,7 @@ const TeamTaskDetailsDrawer: React.FC<TeamTaskDetailsDrawerProps> = ({
             <FaTasks className="text-blue-600" size={24} />
           )}
           <h2 className="text-lg md:text-base font-bold text-gray-900 dark:text-gray-200">
-            Team Task Details
+            Task Details
           </h2>
         </div>
         <Button
@@ -123,7 +106,6 @@ const TeamTaskDetailsDrawer: React.FC<TeamTaskDetailsDrawerProps> = ({
 
       <Drawer.Items className="p-6 md:p-4 space-y-6">
         <>
-          {/* Task Title */}
           <div className="space-y-2">
             <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
               Title
@@ -143,7 +125,6 @@ const TeamTaskDetailsDrawer: React.FC<TeamTaskDetailsDrawerProps> = ({
             )}
           </div>
 
-          {/* Task Description */}
           <div className="space-y-2">
             <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
               Description
@@ -163,27 +144,25 @@ const TeamTaskDetailsDrawer: React.FC<TeamTaskDetailsDrawerProps> = ({
             )}
           </div>
 
-          {/* Task Assignees */}
           <div className="space-y-2">
             <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
-              Assignees
+              Assignee
             </h3>
             {isEditing ? (
               <TextInput
-                name="assigneeIds"
-                value={editedTask.assigneeIds?.join(', ') || ''}
+                name="assignee"
+                value={editedTask.assigneeIds || ''}
                 onChange={handleInputChange}
-                placeholder="Assign users"
+                placeholder="Assign user"
                 className="dark:bg-gray-700"
               />
             ) : (
               <p className="text-gray-700 dark:text-gray-300 text-base md:text-sm">
-                {task.assigneeIds?.join(', ') || 'Unassigned'}
+                {task.assigneeIds || 'Unassigned'}
               </p>
             )}
           </div>
 
-          {/* Due Date */}
           <div className="space-y-2">
             <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
               Due Date
@@ -192,7 +171,7 @@ const TeamTaskDetailsDrawer: React.FC<TeamTaskDetailsDrawerProps> = ({
               <TextInput
                 name="dueDate"
                 type="date"
-                value={new Date(editedTask.dueDate).toISOString().split('T')[0]}
+                value={editedTask.dueDate}
                 onChange={handleInputChange}
                 className="dark:bg-gray-700"
               />
@@ -203,7 +182,6 @@ const TeamTaskDetailsDrawer: React.FC<TeamTaskDetailsDrawerProps> = ({
             )}
           </div>
 
-          {/* Task Status */}
           <div className="space-y-2">
             <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
               Status
@@ -211,7 +189,7 @@ const TeamTaskDetailsDrawer: React.FC<TeamTaskDetailsDrawerProps> = ({
             {isEditing ? (
               <Select
                 name="status"
-                value={editedTask.status || 'todo'}
+                value={editedTask.status}
                 onChange={handleInputChange}
                 className="dark:bg-gray-700"
               >
@@ -223,20 +201,15 @@ const TeamTaskDetailsDrawer: React.FC<TeamTaskDetailsDrawerProps> = ({
             ) : (
               <div className="flex items-center space-x-2">
                 <FaFlag
-                  className={`${
-                    statusColors[task.status || 'todo'] || 'text-gray-500'
-                  } w-5 h-5`}
+                  className={`${statusColors[task.status] || 'text-gray-500'} w-5 h-5`}
                 />
                 <span className="text-base md:text-sm">
-                  {task.status
-                    ? task.status.charAt(0).toUpperCase() + task.status.slice(1)
-                    : 'Todo'}
+                  {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
                 </span>
               </div>
             )}
           </div>
 
-          {/* Task Priority */}
           <div className="space-y-2">
             <h3 className="text-lg md:text-base font-semibold text-gray-900 dark:text-gray-200">
               Priority
@@ -244,7 +217,7 @@ const TeamTaskDetailsDrawer: React.FC<TeamTaskDetailsDrawerProps> = ({
             {isEditing ? (
               <Select
                 name="priority"
-                value={editedTask.priority || 'low'}
+                value={editedTask.priority}
                 onChange={handleInputChange}
                 className="dark:bg-gray-700"
               >
@@ -254,15 +227,12 @@ const TeamTaskDetailsDrawer: React.FC<TeamTaskDetailsDrawerProps> = ({
               </Select>
             ) : (
               <span className="text-base md:text-sm">
-                {editedTask.priority
-                  ? editedTask.priority.charAt(0).toUpperCase() +
-                    editedTask.priority.slice(1)
-                  : 'Low'}
+                {editedTask.priority.charAt(0).toUpperCase() +
+                  editedTask.priority.slice(1)}
               </span>
             )}
           </div>
 
-          {/* Actions: Edit, Cancel, Delete */}
           <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
             <Button
               color={isEditing ? 'success' : 'gray'}
@@ -294,4 +264,4 @@ const TeamTaskDetailsDrawer: React.FC<TeamTaskDetailsDrawerProps> = ({
   )
 }
 
-export default TeamTaskDetailsDrawer
+export default TaskDetailsDrawer
