@@ -1,19 +1,14 @@
 import React, { useState, useRef } from 'react'
 import {
   MdDashboard,
-  MdLockClock,
-  MdFolder,
+  MdGroups,
+  MdPerson,
   MdCreate,
   MdCancel,
 } from 'react-icons/md'
 import { VscSettings } from 'react-icons/vsc'
-import { useDispatch } from 'react-redux'
-import FilterDropdown from './Modals/FilterModal'
-import CreateTaskModal from './Modals/CreateTaskModal'
-import PersonalTaskBoard from './Tasks/PersonalTaskBoard'
-import { createNewTask } from '../redux/features/tasks/tasksSlice'
-import { AppDispatch } from '../redux/store'
-import { Task } from '../redux/features/tasks/tasksSlice'
+import FilterDropdown from '../Modals/FilterModal'
+import CreateTeamModal from '../Modals/CreateTaskModal'
 import { Button } from 'flowbite-react'
 
 interface Tab {
@@ -22,15 +17,16 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
-  { name: 'My Tasks', icon: <MdDashboard /> },
-  { name: 'Recent', icon: <MdLockClock /> },
-  { name: 'Projects', icon: <MdFolder /> },
+  { name: 'Team Tasks', icon: <MdDashboard /> },
+  { name: 'Teams', icon: <MdGroups /> },
+  { name: 'Members', icon: <MdPerson /> },
 ]
 
-const DashboardTabs: React.FC = () => {
+const TeamsDashboardTabs: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>(TABS[0].name)
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false)
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] =
+    useState<boolean>(false)
   const [filters, setFilters] = useState<{
     date: string
     assignee: string
@@ -41,13 +37,12 @@ const DashboardTabs: React.FC = () => {
     status: '',
   })
 
-  const dispatch: AppDispatch = useDispatch()
   const filterButtonRef = useRef<HTMLButtonElement>(null)
 
   const handleTabClick = (tabName: string) => setActiveTab(tabName)
   const toggleFilter = () => setIsFilterOpen((prev) => !prev)
-  const openModal = () => setIsModalOpen(true)
-  const closeModal = () => setIsModalOpen(false)
+  const openCreateTeamModal = () => setIsCreateTeamModalOpen(true)
+  const closeCreateTeamModal = () => setIsCreateTeamModalOpen(false)
 
   const applyFilters = (filterValues: {
     date: string
@@ -68,18 +63,9 @@ const DashboardTabs: React.FC = () => {
     }))
   }
 
-  const handleSaveTask = async (newTask: Partial<Task>) => {
-    try {
-      await dispatch(createNewTask(newTask)).unwrap()
-      closeModal() // Close the modal after successfully saving the task
-    } catch (error) {
-      console.error('Failed to create task:', error)
-    }
-  }
-
   return (
     <div className="flex flex-col h-screen">
-      {/* Header with Tabs and Filter/Task buttons */}
+      {/* Header with Tabs and Filter/Team buttons */}
       <div className="container mx-auto p-4 md:p-5 flex-none">
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md mb-6 p-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -94,7 +80,7 @@ const DashboardTabs: React.FC = () => {
                 isFilterOpen={isFilterOpen}
                 onClick={toggleFilter}
               />
-              <CreateTaskButton onClick={openModal} />
+              <CreateTeamButton onClick={openCreateTeamModal} />
             </div>
           </div>
 
@@ -136,27 +122,27 @@ const DashboardTabs: React.FC = () => {
             </div>
           )}
 
-          {/* Create Task Modal */}
-          <CreateTaskModal
-            isOpen={isModalOpen}
-            onClose={closeModal}
-            onSave={handleSaveTask}
-            userId={1}
+          {/* Create Team Modal */}
+          <CreateTeamModal
+            isOpen={isCreateTeamModalOpen}
+            onClose={closeCreateTeamModal}
           />
         </div>
       </div>
 
-      {/* Task Board based on active tab */}
+      {/* Content based on active tab */}
       <div className="flex-1 container mx-auto p-4 md:p-5">
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md p-4 h-full">
-          {activeTab === 'My Tasks' && <PersonalTaskBoard filters={filters} />}
+          {activeTab === 'Team Tasks' && <div>Team Tasks Content</div>}
+          {activeTab === 'Teams' && <div>Teams List</div>}
+          {activeTab === 'Members' && <div>Team Members List</div>}
         </div>
       </div>
     </div>
   )
 }
 
-export default DashboardTabs
+export default TeamsDashboardTabs
 
 interface FilterTagProps {
   label: string
@@ -219,12 +205,12 @@ const FilterButton = React.forwardRef<HTMLButtonElement, FilterButtonProps>(
   ),
 )
 
-const CreateTaskButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
+const CreateTeamButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   <button
     onClick={onClick}
     className="flex items-center justify-center px-4 py-2 text-gray-900 dark:text-gray-200 rounded-md transition-all duration-300 border border-gray-100 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-500"
   >
     <MdCreate className="h-6 mr-2" />
-    Create Tasks
+    Create Team
   </button>
 )

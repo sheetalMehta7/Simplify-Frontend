@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import DashboardLayout from '../layout/DashboardLayout'
-import DashboardTabs from '../components/DashboardTabs'
-import TeamTaskBoard from '../components/Tasks/TeamTaskBoard' // Import TeamTaskBoard
-import { useDispatch, useSelector } from 'react-redux'
-import { Outlet } from 'react-router-dom'
+import DashboardTabs from '../components/Tabs/DashboardTabs'
+import TeamsDashboardTabs from '../components/Tabs/TeamsDashboardTabs'
 import Calendar from '../components/Calendar/Calendar'
 import Loader from '../components/Loader'
-import { RootState, AppDispatch } from '../redux/store'
-// import { fetchTeamTasks } from '../redux/features/teams/teamTaskSlice'
+import { Outlet } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { AppDispatch } from '../redux/store'
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('Dashboard')
   const [loading, setLoading] = useState<boolean>(false)
   const dispatch = useDispatch<AppDispatch>()
-  // const teamTasks = useSelector((state: RootState) => state.teamTasks.tasks) // Select team tasks from the store
 
   useEffect(() => {
     setLoading(true)
@@ -26,8 +24,8 @@ const Dashboard: React.FC = () => {
   const handleTabSelect = async (tab: string) => {
     setActiveTab(tab)
     if (tab === 'TeamsBoard') {
-      // Fetch team tasks when "TeamsBoard" tab is selected
-      await dispatch(fetchTeamTasks()) // Fetch team tasks
+      // Uncomment this if you want to fetch team tasks when the TeamsBoard tab is selected
+      // await dispatch(fetchTeamTasks())
     }
   }
 
@@ -52,7 +50,10 @@ const Dashboard: React.FC = () => {
         )
       case 'TeamsBoard':
         return (
-          <TeamTaskBoard filters={{ date: '', assignee: '', status: '' }} />
+          <>
+            {/* Displaying TeamsDashboardTabs */}
+            <TeamsDashboardTabs />
+          </>
         )
       case 'Calendar':
         return <Calendar />

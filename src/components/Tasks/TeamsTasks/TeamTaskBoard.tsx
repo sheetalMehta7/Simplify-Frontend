@@ -7,55 +7,67 @@ import {
   DropResult,
 } from 'react-beautiful-dnd'
 import { Table, Button } from 'flowbite-react'
-import TaskCard from './TaskCard'
+import TeamTaskCard from '../TeamTaskCard'
 import TaskDetailsDrawer from '../Tasks/TaskDetailsDrawer'
-import CreateTaskModal from '../Modals/CreateTaskModal'
+import CreateTaskModal from '../../Modals/CreateTaskModal'
 import {
-  fetchTasks,
-  updateTaskThunk,
-  createNewTask,
-  moveTaskLocally,
-} from '../../redux/features/tasks/tasksSlice'
-import { AppDispatch, RootState } from '../../redux/store'
-import { Task } from '../../redux/features/tasks/tasksSlice'
-import Loader from '../Loader'
+  fetchTeamTasks,
+  updateTeamTaskThunk,
+  createTeamTaskThunk,
+  moveTeamTaskLocally,
+} from '../../../redux/features/teams/teamTaskSlice'
+import { AppDispatch, RootState } from '../../../redux/store'
+import Loader from '../../Loader'
+import { TeamTask } from '../../../interfaces/Task'
 
-interface PersonalTaskBoardProps {
+interface TeamTaskBoardProps {
+  teamId: string
   filters?: { date: string; assignee: string; status: string } // Optional filters
 }
 
-const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
-  filters = { date: '', assignee: '', status: '' }, // Default values for filters
+const TeamTaskBoard: React.FC<TeamTaskBoardProps> = ({
+  teamId,
+  filters = { date: '', assignee: '', status: '' },
 }) => {
   const dispatch: AppDispatch = useDispatch()
-  const personalTasks = useSelector(
-    (state: RootState) => state.tasks.personalTasks,
-  ) // Fetching only personal tasks
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const teamTasks = useSelector((state: RootState) => state.teamTasks.tasks) // Fetch the whole tasks object
+  const tasksForTeam = teamTasks ? teamTasks[teamId] : undefined // Safely access team-specific tasks
+
+  const [selectedTask, setSelectedTask] = useState<TeamTask | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
 
+  // Fetch team tasks on component mount
   useEffect(() => {
     const loadTasks = async () => {
       setLoading(true)
-      await dispatch(fetchTasks())
+      await dispatch(fetchTeamTasks(teamId))
       setLoading(false)
     }
     loadTasks()
-  }, [dispatch])
+  }, [dispatch, teamId])
 
-  // Apply filters to tasks
-  const applyFilters = (tasks: { [key: string]: Task[] }) => {
+  // Handle when there are no tasks or the data isn't ready yet
+  if (loading || !teamTasks || !tasksForTeam) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader message="Loading tasks..." />
+      </div>
+    )
+  }
+
+  // Apply filters if needed
+  const applyFilters = (tasks: { [key: string]: TeamTask[] }) => {
     const filteredTasks = Object.entries(tasks).reduce(
-      (acc: { [key: string]: Task[] }, [status, tasksArray]) => {
+      (acc: { [key: string]: TeamTask[] }, [status, tasksArray]) => {
         acc[status] = tasksArray.filter((task) => {
           const matchesDate =
-            !filters?.date || task.dueDate.startsWith(filters.date) // Gracefully handle undefined filters
+            !filters.date || task.dueDate.toISOString().startsWith(filters.date) // Convert dueDate to string
           const matchesAssignee =
-            !filters?.assignee || task.assignee === filters.assignee
+            !filters.assignee || task.assigneeIds?.includes(filters.assignee)
           const matchesStatus =
-            !filters?.status || task.status === filters.status
+            !filters.status || task.status === filters.status
           return matchesDate && matchesAssignee && matchesStatus
         })
         return acc
@@ -65,7 +77,12 @@ const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
     return filteredTasks
   }
 
-  const filteredTasks = applyFilters(personalTasks)
+  const filteredTasks = applyFilters(tasksForTeam)
+
+  // Check if all tasks are empty
+  const areAllTasksEmpty = Object.values(filteredTasks).every(
+    (taskList) => taskList.length === 0,
+  )
 
   // Handle drag-and-drop event
   const onDragEnd = async (result: DropResult) => {
@@ -75,77 +92,59 @@ const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
     const taskId = filteredTasks[source.droppableId][source.index].id
     const newStatus = destination.droppableId
 
-    const draggedTask = personalTasks[source.droppableId].find(
+    const draggedTask = tasksForTeam?.[source.droppableId]?.find(
       (task) => task.id === taskId,
     )
 
     if (!draggedTask) return
 
     dispatch(
-      moveTaskLocally({
+      moveTeamTaskLocally({
         taskId,
         oldStatus: source.droppableId,
         newStatus,
       }),
     )
 
-    await dispatch(updateTaskThunk({ ...draggedTask, status: newStatus }))
+    await dispatch(
+      updateTeamTaskThunk({ teamId, taskId, data: { status: newStatus } }),
+    )
   }
 
-  const handleTaskClick = (task: Task) => {
+  const handleTaskClick = (task: TeamTask) => {
     setSelectedTask(task)
     setIsDrawerOpen(true)
   }
 
-  const handleEditTask = (task: Task) => {
+  const handleEditTask = (task: TeamTask) => {
     setSelectedTask(task)
     setIsDrawerOpen(true)
   }
-
-  const areAllTasksEmpty = Object.values(personalTasks).every(
-    (taskList) => taskList.length === 0,
-  )
-  const areFilteredTasksEmpty = Object.values(filteredTasks).every(
-    (taskList) => taskList.length === 0,
-  )
 
   return (
     <>
       <div className="relative p-4 h-screen">
-        {loading ? (
-          <div className="flex items-center justify-center h-screen">
-            <Loader message="Loading tasks..." />
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="flex-1 overflow-x-auto min-h-screen">
+            {areAllTasksEmpty ? (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <p className="text-gray-500 dark:text-gray-300 mb-4">
+                  No tasks available for this team. You can create a new task to
+                  get started.
+                </p>
+                <Button onClick={() => setIsCreateModalOpen(true)} color="blue">
+                  Create Task
+                </Button>
+              </div>
+            ) : (
+              <TaskBoardTable
+                tasks={filteredTasks}
+                onTaskClick={handleTaskClick}
+                onEdit={handleEditTask}
+              />
+            )}
           </div>
-        ) : (
-          <DragDropContext onDragEnd={onDragEnd}>
-            <div className="flex-1 overflow-x-auto min-h-screen">
-              {areAllTasksEmpty && areFilteredTasksEmpty ? (
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                  <p className="text-gray-500 dark:text-gray-300 mb-4">
-                    No tasks available. You can create a new task to get
-                    started.
-                  </p>
-                  <Button
-                    onClick={() => setIsCreateModalOpen(true)}
-                    color="blue"
-                  >
-                    Create Task
-                  </Button>
-                </div>
-              ) : areFilteredTasksEmpty ? (
-                <div className="text-center text-gray-500 dark:text-gray-300 p-4">
-                  No tasks found for the applied filters.
-                </div>
-              ) : (
-                <TaskBoardTable
-                  tasks={filteredTasks}
-                  onTaskClick={handleTaskClick}
-                  onEdit={handleEditTask}
-                />
-              )}
-            </div>
-          </DragDropContext>
-        )}
+        </DragDropContext>
       </div>
 
       <TaskDetailsDrawer
@@ -157,17 +156,21 @@ const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
       <CreateTaskModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onSave={(task) => dispatch(createNewTask(task))}
+        onSave={(task) =>
+          dispatch(createTeamTaskThunk({ teamId, data: { ...task } }))
+        }
+        userId="1"
         userName="John Doe"
+        teamId={teamId}
       />
     </>
   )
 }
 
 const TaskBoardTable: React.FC<{
-  tasks: { [key: string]: Task[] }
-  onTaskClick: (task: Task) => void
-  onEdit: (task: Task) => void
+  tasks: { [key: string]: TeamTask[] }
+  onTaskClick: (task: TeamTask) => void
+  onEdit: (task: TeamTask) => void
 }> = ({ tasks, onTaskClick, onEdit }) => {
   const columns = ['todo', 'in-progress', 'review', 'done']
 
@@ -215,7 +218,7 @@ const TaskBoardTable: React.FC<{
                             }`}
                             onClick={() => onTaskClick(task)}
                           >
-                            <TaskCard
+                            <TeamTaskCard
                               task={task}
                               onEdit={onEdit}
                               onTaskClick={onTaskClick}
@@ -236,4 +239,4 @@ const TaskBoardTable: React.FC<{
   )
 }
 
-export default PersonalTaskBoard
+export default TeamTaskBoard
