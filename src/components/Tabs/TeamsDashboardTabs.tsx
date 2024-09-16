@@ -8,9 +8,9 @@ import {
 } from 'react-icons/md'
 import { VscSettings } from 'react-icons/vsc'
 import FilterDropdown from '../Modals/FilterModal'
-import CreateTeamModal from '../Modals/CreateTaskModal'
+import CreateTeamModal from '../Modals/CreateTeamModal'
 import { Button } from 'flowbite-react'
-
+import Teams from '../Tasks/Teams/Teams'
 interface Tab {
   name: string
   icon: React.ReactNode
@@ -134,7 +134,7 @@ const TeamsDashboardTabs: React.FC = () => {
       <div className="flex-1 container mx-auto p-4 md:p-5">
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md p-4 h-full">
           {activeTab === 'Team Tasks' && <div>Team Tasks Content</div>}
-          {activeTab === 'Teams' && <div>Teams List</div>}
+          {activeTab === 'Teams' && <Teams />} {/* Render Teams Component */}
           {activeTab === 'Members' && <div>Team Members List</div>}
         </div>
       </div>
@@ -143,6 +143,8 @@ const TeamsDashboardTabs: React.FC = () => {
 }
 
 export default TeamsDashboardTabs
+
+// The following code defines utility components used above
 
 interface FilterTagProps {
   label: string

@@ -22,17 +22,8 @@ export const getUserTeams = async () => {
   return response.data
 }
 
-// Create a new team (admin only)
-export const createTeam = async (data: {
-  name: string
-  description?: string
-}) => {
-  const response = await axiosInstance.post('/teams', data)
-  return response.data
-}
-
-// Fetch members of a specific team
-export const getTeamMembers = async (teamId: string) => {
-  const response = await axiosInstance.get(`/teams/${teamId}/members`)
+// Fetch all users to allow adding team members
+export const getAllUsers = async () => {
+  const response = await axiosInstance.get('/user/all')
   return response.data
 }

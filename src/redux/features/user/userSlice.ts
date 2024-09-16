@@ -1,5 +1,16 @@
+// src/redux/features/user/userSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { getUserProfile, updateUserProfile } from '../../../api/userApi'
+import {
+  getUserProfile,
+  updateUserProfile,
+  getAllUsers,
+} from '../../../api/userApi'
+
+interface User {
+  id: string
+  email: string
+  name: string
+}
 
 interface UserProfile {
   id: string
@@ -11,12 +22,14 @@ interface UserProfile {
 
 interface UserState {
   profile: UserProfile | null
+  users: User[] // All users for team creation
   loading: boolean
   error: string | null
 }
 
 const initialState: UserState = {
   profile: null,
+  users: [], // Empty array for users
   loading: false,
   error: null,
 }
@@ -27,6 +40,15 @@ export const fetchUserProfile = createAsyncThunk(
   async () => {
     const profile = await getUserProfile()
     return profile
+  },
+)
+
+// Thunk to fetch all users
+export const fetchAllUsers = createAsyncThunk(
+  'user/fetchAllUsers',
+  async () => {
+    const users = await getAllUsers()
+    return users
   },
 )
 
@@ -59,6 +81,18 @@ const userSlice = createSlice({
       })
       .addCase(updateUserProfileThunk.fulfilled, (state, action) => {
         state.profile = action.payload
+      })
+      .addCase(fetchAllUsers.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchAllUsers.fulfilled, (state, action) => {
+        state.loading = false
+        state.users = action.payload
+      })
+      .addCase(fetchAllUsers.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.error.message || 'Failed to fetch users'
       })
   },
 })

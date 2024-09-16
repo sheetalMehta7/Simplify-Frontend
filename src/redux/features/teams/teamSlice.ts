@@ -1,17 +1,18 @@
-// redux/features/teams/teamSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import {
   createTeam,
   getAllTeams,
   getTeamDetails,
   getTeamMembers,
+  updateTeam,
+  deleteTeam,
 } from '../../../api/teamApi'
 
 interface Team {
   id: string
   name: string
   description?: string
-  members: { id: string; name: string }[]
+  members: { id: string; name: string }[] // Members of the team
 }
 
 interface TeamState {
@@ -38,12 +39,36 @@ export const fetchTeams = createAsyncThunk('teams/fetchTeams', async () => {
   return teams
 })
 
-// Create a new team
+// Create a new team with members
 export const createNewTeam = createAsyncThunk(
   'teams/createNewTeam',
-  async (data: { name: string; description?: string }) => {
+  async (data: { name: string; description?: string; members: string[] }) => {
     const team = await createTeam(data)
     return team
+  },
+)
+
+// Update a team
+export const updateTeamThunk = createAsyncThunk(
+  'teams/updateTeam',
+  async ({
+    teamId,
+    data,
+  }: {
+    teamId: string
+    data: { name?: string; description?: string; members?: string[] }
+  }) => {
+    const updatedTeam = await updateTeam(teamId, data)
+    return updatedTeam
+  },
+)
+
+// Delete a team
+export const deleteTeamThunk = createAsyncThunk(
+  'teams/deleteTeam',
+  async (teamId: string) => {
+    await deleteTeam(teamId)
+    return teamId // Return the deleted team ID to remove it from the state
   },
 )
 
@@ -85,6 +110,17 @@ const teamSlice = createSlice({
       })
       .addCase(createNewTeam.fulfilled, (state, action) => {
         state.teams.push(action.payload)
+      })
+      .addCase(updateTeamThunk.fulfilled, (state, action) => {
+        const index = state.teams.findIndex(
+          (team) => team.id === action.payload.id,
+        )
+        if (index !== -1) {
+          state.teams[index] = action.payload // Update the team in the state
+        }
+      })
+      .addCase(deleteTeamThunk.fulfilled, (state, action) => {
+        state.teams = state.teams.filter((team) => team.id !== action.payload)
       })
       .addCase(fetchTeamDetails.fulfilled, (state, action) => {
         state.selectedTeam = action.payload
