@@ -127,7 +127,7 @@ const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
                   </p>
                   <Button
                     onClick={() => setIsCreateModalOpen(true)}
-                    color="blue"
+                    gradientDuoTone="purpleToBlue"
                   >
                     Create Task
                   </Button>
