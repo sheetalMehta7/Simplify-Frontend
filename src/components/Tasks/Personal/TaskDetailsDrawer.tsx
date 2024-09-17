@@ -24,6 +24,7 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
   const dispatch: AppDispatch = useDispatch()
   const [isEditing, setIsEditing] = useState(false)
   const [editedTask, setEditedTask] = useState<Task | null>(task)
+  const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
   useEffect(() => {
     if (task) {
@@ -37,6 +38,20 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target
+
+    // Title length validation for max 100 characters
+    if (name === 'title' && value.length > 100) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        title: 'Title cannot exceed 100 characters',
+      }))
+    } else {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: '',
+      }))
+    }
+
     setEditedTask({
       ...editedTask,
       [name]: value,
@@ -45,6 +60,16 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
 
   const handleEditToggle = async () => {
     if (isEditing && editedTask) {
+      // Check for title length before submitting changes
+      if (editedTask.title.length > 100) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          title: 'Title cannot exceed 100 characters',
+        }))
+        return
+      }
+
+      // Check if status has changed and move task locally
       if (task.status !== editedTask.status) {
         dispatch(
           moveTaskLocally({
@@ -54,6 +79,8 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
           }),
         )
       }
+
+      // Dispatch the update
       await dispatch(updateTaskThunk(editedTask))
     }
     setIsEditing(!isEditing)
@@ -116,12 +143,16 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
                 value={editedTask.title}
                 onChange={handleInputChange}
                 placeholder="Enter task title"
+                maxLength={100} // Prevent typing more than 100 characters
                 className="dark:bg-gray-700"
               />
             ) : (
               <p className="text-gray-700 dark:text-gray-300 text-base md:text-sm">
                 {task.title}
               </p>
+            )}
+            {errors.title && (
+              <p className="text-red-500 text-sm mt-1">{errors.title}</p>
             )}
           </div>
 
