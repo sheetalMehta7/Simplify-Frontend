@@ -196,7 +196,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
                 <Button color="gray" onClick={onClose}>
                   Cancel
                 </Button>
-                <Button color="blue" type="submit">
+                <Button gradientDuoTone="purpleToBlue" type="submit">
                   Apply Filters
                 </Button>
               </div>

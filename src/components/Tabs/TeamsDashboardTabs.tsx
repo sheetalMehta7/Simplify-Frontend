@@ -8,9 +8,10 @@ import {
 } from 'react-icons/md'
 import { VscSettings } from 'react-icons/vsc'
 import FilterDropdown from '../Modals/FilterModal'
-import CreateTeamModal from '../Modals/CreateTeamModal'
+import TeamModal from '../Modals/TeamModal' // Use the common TeamModal
 import { Button } from 'flowbite-react'
 import Teams from '../Tasks/Teams/Teams'
+
 interface Tab {
   name: string
   icon: React.ReactNode
@@ -25,8 +26,9 @@ const TABS: Tab[] = [
 const TeamsDashboardTabs: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>(TABS[0].name)
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false)
-  const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] =
-    useState<boolean>(false)
+  const [isTeamModalOpen, setIsTeamModalOpen] = useState<boolean>(false)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create') // Track the mode for TeamModal
+  const [selectedTeam, setSelectedTeam] = useState<any>(null) // Track the team for editing
   const [filters, setFilters] = useState<{
     date: string
     assignee: string
@@ -41,8 +43,30 @@ const TeamsDashboardTabs: React.FC = () => {
 
   const handleTabClick = (tabName: string) => setActiveTab(tabName)
   const toggleFilter = () => setIsFilterOpen((prev) => !prev)
-  const openCreateTeamModal = () => setIsCreateTeamModalOpen(true)
-  const closeCreateTeamModal = () => setIsCreateTeamModalOpen(false)
+
+  // Open modal for creating a new team
+  const openCreateTeamModal = () => {
+    setSelectedTeam(null)
+    setModalMode('create')
+    setIsTeamModalOpen(true)
+  }
+
+  // Open modal for editing an existing team
+  const openEditTeamModal = (team: any) => {
+    setSelectedTeam(team) // Set the selected team for editing
+    setModalMode('edit') // Set to edit mode
+    setIsTeamModalOpen(true)
+  }
+
+  // Close the modal and refresh the teams if needed
+  const closeTeamModal = (teamUpdated: boolean = false) => {
+    setIsTeamModalOpen(false)
+    setSelectedTeam(null)
+    if (teamUpdated) {
+      // Refresh the teams list if a team was created or updated
+      // (Assume that Teams component is already handling the fetch on its own)
+    }
+  }
 
   const applyFilters = (filterValues: {
     date: string
@@ -122,10 +146,12 @@ const TeamsDashboardTabs: React.FC = () => {
             </div>
           )}
 
-          {/* Create Team Modal */}
-          <CreateTeamModal
-            isOpen={isCreateTeamModalOpen}
-            onClose={closeCreateTeamModal}
+          {/* Team Modal for both Create and Edit */}
+          <TeamModal
+            isOpen={isTeamModalOpen}
+            onClose={closeTeamModal}
+            mode={modalMode} // Pass the mode to determine create or edit
+            team={selectedTeam} // Pass selected team for edit mode
           />
         </div>
       </div>
@@ -134,7 +160,10 @@ const TeamsDashboardTabs: React.FC = () => {
       <div className="flex-1 container mx-auto p-4 md:p-5">
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md p-4 h-full">
           {activeTab === 'Team Tasks' && <div>Team Tasks Content</div>}
-          {activeTab === 'Teams' && <Teams />} {/* Render Teams Component */}
+          {activeTab === 'Teams' && (
+            <Teams onEditTeam={openEditTeamModal} />
+          )}{' '}
+          {/* Pass edit handler to Teams component */}
           {activeTab === 'Members' && <div>Team Members List</div>}
         </div>
       </div>
@@ -144,7 +173,7 @@ const TeamsDashboardTabs: React.FC = () => {
 
 export default TeamsDashboardTabs
 
-// The following code defines utility components used above
+// Utility Components (Unchanged from original code)
 
 interface FilterTagProps {
   label: string

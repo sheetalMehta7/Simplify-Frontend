@@ -213,7 +213,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         <Button color="gray" onClick={onClose}>
           Cancel
         </Button>
-        <Button color="blue" onClick={handleSubmit}>
+        <Button gradientDuoTone="purpleToBlue" onClick={handleSubmit}>
           Create Task
         </Button>
       </Modal.Footer>

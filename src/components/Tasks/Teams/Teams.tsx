@@ -6,8 +6,7 @@ import {
   deleteTeamThunk,
 } from '../../../redux/features/teams/teamSlice'
 import Loader from '../../Loader'
-import CreateTeamModal from '../../Modals/CreateTeamModal'
-import EditTeamModal from '../../Modals/EditTeamModal'
+import TeamModal from '../../Modals/TeamModal'
 import ConfirmModal from '../../Modals/ConfirmModal'
 import { Button } from 'flowbite-react'
 import { MdEdit, MdDelete } from 'react-icons/md'
@@ -16,8 +15,8 @@ const Teams: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>()
   const teams = useSelector((state: RootState) => state.teams.teams)
   const loading = useSelector((state: RootState) => state.teams.loading)
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [selectedTeam, setSelectedTeam] = useState<any>(null)
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const [teamToDelete, setTeamToDelete] = useState<string | null>(null)
@@ -26,30 +25,32 @@ const Teams: React.FC = () => {
     dispatch(fetchTeams())
   }, [dispatch])
 
+  // Handle opening the create team modal
   const handleCreateTeam = () => {
-    setIsCreateModalOpen(true)
+    setSelectedTeam(null) // No team selected in create mode
+    setModalMode('create')
+    setIsModalOpen(true)
   }
 
-  const closeCreateModal = () => {
-    setIsCreateModalOpen(false)
-  }
-
+  // Handle opening the edit team modal
   const openEditModal = (team: any) => {
     const teamWithMembers = {
       ...team,
-      members: team.members.map((member: any) => member.user.id),
+      members: team.members
+        ? team.members.map((member: any) => member.user.id)
+        : [],
     }
     setSelectedTeam(teamWithMembers)
-    setIsEditModalOpen(true)
+    setModalMode('edit')
+    setIsModalOpen(true)
   }
 
-  const closeEditModal = async (teamUpdated: boolean = false) => {
-    setIsEditModalOpen(false)
+  // Close the modal and optionally refresh the team list if needed
+  const closeModal = (teamUpdated: boolean = false) => {
+    setIsModalOpen(false)
     setSelectedTeam(null)
-
-    // If a team has been updated, refresh the teams list.
     if (teamUpdated) {
-      dispatch(fetchTeams()) // Re-fetch updated team data.
+      dispatch(fetchTeams()) // Refresh the teams list if a team was updated
     }
   }
 
@@ -67,6 +68,7 @@ const Teams: React.FC = () => {
     if (teamToDelete) {
       dispatch(deleteTeamThunk(teamToDelete))
       closeConfirmModal()
+      dispatch(fetchTeams()) // Refresh after deleting a team
     }
   }
 
@@ -81,7 +83,7 @@ const Teams: React.FC = () => {
               <p className="text-gray-500 dark:text-gray-300 mb-4">
                 No teams available. You can create a new team to get started.
               </p>
-              <Button onClick={handleCreateTeam} color="blue">
+              <Button onClick={handleCreateTeam} gradientDuoTone="purpleToBlue">
                 Create Team
               </Button>
             </div>
@@ -101,11 +103,11 @@ const Teams: React.FC = () => {
                     <div className="flex justify-end mt-4 space-x-2">
                       <Button
                         onClick={() => openEditModal(team)}
-                        color="blue"
+                        gradientDuoTone="purpleToBlue"
                         size="xs"
                         className="flex items-center"
                       >
-                        <MdEdit className="mr-1" />
+                        <MdEdit className="mr-1 mt-0.5" />
                         Edit
                       </Button>
                       <Button
@@ -114,7 +116,7 @@ const Teams: React.FC = () => {
                         size="xs"
                         className="flex items-center"
                       >
-                        <MdDelete className="mr-1" />
+                        <MdDelete className="mr-1 mt-0.5" />
                         Delete
                       </Button>
                     </div>
@@ -126,15 +128,13 @@ const Teams: React.FC = () => {
         </>
       )}
 
-      <CreateTeamModal isOpen={isCreateModalOpen} onClose={closeCreateModal} />
-
-      {selectedTeam && (
-        <EditTeamModal
-          isOpen={isEditModalOpen}
-          onClose={closeEditModal} // Pass the close function that triggers refresh on update.
-          team={selectedTeam}
-        />
-      )}
+      {/* Reusable TeamModal for both Create and Edit */}
+      <TeamModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        mode={modalMode}
+        team={selectedTeam} // Pass only when editing
+      />
 
       {/* Confirm Delete Modal */}
       <ConfirmModal

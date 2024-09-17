@@ -132,7 +132,10 @@ const TeamTaskBoard: React.FC<TeamTaskBoardProps> = ({
                   No tasks available for this team. You can create a new task to
                   get started.
                 </p>
-                <Button onClick={() => setIsCreateModalOpen(true)} color="blue">
+                <Button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  gradientDuoTone="purpleToBlue"
+                >
                   Create Task
                 </Button>
               </div>
