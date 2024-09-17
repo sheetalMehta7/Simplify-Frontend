@@ -147,7 +147,10 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
                 className="dark:bg-gray-700"
               />
             ) : (
-              <p className="text-gray-700 dark:text-gray-300 text-base md:text-sm">
+              <p
+                className="text-gray-700 dark:text-gray-300 text-base md:text-sm"
+                style={{ wordBreak: 'break-word', whiteSpace: 'normal' }} // Ensure wrapping
+              >
                 {task.title}
               </p>
             )}
@@ -169,7 +172,10 @@ const TaskDetailsDrawer: React.FC<TaskDetailsDrawerProps> = ({
                 className="dark:bg-gray-700"
               />
             ) : (
-              <p className="text-gray-700 dark:text-gray-300 text-base md:text-sm">
+              <p
+                className="text-gray-700 dark:text-gray-300 text-base md:text-sm"
+                style={{ wordBreak: 'break-word', whiteSpace: 'normal' }} // Ensure wrapping
+              >
                 {task.description || 'No description provided'}
               </p>
             )}
