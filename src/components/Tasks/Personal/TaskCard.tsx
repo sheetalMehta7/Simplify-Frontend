@@ -8,7 +8,7 @@ import {
   FaChevronRight,
   FaExclamationTriangle,
 } from 'react-icons/fa'
-import { Tooltip } from 'flowbite-react' // Import Tooltip from Flowbite
+import { Tooltip } from 'flowbite-react'
 import { useDispatch } from 'react-redux'
 import {
   updateTaskThunk,
@@ -86,20 +86,19 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
         ${isOverdue ? 'bg-red-100 border-l-4 border-red-500' : 'bg-white dark:bg-gray-700'}`}
       onClick={() => onTaskClick(task)}
     >
-      {/* Flag or overdue icon */}
+      {/* Flag icon */}
       <FaFlag
         className={`absolute top-2 left-2 ${getFlagColor(task.status)}`}
         size={16}
       />
 
-      {/* Overdue warning icon with Tooltip */}
+      {/* Overdue warning icon wrapped in Tooltip */}
       {isOverdue && (
-        <Tooltip content="This task is overdue!" style="light">
-          <FaExclamationTriangle
-            className="absolute top-2 right-6 text-red-500"
-            size={18}
-          />
-        </Tooltip>
+        <div className="flex gap-2 absolute top-2 right-6">
+          <Tooltip placement="top" content="Task is Overdue!">
+            <FaExclamationTriangle className="text-red-500" size={18} />
+          </Tooltip>
+        </div>
       )}
 
       <div className="absolute top-2 right-2" ref={menuRef}>
