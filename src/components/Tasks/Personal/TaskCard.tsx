@@ -6,7 +6,9 @@ import {
   FaTrash,
   FaTasks,
   FaChevronRight,
+  FaExclamationTriangle,
 } from 'react-icons/fa'
+import { Tooltip } from 'flowbite-react' // Import Tooltip from Flowbite
 import { useDispatch } from 'react-redux'
 import {
   updateTaskThunk,
@@ -31,6 +33,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
   const dispatch: AppDispatch = useDispatch()
   const menuRef = useRef<HTMLDivElement>(null)
   const statusRef = useRef<HTMLLIElement>(null)
+
+  // Helper function to check if the task is overdue
+  const isOverdue = task.dueDate ? new Date(task.dueDate) < new Date() : false
 
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
@@ -70,15 +75,32 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
     setStatusChangeOpen(true)
   }
 
+  // Helper function to truncate title to 50 characters
+  const truncateTitle = (title: string) => {
+    return title.length > 50 ? title.substring(0, 50) + '...' : title
+  }
+
   return (
     <div
-      className="relative bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md text-gray-900 dark:text-white cursor-pointer"
+      className={`relative p-4 rounded-lg shadow-md text-gray-900 dark:text-white cursor-pointer 
+        ${isOverdue ? 'bg-red-100 border-l-4 border-red-500' : 'bg-white dark:bg-gray-700'}`}
       onClick={() => onTaskClick(task)}
     >
+      {/* Flag or overdue icon */}
       <FaFlag
         className={`absolute top-2 left-2 ${getFlagColor(task.status)}`}
         size={16}
       />
+
+      {/* Overdue warning icon with Tooltip */}
+      {isOverdue && (
+        <Tooltip content="This task is overdue!" style="light">
+          <FaExclamationTriangle
+            className="absolute top-2 right-6 text-red-500"
+            size={18}
+          />
+        </Tooltip>
+      )}
 
       <div className="absolute top-2 right-2" ref={menuRef}>
         <button
@@ -161,12 +183,14 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
         )}
       </div>
 
-      <div className="ml-8">
+      <div
+        className={`${isOverdue ? 'dark:text-black' : 'dark:text-white'} ml-8`}
+      >
         <h3
           className="text-sm font-semibold md:text-base lg:text-base"
           style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}
         >
-          {task.title}
+          {truncateTitle(task.title)}
         </h3>
         <p className="text-xs md:text-xs mb-1">
           Assignee: {task.assigneeIds || 'Unassigned'}
