@@ -40,9 +40,9 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     description: '',
     status: 'todo',
     priority: 'low',
-    dueDate: dueDate ? format(dueDate, 'yyyy-MM-dd') : '', // Format the date using date-fns
-    assigneeName: '', // Placeholder, will be populated with userName
-    teamId: teamId || '', // Optional teamId if it's a team task
+    dueDate: dueDate ? format(dueDate, 'yyyy-MM-dd') : '',
+    assigneeName: '',
+    teamId: teamId || '',
   })
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
@@ -52,7 +52,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     if (user && user.name) {
       setTaskDetails((prevDetails) => ({
         ...prevDetails,
-        assigneeName: user.name, // Set the assigneeName to the user's name
+        assigneeName: user.name,
       }))
     }
   }, [])
@@ -61,7 +61,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     if (dueDate) {
       setTaskDetails((prevDetails) => ({
         ...prevDetails,
-        dueDate: format(dueDate, 'yyyy-MM-dd'), // Ensure only the date part is used with proper formatting
+        dueDate: format(dueDate, 'yyyy-MM-dd'),
       }))
     }
   }, [dueDate])
@@ -72,8 +72,20 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     >,
   ) => {
     const { name, value } = e.target
+
+    if (name === 'title' && value.length > 100) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        title: 'Title cannot exceed 100 characters',
+      }))
+    } else {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: '',
+      }))
+    }
+
     setTaskDetails((prevDetails) => ({ ...prevDetails, [name]: value }))
-    setErrors((prevErrors) => ({ ...prevErrors, [name]: '' }))
   }
 
   const validateForm = () => {
@@ -81,6 +93,8 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     const newErrors: { [key: string]: string } = {}
 
     if (!title) newErrors.title = 'Title is required'
+    if (title && title.length > 100)
+      newErrors.title = 'Title cannot exceed 100 characters'
     if (!priority) newErrors.priority = 'Priority is required'
     if (!status) newErrors.status = 'Status is required'
     if (!dueDate) {
@@ -102,7 +116,19 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           : taskDetails.assigneeName,
       }
 
-      onSave(finalTaskDetails) // Save task and close modal
+      onSave(finalTaskDetails)
+
+      // Reset the form after submission
+      setTaskDetails({
+        title: '',
+        description: '',
+        status: 'todo',
+        priority: 'low',
+        dueDate: dueDate ? format(dueDate, 'yyyy-MM-dd') : '',
+        assigneeName: '',
+        teamId: teamId || '',
+      })
+
       onClose()
     }
   }
@@ -124,6 +150,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               onChange={handleChange}
               color={errors.title ? 'failure' : ''}
               placeholder="Enter task title"
+              maxLength={100} // Enforce maxLength to prevent typing beyond 100 chars
             />
             {errors.title && (
               <p className="text-red-500 text-sm mt-1">{errors.title}</p>

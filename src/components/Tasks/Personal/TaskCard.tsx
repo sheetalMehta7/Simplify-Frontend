@@ -162,7 +162,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
       </div>
 
       <div className="ml-8">
-        <h3 className="text-sm font-semibold md:text-base lg:text-base">
+        <h3
+          className="text-sm font-semibold md:text-base lg:text-base"
+          style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}
+        >
           {task.title}
         </h3>
         <p className="text-xs md:text-xs mb-1">
