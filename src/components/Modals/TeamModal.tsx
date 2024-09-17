@@ -99,7 +99,7 @@ const TeamModal: React.FC<TeamModalProps> = ({
     }
   }
 
-  // Render users for selection
+  // Render remaining users for selection
   const renderUsers = () => {
     if (loadingUsers) {
       return (
@@ -107,18 +107,31 @@ const TeamModal: React.FC<TeamModalProps> = ({
       )
     }
 
+    // Filter out already selected members
+    const remainingUsers = users.filter(
+      (user) => !selectedMembers.includes(user.id),
+    )
+
+    // Show message if no more users to add
+    if (remainingUsers.length === 0) {
+      return (
+        <p className="text-gray-500 dark:text-gray-400">
+          All members have been added to the team.
+        </p>
+      )
+    }
+
     return (
       <div className="grid grid-cols-6 gap-4 max-h-48 overflow-y-auto">
-        {users.map((user) => (
+        {remainingUsers.map((user) => (
           <div
             key={user.id}
-            className="relative cursor-pointer"
+            className="relative cursor-pointer transition-opacity duration-300"
             onClick={() => handleSelectMember(user.id)}
+            style={{ opacity: isSelected(user.id) ? 0.5 : 1 }}
           >
             <div
-              className={`relative w-12 h-12 rounded-full overflow-hidden transform transition-transform duration-200 ${
-                isSelected(user.id) ? 'opacity-75' : ''
-              } hover:scale-105`}
+              className={`relative w-12 h-12 rounded-full overflow-hidden transform transition-transform duration-200 hover:scale-105`}
             >
               <img
                 src={`https://ui-avatars.com/api/?name=${displayFirstWord(user.name)}&background=random`}
@@ -203,7 +216,11 @@ const TeamModal: React.FC<TeamModalProps> = ({
         </div>
 
         {/* Conditionally display more users */}
-        {showMoreUsers && <div className="mt-4">{renderUsers()}</div>}
+        {showMoreUsers && (
+          <div className="mt-4 transition-opacity duration-300">
+            {renderUsers()}
+          </div>
+        )}
       </Modal.Body>
       <Modal.Footer className="bg-white dark:bg-gray-800">
         <Button gradientDuoTone="purpleToBlue" onClick={handleSaveTeam}>
