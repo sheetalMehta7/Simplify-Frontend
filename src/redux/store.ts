@@ -1,4 +1,3 @@
-// src/redux/store.ts
 import { configureStore } from '@reduxjs/toolkit'
 import {
   persistStore,
@@ -10,14 +9,14 @@ import {
   PURGE,
   REGISTER,
 } from 'redux-persist'
-import storage from 'redux-persist/lib/storage' // defaults to localStorage for web
-import rootReducer from './rootReducer' // rootReducer combines all reducers
+import storage from 'redux-persist/lib/storage'
+import rootReducer from './rootReducer'
 
 // Configure persist for the `auth` reducer
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth'], // Only persist the 'auth' state
+  whitelist: ['auth'],
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)
