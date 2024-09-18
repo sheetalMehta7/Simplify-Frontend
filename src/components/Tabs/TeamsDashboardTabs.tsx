@@ -36,8 +36,7 @@ const TeamsDashboardTabs: React.FC = () => {
     teamId: '',
   })
 
-  // Simulated teams array, you should replace it with your actual teams data
-  const teams = [] // Empty array represents no teams available
+  const teams = [] // Simulated empty teams array
 
   const handleTabClick = (tabName: string) => setActiveTab(tabName)
   const toggleFilter = () => setIsFilterOpen((prev) => !prev)
@@ -54,7 +53,7 @@ const TeamsDashboardTabs: React.FC = () => {
     setIsTeamModalOpen(true)
   }
 
-  const closeTeamModal = (_teamUpdated: boolean = false) => {
+  const closeTeamModal = () => {
     setIsTeamModalOpen(false)
     setSelectedTeam(null)
   }
@@ -77,25 +76,25 @@ const TeamsDashboardTabs: React.FC = () => {
       {/* Header with Tabs, Filter, and Create Team Buttons */}
       <div className="container mx-auto p-4 md:p-5 flex-none">
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md mb-6 p-4">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center">
             {/* Tab Buttons */}
             <TabButtons activeTab={activeTab} onTabClick={handleTabClick} />
 
             {/* Action Buttons: Filter and Create Team */}
-            <div className="flex space-x-2 items-center">
+            <div className="mt-4 md:mt-0 flex space-x-2">
               <Button
                 onClick={toggleFilter}
                 color="gray"
-                className="flex items-center justify-center h-10 text-sm font-medium px-4 py-2"
+                className="w-full md:w-32 h-10 flex items-center justify-center text-sm font-medium px-4 py-2"
               >
-                <VscSettings className="mr-2" /> Filter
+                <VscSettings className="mr-2 mt-0.5" /> Filter
               </Button>
               <Button
                 onClick={openCreateTeamModal}
                 gradientDuoTone="purpleToBlue"
-                className="flex items-center justify-center h-10 text-sm font-medium px-4 py-2"
+                className="w-full md:w-44 h-10 flex items-center justify-center text-sm font-medium px-4 py-2"
               >
-                <MdCreate className="mr-2" /> Create Team
+                <MdCreate className="mr-2 mt-0.5" /> Create Team
               </Button>
             </div>
           </div>
@@ -126,7 +125,6 @@ const TeamsDashboardTabs: React.FC = () => {
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md p-4 h-full">
           {activeTab === 'Team Tasks' && (
             <>
-              {/* Simulate no tasks available */}
               {teams.length === 0 ? (
                 <div className="flex flex-col justify-center items-center h-full text-center">
                   <p className="text-gray-900 dark:text-gray-200 text-lg mb-4">
@@ -135,9 +133,9 @@ const TeamsDashboardTabs: React.FC = () => {
                   <Button
                     onClick={openCreateTeamModal}
                     gradientDuoTone="purpleToBlue"
-                    className="flex items-center justify-center h-10 text-sm font-medium px-4 py-2"
+                    className="w-full md:w-48 h-10 flex items-center justify-center text-sm font-medium px-4 py-2"
                   >
-                    <MdCreate className="mr-2" /> Create New Task
+                    <MdCreate className="mr-2 mt-0.5" /> Create New Task
                   </Button>
                 </div>
               ) : (
@@ -155,9 +153,9 @@ const TeamsDashboardTabs: React.FC = () => {
                   <Button
                     onClick={openCreateTeamModal}
                     gradientDuoTone="purpleToBlue"
-                    className="flex items-center justify-center h-10 text-sm font-medium px-4 py-2"
+                    className="w-full md:w-52 h-10 flex items-center justify-center text-sm font-medium px-4 py-2"
                   >
-                    <MdCreate className="mr-2" /> Create New Team
+                    <MdCreate className="mr-2 mt-0.5" /> Create New Team
                   </Button>
                 </div>
               ) : (
@@ -177,25 +175,16 @@ export default TeamsDashboardTabs
 // Utility Components (Updated for equal and responsive sizing)
 
 interface TabButtonsProps {
-  tabs?: Tab[] // Make tabs optional to use default value
   activeTab: string
   onTabClick: (tabName: string) => void
 }
 
-const TabButtons: React.FC<TabButtonsProps> = ({
-  tabs = [
-    { name: 'Team Tasks', icon: <MdDashboard /> },
-    { name: 'Teams', icon: <MdGroups /> },
-    { name: 'Members', icon: <MdPerson /> },
-  ],
-  activeTab,
-  onTabClick,
-}) => (
-  <div className="flex space-x-2 md:space-x-4">
-    {tabs.map((tab) => (
+const TabButtons: React.FC<TabButtonsProps> = ({ activeTab, onTabClick }) => (
+  <div className="flex space-x-1 md:space-x-3 flex-wrap">
+    {TABS.map((tab) => (
       <button
         key={tab.name}
-        className={`flex items-center justify-center w-40 h-10 rounded-md transition-all duration-300 text-sm font-medium ${
+        className={`w-full md:w-28 h-8 md:h-10 flex items-center justify-center rounded-md transition-all duration-300 text-sm font-medium ${
           tab.name === activeTab
             ? 'text-white bg-blue-500'
             : 'text-gray-900 dark:text-gray-200 hover:bg-blue-500 hover:text-white'

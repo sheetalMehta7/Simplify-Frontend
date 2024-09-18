@@ -114,14 +114,14 @@ const DashboardTabs: React.FC = () => {
               <Button
                 onClick={toggleFilter}
                 color="gray"
-                className="flex items-center justify-center w-40 h-10 text-sm font-medium px-4 py-2"
+                className="flex items-center justify-center w-full md:w-32 h-10 text-sm font-medium px-4 py-2"
               >
                 <VscSettings className="mr-2 mt-0.5" /> Filter
               </Button>
               <Button
                 onClick={openModal}
                 gradientDuoTone="purpleToBlue"
-                className="flex items-center justify-center w-40 h-10 text-sm font-medium px-4 py-2"
+                className="flex items-center justify-center w-full md:w-40 h-10 text-sm font-medium px-4 py-2"
               >
                 <MdCreate className="mr-2 mt-0.5" /> Create Task
               </Button>
@@ -212,11 +212,11 @@ const TabButtons: React.FC<TabButtonsProps> = ({
   activeTab,
   onTabClick,
 }) => (
-  <div className="flex space-x-2 md:space-x-4">
+  <div className="flex flex-wrap space-x-1 md:space-x-3">
     {tabs.map((tab) => (
       <button
         key={tab.name}
-        className={`flex items-center justify-center w-40 h-10 rounded-md transition-all duration-300 text-sm font-medium ${
+        className={`flex items-center justify-center w-full md:w-28 h-8 md:h-10 rounded-md transition-all duration-300 text-sm font-medium mb-2 md:mb-0 ${
           tab.name === activeTab
             ? 'text-white bg-blue-500'
             : 'text-gray-900 dark:text-gray-200 hover:text-white hover:bg-blue-500 dark:hover:bg-blue-500'
