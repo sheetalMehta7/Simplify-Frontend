@@ -9,7 +9,6 @@ import { FaTeamspeak } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { logout } from '../redux/features/auth/authSlice'
-import ProjectSection from '../pages/Project'
 
 interface SidebarNavProps {
   onTabSelect: (tab: string) => void
@@ -48,14 +47,14 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
       tab: 'TeamsBoard',
     },
     {
-      icon: <MdCalendarToday className="text-xl" />,
-      label: 'Calendar',
-      tab: 'Calendar',
-    },
-    {
       icon: <HiClipboardList className="text-xl" />,
       label: 'Projects',
       tab: 'Projects',
+    },
+    {
+      icon: <MdCalendarToday className="text-xl" />,
+      label: 'Calendar',
+      tab: 'Calendar',
     },
     {
       icon: <BsFillBarChartLineFill className="text-xl" />,
@@ -134,11 +133,11 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
 
       {/* Main Content Section */}
       <main className="ml-52 p-6 w-full">
-        {selectedTab === 'Projects' && <ProjectSection />}
+        {selectedTab === 'Projects' && <div>Projects Content</div>}
+        {/* Use the new ProjectDashboardTabs component */}
         {/* Render other tabs like "Dashboard", "Issues", etc., here */}
         {selectedTab === 'Dashboard' && <div>Dashboard Content</div>}
         {selectedTab === 'TeamsBoard' && <div>Teams Board Content</div>}
-        {/* Add more conditions for other tabs if needed */}
       </main>
     </div>
   )

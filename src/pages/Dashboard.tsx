@@ -4,6 +4,7 @@ import DashboardTabs from '../components/Tabs/DashboardTabs'
 import TeamsDashboardTabs from '../components/Tabs/TeamsDashboardTabs'
 import Calendar from '../components/Calendar/Calendar'
 import Loader from '../components/Loader'
+import ProjectDashboardTabs from '../components/Tabs/ProjectDashboardTabs'
 import { Outlet } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../redux/store'
@@ -51,7 +52,6 @@ const Dashboard: React.FC = () => {
       case 'TeamsBoard':
         return (
           <>
-            {/* Displaying TeamsDashboardTabs */}
             <TeamsDashboardTabs />
           </>
         )
@@ -65,9 +65,9 @@ const Dashboard: React.FC = () => {
         )
       case 'Projects':
         return (
-          <p className="text-gray-900 dark:text-gray-200">
-            Projects content goes here.
-          </p>
+          <>
+            <ProjectDashboardTabs />
+          </>
         )
       case 'Development':
         return (
