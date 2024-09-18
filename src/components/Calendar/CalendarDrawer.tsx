@@ -1,7 +1,7 @@
 import React from 'react'
 import { Drawer } from 'flowbite-react'
 import { MdClose } from 'react-icons/md'
-import { Task } from '../../interfaces/Task' // Importing the updated Task type
+import { Task } from '../../types/Task' // Importing the updated Task type
 
 interface CalendarDrawerProps {
   task: Task | null

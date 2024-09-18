@@ -1,11 +1,20 @@
 import axiosInstance from '../helpers/axiosInstance'
 
-// Create a new team
-export const createTeam = async (data: {
+// Types for team and API payloads
+interface TeamPayload {
   name: string
   description?: string
-  members: string[] // Pass members as an array of user IDs
-}) => {
+  members: string[] // User IDs
+}
+
+interface UpdateTeamPayload {
+  name?: string
+  description?: string
+  members?: string[] // Updated members (user IDs)
+}
+
+// Create a new team
+export const createTeam = async (data: TeamPayload) => {
   const response = await axiosInstance.post('/teams', data)
   return response.data
 }
@@ -29,10 +38,7 @@ export const getTeamMembers = async (teamId: string) => {
 }
 
 // Update a team
-export const updateTeam = async (
-  teamId: string,
-  data: { name?: string; description?: string; members?: string[] },
-) => {
+export const updateTeam = async (teamId: string, data: UpdateTeamPayload) => {
   const response = await axiosInstance.put(`/teams/${teamId}`, data)
   return response.data
 }

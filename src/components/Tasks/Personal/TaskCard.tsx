@@ -184,7 +184,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
       </div>
 
       <div
-        className={`${isOverdue && !isDone ? 'dark:text-black' : 'dark:text-white'} ml-8`}
+        className={`${
+          isOverdue && !isDone ? 'dark:text-black' : 'dark:text-white'
+        } ml-8`}
       >
         <h3
           className="text-sm font-semibold md:text-base lg:text-base"
@@ -193,7 +195,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
           {truncateTitle(task.title)}
         </h3>
         <p className="text-xs md:text-xs mb-1">
-          Assignee: {task.assigneeIds || 'Unassigned'}
+          Assignee: {task.assignee || 'Unassigned'}
         </p>
         <p className="text-xs md:text-xs mb-2">
           Due Date:{' '}
@@ -204,7 +206,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
 
         {/* Status Badge */}
         <span
-          className={`text-xs font-bold py-1 px-2 rounded-full ${getBadgeColor(task.status)}`}
+          className={`text-xs font-bold py-1 px-2 rounded-full ${getBadgeColor(
+            task.status,
+          )}`}
         >
           {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
         </span>

@@ -17,6 +17,7 @@ interface Task {
   priority: string
   dueDate?: string
   assigneeName: string
+  userId: string // New addition to store userId
   teamId?: string
 }
 
@@ -42,6 +43,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     priority: 'low',
     dueDate: dueDate ? format(dueDate, 'yyyy-MM-dd') : '',
     assigneeName: '',
+    userId: '', // New addition
     teamId: teamId || '',
   })
 
@@ -49,10 +51,11 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}')
-    if (user && user.name) {
+    if (user && user.name && user.id) {
       setTaskDetails((prevDetails) => ({
         ...prevDetails,
         assigneeName: user.name,
+        userId: user.id, // Set the userId here
       }))
     }
   }, [])
@@ -114,6 +117,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         assigneeName: taskDetails.teamId
           ? taskDetails.assigneeName
           : taskDetails.assigneeName,
+        userId: taskDetails.userId, // Ensure the userId is included in the task data
       }
 
       onSave(finalTaskDetails)
@@ -126,6 +130,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         priority: 'low',
         dueDate: dueDate ? format(dueDate, 'yyyy-MM-dd') : '',
         assigneeName: '',
+        userId: taskDetails.userId, // Keep userId for subsequent tasks
         teamId: teamId || '',
       })
 

@@ -31,6 +31,20 @@ const TeamModal: React.FC<TeamModalProps> = ({
   const [selectedMembers, setSelectedMembers] = useState<string[]>([])
   const [showMoreUsers, setShowMoreUsers] = useState(false)
 
+  const [loggedInUser, setLoggedInUser] = useState<{
+    name: string
+    email: string
+  } | null>(null)
+
+  // Fetch the logged-in user details from localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser)
+      setLoggedInUser(parsedUser)
+    }
+  }, [])
+
   // Fetch users when modal is opened
   useEffect(() => {
     if (isOpen) {
@@ -73,7 +87,6 @@ const TeamModal: React.FC<TeamModalProps> = ({
   const handleSaveTeam = async () => {
     if (teamName.trim()) {
       if (mode === 'create') {
-        // Handle team creation
         await dispatch(
           createNewTeam({
             name: teamName,
@@ -82,7 +95,6 @@ const TeamModal: React.FC<TeamModalProps> = ({
           }),
         )
       } else if (mode === 'edit' && team) {
-        // Handle team update
         await dispatch(
           updateTeamThunk({
             teamId: team.id,
@@ -95,7 +107,7 @@ const TeamModal: React.FC<TeamModalProps> = ({
         )
       }
       resetForm()
-      onClose(true) // Close modal and refresh the list
+      onClose(true)
     }
   }
 
@@ -107,12 +119,13 @@ const TeamModal: React.FC<TeamModalProps> = ({
       )
     }
 
-    // Filter out already selected members
+    // Filter out already selected members and the logged-in user
     const remainingUsers = users.filter(
-      (user) => !selectedMembers.includes(user.id),
+      (user) =>
+        !selectedMembers.includes(user.id) &&
+        user.email !== loggedInUser?.email,
     )
 
-    // Show message if no more users to add
     if (remainingUsers.length === 0) {
       return (
         <p className="text-gray-500 dark:text-gray-400">
@@ -174,7 +187,6 @@ const TeamModal: React.FC<TeamModalProps> = ({
           className="dark:bg-gray-700 dark:text-white"
         />
 
-        {/* Display Selected Members */}
         <div className="flex flex-wrap gap-4 max-h-48 overflow-y-auto">
           {selectedMembers.map((memberId) => {
             const member = users.find((user) => user.id === memberId)
@@ -204,7 +216,6 @@ const TeamModal: React.FC<TeamModalProps> = ({
           })}
         </div>
 
-        {/* Button to show more users */}
         <div className="mt-4">
           <Button
             gradientDuoTone="purpleToBlue"
@@ -215,7 +226,6 @@ const TeamModal: React.FC<TeamModalProps> = ({
           </Button>
         </div>
 
-        {/* Conditionally display more users */}
         {showMoreUsers && (
           <div className="mt-4 transition-opacity duration-300">
             {renderUsers()}
