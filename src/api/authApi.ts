@@ -7,6 +7,11 @@ export const signup = async (email: string, password: string, name: string) => {
     password,
     name,
   })
+
+  // Store token and user details (role included) in localStorage
+  localStorage.setItem('token', response.data.token)
+  localStorage.setItem('user', JSON.stringify(response.data.user))
+
   return response.data
 }
 
@@ -15,5 +20,10 @@ export const login = async (email: string, password: string) => {
     email,
     password,
   })
+
+  // Store token and user details (role included) in localStorage
+  localStorage.setItem('token', response.data.token)
+  localStorage.setItem('user', JSON.stringify(response.data.user))
+
   return response.data
 }

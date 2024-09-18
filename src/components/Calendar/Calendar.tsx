@@ -23,7 +23,7 @@ import { CalendarDrawer } from './CalendarDrawer'
 import CreateTaskModal from '../Modals/CreateTaskModal'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import { Task, TaskFromApi } from '../../interfaces/Task'
+import { Task, TaskFromApi } from '../../types/Task'
 import { createNewTask } from '../../redux/features/tasks/tasksSlice'
 
 const monthsList = [

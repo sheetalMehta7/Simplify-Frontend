@@ -1,12 +1,16 @@
 // src/redux/features/auth/authSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
+// Define the user structure, including role
+interface User {
+  id: string
+  email: string
+  name: string
+  role: 'member' | 'admin' // Define the roles explicitly
+}
+
 interface AuthState {
-  user: {
-    id: number
-    email: string
-    name: string
-  } | null
+  user: User | null
   token: string | null
 }
 
@@ -19,10 +23,8 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    loginSuccess(
-      state,
-      action: PayloadAction<{ user: AuthState['user']; token: string }>,
-    ) {
+    // Handle login success
+    loginSuccess(state, action: PayloadAction<{ user: User; token: string }>) {
       state.user = action.payload.user
       state.token = action.payload.token
 
@@ -30,6 +32,8 @@ const authSlice = createSlice({
       localStorage.setItem('authToken', action.payload.token)
       localStorage.setItem('user', JSON.stringify(action.payload.user))
     },
+
+    // Handle logout
     logout(state) {
       state.user = null
       state.token = null
@@ -38,6 +42,8 @@ const authSlice = createSlice({
       localStorage.removeItem('authToken')
       localStorage.removeItem('user')
     },
+
+    // Load user and token from local storage during app initialization
     loadUserFromLocalStorage(state) {
       const user = localStorage.getItem('user')
       const token = localStorage.getItem('authToken')
@@ -47,10 +53,33 @@ const authSlice = createSlice({
         state.token = token
       }
     },
+
+    // Update user profile locally after changes
+    updateUserProfile(
+      state,
+      action: PayloadAction<{
+        name: string
+        email: string
+        role: 'member' | 'admin'
+      }>,
+    ) {
+      if (state.user) {
+        state.user.name = action.payload.name
+        state.user.email = action.payload.email
+        state.user.role = action.payload.role
+      }
+
+      // Update user in local storage to persist changes
+      localStorage.setItem('user', JSON.stringify(state.user))
+    },
   },
 })
 
-export const { loginSuccess, logout, loadUserFromLocalStorage } =
-  authSlice.actions
+export const {
+  loginSuccess,
+  logout,
+  loadUserFromLocalStorage,
+  updateUserProfile,
+} = authSlice.actions
 
 export default authSlice.reducer

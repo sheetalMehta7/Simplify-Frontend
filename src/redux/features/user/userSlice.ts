@@ -6,9 +6,17 @@ import {
   getAllUsers,
 } from '../../../api/userApi'
 
+// Define the allowed roles as an enum or union type
+type UserRole = 'member' | 'admin'
+
 interface User {
   id: string
   email: string
+  name: string
+}
+
+interface Team {
+  id: string
   name: string
 }
 
@@ -16,8 +24,8 @@ interface UserProfile {
   id: string
   email: string
   name: string
-  role: string // Role in the team, e.g., 'admin', 'member'
-  teams: { id: string; name: string }[] // Teams the user is part of
+  role: UserRole // Role restricted to 'admin' or 'member'
+  teams: Team[] // Teams the user is part of
 }
 
 interface UserState {
@@ -55,7 +63,7 @@ export const fetchAllUsers = createAsyncThunk(
 // Thunk to update user profile
 export const updateUserProfileThunk = createAsyncThunk(
   'user/updateUserProfile',
-  async (data: Partial<UserProfile>) => {
+  async (data: Partial<Omit<UserProfile, 'role'>> & { role?: UserRole }) => {
     const updatedProfile = await updateUserProfile(data)
     return updatedProfile
   },
@@ -73,14 +81,23 @@ const userSlice = createSlice({
       })
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
         state.loading = false
-        state.profile = action.payload
+        // Ensure the teams field is initialized
+        state.profile = {
+          ...action.payload,
+          teams: action.payload.teams || [], // Default to an empty array if teams are missing
+        }
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.loading = false
         state.error = action.error.message || 'Failed to fetch user profile'
       })
       .addCase(updateUserProfileThunk.fulfilled, (state, action) => {
-        state.profile = action.payload
+        // Ensure teams is maintained when updating the profile
+        state.profile = {
+          ...state.profile!,
+          ...action.payload,
+          teams: state.profile?.teams || [], // Keep the teams field
+        }
       })
       .addCase(fetchAllUsers.pending, (state) => {
         state.loading = true

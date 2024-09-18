@@ -18,7 +18,7 @@ import {
 } from '../../../redux/features/teams/teamTaskSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
 import Loader from '../../Loader'
-import { TeamTask } from '../../../interfaces/Task'
+import { TeamTask } from '../../../types/Task'
 
 interface TeamTaskBoardProps {
   teamId: string

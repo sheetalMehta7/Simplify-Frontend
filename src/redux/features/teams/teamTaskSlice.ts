@@ -5,11 +5,16 @@ import {
   updateTeamTask,
   deleteTeamTask,
 } from '../../../api/teamTaskApi'
-import { TeamTaskFromApi, TeamTask } from '../../../interfaces/Task'
+import {
+  TeamTaskFromApi,
+  TeamTask,
+  TaskStatus,
+  TaskPriority,
+} from '../../../types/Task'
 
 // TeamTaskState interface
 interface TeamTaskState {
-  tasks: { [key: string]: TeamTask[] } // Grouped by status: todo, in-progress, etc.
+  tasks: { [key in TaskStatus]: TeamTask[] } // Grouped by status: todo, in-progress, etc.
   loading: boolean
   error: string | null
 }
@@ -29,6 +34,8 @@ const initialState: TeamTaskState = {
 const mapApiToTeamTask = (task: TeamTaskFromApi): TeamTask => ({
   ...task,
   dueDate: new Date(task.dueDate), // Convert dueDate to Date object
+  status: task.status as TaskStatus, // Ensure correct status type
+  priority: task.priority as TaskPriority, // Ensure correct priority type
 })
 
 // Thunk to fetch team tasks by teamId
@@ -44,7 +51,6 @@ export const fetchTeamTasks = createAsyncThunk(
 export const createTeamTaskThunk = createAsyncThunk(
   'teamTasks/createTeamTask',
   async ({ teamId, data }: { teamId: string; data: Partial<TeamTask> }) => {
-    // Convert Date to ISO string if dueDate is provided
     const taskData = {
       ...data,
       dueDate: data.dueDate ? data.dueDate.toISOString() : undefined, // Ensure ISO string format
@@ -58,16 +64,13 @@ export const createTeamTaskThunk = createAsyncThunk(
 // Thunk to update a team task
 export const updateTeamTaskThunk = createAsyncThunk(
   'teamTasks/updateTeamTask',
-  async ({
-    teamId,
-    taskId,
-    data,
-  }: {
+  async (params: {
     teamId: string
     taskId: string
     data: Partial<TeamTask>
   }) => {
-    // Convert Date to ISO string if dueDate is provided
+    const { teamId, taskId, data } = params
+
     const taskData = {
       ...data,
       dueDate: data.dueDate ? data.dueDate.toISOString() : undefined, // Ensure ISO string format
@@ -95,30 +98,34 @@ const teamTaskSlice = createSlice({
     moveTeamTaskLocally: (state, action) => {
       const { taskId, oldStatus, newStatus } = action.payload
 
-      // Find the task in the old status
-      const taskToMove = state.tasks[oldStatus].find(
+      // Ensure the status keys are valid TaskStatus enums
+      const taskToMove = state.tasks[oldStatus as TaskStatus].find(
         (task) => task.id === taskId,
       )
 
       if (taskToMove) {
         // Remove from the old status
-        state.tasks[oldStatus] = state.tasks[oldStatus].filter(
-          (task) => task.id !== taskId,
-        )
+        state.tasks[oldStatus as TaskStatus] = state.tasks[
+          oldStatus as TaskStatus
+        ].filter((task) => task.id !== taskId)
 
         // Add to the new status
-        state.tasks[newStatus].push({ ...taskToMove, status: newStatus })
+        state.tasks[newStatus as TaskStatus].push({
+          ...taskToMove,
+          status: newStatus,
+        })
       }
     },
   },
   extraReducers: (builder) => {
     builder
+      // Handle fetching team tasks
       .addCase(fetchTeamTasks.pending, (state) => {
         state.loading = true
         state.error = null
       })
       .addCase(fetchTeamTasks.fulfilled, (state, action) => {
-        const tasksByStatus: { [key: string]: TeamTask[] } = {
+        const tasksByStatus: { [key in TaskStatus]: TeamTask[] } = {
           todo: [],
           'in-progress': [],
           review: [],
@@ -127,7 +134,7 @@ const teamTaskSlice = createSlice({
 
         // Group tasks by status
         action.payload.forEach((task: TeamTask) => {
-          tasksByStatus[task.status || 'todo'].push(task)
+          tasksByStatus[task.status].push(task)
         })
 
         state.tasks = tasksByStatus
@@ -137,11 +144,14 @@ const teamTaskSlice = createSlice({
         state.loading = false
         state.error = action.error.message || 'Error fetching team tasks'
       })
+
+      // Handle creating a new team task
       .addCase(createTeamTaskThunk.fulfilled, (state, action) => {
         const newTask = action.payload
-        const status = newTask.status || 'todo'
-        state.tasks[status].push(newTask)
+        state.tasks[newTask.status].push(newTask)
       })
+
+      // Handle updating a team task
       .addCase(updateTeamTaskThunk.fulfilled, (state, action) => {
         const updatedTask = action.payload
         const oldStatus = updatedTask.status
@@ -154,24 +164,26 @@ const teamTaskSlice = createSlice({
 
           if (taskIndex !== -1) {
             if (oldStatus !== newStatus) {
-              state.tasks[status] = taskList.filter(
+              state.tasks[status as TaskStatus] = taskList.filter(
                 (task) => task.id !== updatedTask.id,
               )
               state.tasks[newStatus].push(updatedTask)
             } else {
-              state.tasks[status][taskIndex] = updatedTask
+              state.tasks[status as TaskStatus][taskIndex] = updatedTask
             }
             break
           }
         }
       })
+
+      // Handle deleting a team task
       .addCase(deleteTeamTaskThunk.fulfilled, (state, action) => {
         const taskId = action.payload
 
         Object.keys(state.tasks).forEach((status) => {
-          state.tasks[status] = state.tasks[status].filter(
-            (task) => task.id !== taskId,
-          )
+          state.tasks[status as TaskStatus] = state.tasks[
+            status as TaskStatus
+          ].filter((task) => task.id !== taskId)
         })
       })
   },

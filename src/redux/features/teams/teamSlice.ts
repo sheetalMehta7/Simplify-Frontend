@@ -8,6 +8,7 @@ import {
   deleteTeam,
 } from '../../../api/teamApi'
 
+// Define the Team and Member interfaces
 interface Team {
   id: string
   name: string
@@ -16,22 +17,23 @@ interface Team {
 }
 
 interface TeamState {
-  teams: Team[]
-  selectedTeam: Team | null
-  teamMembers: { id: string; name: string; role: string }[]
-  loading: boolean
-  error: string | null
+  teams: Team[] // All teams
+  selectedTeam: Team | null // Current selected team
+  teamMembers: { id: string; name: string; role: string }[] // Members of the selected team
+  loading: boolean // Loading state
+  error: string | null // Error message, if any
 }
 
+// Initial state of the teams slice
 const initialState: TeamState = {
-  teams: [],
-  selectedTeam: null,
-  teamMembers: [],
-  loading: false,
-  error: null,
+  teams: [], // Array to store teams
+  selectedTeam: null, // Initially no team selected
+  teamMembers: [], // Empty members array
+  loading: false, // No loading at start
+  error: null, // No error at start
 }
 
-// Thunks
+// Thunks for async actions
 
 // Fetch all teams
 export const fetchTeams = createAsyncThunk('teams/fetchTeams', async () => {
@@ -48,7 +50,7 @@ export const createNewTeam = createAsyncThunk(
   },
 )
 
-// Update a team
+// Update an existing team
 export const updateTeamThunk = createAsyncThunk(
   'teams/updateTeam',
   async ({
@@ -63,12 +65,12 @@ export const updateTeamThunk = createAsyncThunk(
   },
 )
 
-// Delete a team
+// Delete a team by ID
 export const deleteTeamThunk = createAsyncThunk(
   'teams/deleteTeam',
   async (teamId: string) => {
     await deleteTeam(teamId)
-    return teamId // Return the deleted team ID to remove it from the state
+    return teamId // Return deleted team ID to remove it from the state
   },
 )
 
@@ -81,7 +83,7 @@ export const fetchTeamDetails = createAsyncThunk(
   },
 )
 
-// Fetch team members by team ID
+// Fetch members of a team by team ID
 export const fetchTeamMembers = createAsyncThunk(
   'teams/fetchTeamMembers',
   async (teamId: string) => {
@@ -90,12 +92,14 @@ export const fetchTeamMembers = createAsyncThunk(
   },
 )
 
+// Create the teamSlice
 const teamSlice = createSlice({
   name: 'teams',
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Fetch all teams
       .addCase(fetchTeams.pending, (state) => {
         state.loading = true
         state.error = null
@@ -108,9 +112,13 @@ const teamSlice = createSlice({
         state.loading = false
         state.error = action.error.message ?? 'Error fetching teams'
       })
+
+      // Create a new team
       .addCase(createNewTeam.fulfilled, (state, action) => {
-        state.teams.push(action.payload)
+        state.teams.push(action.payload) // Add new team to the state
       })
+
+      // Update an existing team
       .addCase(updateTeamThunk.fulfilled, (state, action) => {
         const index = state.teams.findIndex(
           (team) => team.id === action.payload.id,
@@ -119,12 +127,18 @@ const teamSlice = createSlice({
           state.teams[index] = action.payload // Update the team in the state
         }
       })
+
+      // Delete a team
       .addCase(deleteTeamThunk.fulfilled, (state, action) => {
         state.teams = state.teams.filter((team) => team.id !== action.payload)
       })
+
+      // Fetch details of a team
       .addCase(fetchTeamDetails.fulfilled, (state, action) => {
         state.selectedTeam = action.payload
       })
+
+      // Fetch members of a team
       .addCase(fetchTeamMembers.fulfilled, (state, action) => {
         state.teamMembers = action.payload
       })

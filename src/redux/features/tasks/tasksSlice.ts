@@ -14,8 +14,8 @@ export interface Task {
   assigneeIds: string[]
   description: string
   dueDate: string
-  status: string
-  priority: string
+  status: 'todo' | 'in-progress' | 'review' | 'done'
+  priority: 'low' | 'normal' | 'high'
   userId: string
   teamId?: string
 }
@@ -45,7 +45,7 @@ const initialState: TasksState = {
   error: null,
 }
 
-// Thunk to fetch tasks
+// Thunk to fetch tasks (both personal and team)
 export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
   const tasks = await getAllTasks()
   const tasksByStatus: TasksState = {
@@ -66,17 +66,26 @@ export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
   }
 
   tasks.forEach((task: Task) => {
+    const taskStatus = task.status.toLowerCase()
     if (task.teamId) {
-      tasksByStatus.teamTasks[task.status].push(task)
+      if (tasksByStatus.teamTasks[taskStatus]) {
+        tasksByStatus.teamTasks[taskStatus].push(task)
+      } else {
+        tasksByStatus.teamTasks['todo'].push(task) // Fallback to 'todo'
+      }
     } else {
-      tasksByStatus.personalTasks[task.status].push(task)
+      if (tasksByStatus.personalTasks[taskStatus]) {
+        tasksByStatus.personalTasks[taskStatus].push(task)
+      } else {
+        tasksByStatus.personalTasks['todo'].push(task) // Fallback to 'todo'
+      }
     }
   })
 
   return tasksByStatus
 })
 
-// Thunk to create a new task
+// Thunk to create a new task (for personal or team tasks)
 export const createNewTask = createAsyncThunk(
   'tasks/createTask',
   async (newTask: Partial<Task>) => {
@@ -112,7 +121,7 @@ const tasksSlice = createSlice({
       const { taskId, oldStatus, newStatus, teamId } = action.payload
       const taskCategory = teamId ? state.teamTasks : state.personalTasks
 
-      const taskToMove = taskCategory[oldStatus].find(
+      const taskToMove = taskCategory[oldStatus]?.find(
         (task) => task.id === taskId,
       )
 
@@ -122,8 +131,9 @@ const tasksSlice = createSlice({
           (task) => task.id !== taskId,
         )
 
-        // Add to the new status
-        taskCategory[newStatus].push({ ...taskToMove, status: newStatus })
+        // Ensure new status exists in taskCategory, otherwise fallback to 'todo'
+        const statusToPush = taskCategory[newStatus] || taskCategory['todo']
+        statusToPush.push({ ...taskToMove, status: newStatus })
       }
     },
   },
@@ -145,19 +155,27 @@ const tasksSlice = createSlice({
 
       .addCase(createNewTask.fulfilled, (state, action) => {
         const newTask = action.payload
-        const status = newTask.status || 'todo'
+        const status = newTask.status.toLowerCase() || 'todo'
 
         if (newTask.teamId) {
-          state.teamTasks[status].push(newTask)
+          if (state.teamTasks[status]) {
+            state.teamTasks[status].push(newTask)
+          } else {
+            state.teamTasks['todo'].push(newTask) // Fallback
+          }
         } else {
-          state.personalTasks[status].push(newTask)
+          if (state.personalTasks[status]) {
+            state.personalTasks[status].push(newTask)
+          } else {
+            state.personalTasks['todo'].push(newTask) // Fallback
+          }
         }
       })
 
       .addCase(updateTaskThunk.fulfilled, (state, action) => {
         const updatedTask = action.payload
-        const oldStatus = updatedTask.status
-        const newStatus = updatedTask.status
+        const oldStatus = updatedTask.status.toLowerCase()
+        const newStatus = updatedTask.status.toLowerCase()
         const taskCategory = updatedTask.teamId
           ? state.teamTasks
           : state.personalTasks
@@ -170,7 +188,11 @@ const tasksSlice = createSlice({
               taskCategory[status] = taskList.filter(
                 (t) => t.id !== updatedTask.id,
               )
-              taskCategory[newStatus].push(updatedTask)
+              if (taskCategory[newStatus]) {
+                taskCategory[newStatus].push(updatedTask)
+              } else {
+                taskCategory['todo'].push(updatedTask) // Fallback to 'todo'
+              }
             } else {
               taskCategory[status][taskIndex] = updatedTask
             }

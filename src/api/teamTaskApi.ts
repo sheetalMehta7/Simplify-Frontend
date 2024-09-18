@@ -1,4 +1,5 @@
 import axiosInstance from '../helpers/axiosInstance'
+import { TaskStatus, TaskPriority } from '../types/taskTypes' // Assuming enums for status/priority are defined
 
 // Fetch all tasks for a specific team
 export const getTeamTasks = async (teamId: string) => {
@@ -12,10 +13,10 @@ export const createTeamTask = async (
   data: {
     title: string
     description?: string
-    status: string
-    priority: string
+    status: TaskStatus // Using enum for TaskStatus
+    priority: TaskPriority // Using enum for TaskPriority
     dueDate?: string
-    assigneeIds?: string[]
+    assigneeIds?: string[] // Array of user IDs
   },
 ) => {
   const response = await axiosInstance.post(`/teams/${teamId}/tasks`, data)
@@ -29,10 +30,10 @@ export const updateTeamTask = async (
   data: {
     title?: string
     description?: string
-    status?: string
-    priority?: string
+    status?: TaskStatus // Using enum for TaskStatus
+    priority?: TaskPriority // Using enum for TaskPriority
     dueDate?: string
-    assigneeIds?: string[]
+    assigneeIds?: string[] // Array of user IDs
   },
 ) => {
   const response = await axiosInstance.put(

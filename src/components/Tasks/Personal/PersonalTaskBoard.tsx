@@ -45,6 +45,21 @@ const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
     loadTasks()
   }, [dispatch])
 
+  // Normalize task data to ensure status and priority are in lowercase
+  const normalizeTaskData = (tasks: { [key: string]: Task[] }) => {
+    return Object.entries(tasks).reduce(
+      (acc: { [key: string]: Task[] }, [status, tasksArray]) => {
+        acc[status] = tasksArray.map((task) => ({
+          ...task,
+          status: task.status.toLowerCase(), // Convert status to lowercase
+          priority: task.priority.toLowerCase(), // Convert priority to lowercase
+        }))
+        return acc
+      },
+      { todo: [], 'in-progress': [], review: [], done: [] },
+    )
+  }
+
   // Apply filters to tasks
   const applyFilters = (tasks: { [key: string]: Task[] }) => {
     const filteredTasks = Object.entries(tasks).reduce(
@@ -65,7 +80,8 @@ const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
     return filteredTasks
   }
 
-  const filteredTasks = applyFilters(personalTasks)
+  const normalizedTasks = normalizeTaskData(personalTasks) // Normalize tasks
+  const filteredTasks = applyFilters(normalizedTasks) // Apply filters to normalized tasks
 
   // Handle drag-and-drop event
   const onDragEnd = async (result: DropResult) => {
