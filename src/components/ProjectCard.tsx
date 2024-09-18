@@ -71,11 +71,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     return title.length > 50 ? title.substring(0, 50) + '...' : title
   }
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSaveEdit()
+    }
+  }
+
   return (
     <div className="relative p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md text-gray-900 dark:text-white">
       {/* Project Icon in the top-left corner */}
       <div className="absolute top-4 left-4">
-        <FaProjectDiagram className="text-blue-500" size={28} />
+        <FaProjectDiagram className="text-blue-500" size={24} />
       </div>
 
       {/* Three-dot Menu */}
@@ -115,19 +121,19 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         )}
       </div>
 
-      {/* Content with proper padding */}
+      {/* Content with reduced text size */}
       <div className="ml-12 mt-8">
-        <h2 className="text-xl font-semibold mb-2">
+        <h2 className="text-lg font-semibold mb-2">
           {truncateTitle(project.title)}
         </h2>
-        <p className="text-gray-500 dark:text-gray-300 mb-1">
+        <p className="text-sm text-gray-500 dark:text-gray-300 mb-1">
           {project.description || 'No description'}
         </p>
-        <p className="text-sm text-gray-400 mb-1">
+        <p className="text-xs text-gray-400 mb-1">
           Status: {project.status || 'No status'}
         </p>
         {project.team && (
-          <p className="text-sm text-gray-400">Team: {project.team.name}</p>
+          <p className="text-xs text-gray-400">Team: {project.team.name}</p>
         )}
       </div>
 
@@ -140,11 +146,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
             className="mb-4"
+            onKeyPress={handleKeyPress}
           />
           <TextInput
             placeholder="Description"
             value={editDescription}
             onChange={(e) => setEditDescription(e.target.value)}
+            onKeyPress={handleKeyPress}
           />
         </Modal.Body>
         <Modal.Footer>
