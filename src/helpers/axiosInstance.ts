@@ -26,17 +26,17 @@ export const setupAxiosInterceptors = (navigate: (path: string) => void) => {
       const errorMessage =
         error.response?.data?.message || 'An unexpected error occurred'
 
-      // Token expired or invalid, log out across all tabs
+      // Check if the token is invalid or expired
       if (
         error.response?.status === 403 &&
         errorMessage === 'Invalid or expired token'
       ) {
-        // Trigger logout in current tab
+        // Remove token from localStorage which triggers logout in all tabs
+        localStorage.removeItem('authToken')
+
+        // Dispatch an error message and log out the user
         store.dispatch(setError('Session expired. You have been logged out.'))
         store.dispatch(logout())
-
-        // Broadcast logout to all other tabs
-        localStorage.setItem('logout', Date.now().toString())
 
         // Redirect current tab
         navigate('/')

@@ -15,18 +15,13 @@ const AppRouter = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Load user from localStorage when the app starts
     dispatch(loadUserFromLocalStorage())
 
-    // Set up Axios interceptors with navigation handling
     setupAxiosInterceptors(navigate)
-
-    // Listen for logout event across tabs
     const handleStorageEvent = (event: StorageEvent) => {
-      if (event.key === 'logout') {
-        // Logout event detected from another tab
+      if (event.key === 'authToken' && !event.newValue) {
         dispatch(logout())
-        navigate('/') // Redirect to the home or login page
+        navigate('/')
       }
     }
 
