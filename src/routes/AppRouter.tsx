@@ -1,7 +1,10 @@
 import { useEffect } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import { loadUserFromLocalStorage } from '../redux/features/auth/authSlice'
+import {
+  loadUserFromLocalStorage,
+  logout,
+} from '../redux/features/auth/authSlice'
 import { setupAxiosInterceptors } from '../helpers/axiosInstance'
 import { Home } from '../pages/Home'
 import Dashboard from '../pages/Dashboard'
@@ -14,8 +17,24 @@ const AppRouter = () => {
   useEffect(() => {
     // Load user from localStorage when the app starts
     dispatch(loadUserFromLocalStorage())
+
     // Set up Axios interceptors with navigation handling
     setupAxiosInterceptors(navigate)
+
+    // Listen for logout event across tabs
+    const handleStorageEvent = (event: StorageEvent) => {
+      if (event.key === 'logout') {
+        // Logout event detected from another tab
+        dispatch(logout())
+        navigate('/') // Redirect to the home or login page
+      }
+    }
+
+    window.addEventListener('storage', handleStorageEvent)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageEvent)
+    }
   }, [dispatch, navigate])
 
   return (

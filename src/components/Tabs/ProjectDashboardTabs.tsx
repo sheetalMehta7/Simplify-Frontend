@@ -56,7 +56,7 @@ const ProjectDashboardTabs: React.FC = () => {
 
   const handleDelete = async (projectId: string) => {
     try {
-      await dispatch(deleteProject(projectId)).unwrap() // Ensure we handle the async action
+      await dispatch(deleteProject(projectId)).unwrap()
     } catch (error) {
       console.error('Failed to delete project:', error)
     }

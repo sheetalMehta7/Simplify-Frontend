@@ -1,4 +1,3 @@
-// src/api/authApi.ts
 import axiosInstance from '../helpers/axiosInstance'
 
 export const signup = async (email: string, password: string, name: string) => {
@@ -8,10 +7,6 @@ export const signup = async (email: string, password: string, name: string) => {
     name,
   })
 
-  // Store token and user details (role included) in localStorage
-  localStorage.setItem('token', response.data.token)
-  localStorage.setItem('user', JSON.stringify(response.data.user))
-
   return response.data
 }
 
@@ -20,10 +15,6 @@ export const login = async (email: string, password: string) => {
     email,
     password,
   })
-
-  // Store token and user details (role included) in localStorage
-  localStorage.setItem('token', response.data.token)
-  localStorage.setItem('user', JSON.stringify(response.data.user))
 
   return response.data
 }
