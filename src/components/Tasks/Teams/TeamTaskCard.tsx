@@ -1,21 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react'
-import {
-  FaFlag,
-  FaEllipsisV,
-  FaEdit,
-  FaTrash,
-  FaTasks,
-  FaChevronRight,
-  // FaUsers,
-} from 'react-icons/fa'
-import { useDispatch } from 'react-redux'
-import {
-  updateTeamTaskThunk,
-  deleteTeamTaskThunk,
-  moveTeamTaskLocally,
-} from '../../redux/features/teams/teamTaskSlice'
-import { AppDispatch } from '../../redux/store'
-import { TeamTask } from '../../interfaces/Task'
+// src/components/TeamTaskCard.tsx
+import React from 'react'
+import { TeamTask, TaskPriority } from '../../../types/Task'
+import { HiPencil, HiOutlineEye } from 'react-icons/hi'
 
 interface TeamTaskCardProps {
   task: TeamTask
@@ -23,255 +9,54 @@ interface TeamTaskCardProps {
   onTaskClick: (task: TeamTask) => void
 }
 
+const priorityStyles: { [key in TaskPriority]: string } = {
+  low: 'bg-green-100 text-green-600',
+  medium: 'bg-yellow-100 text-yellow-600',
+  high: 'bg-red-100 text-red-600',
+}
+
 const TeamTaskCard: React.FC<TeamTaskCardProps> = ({
   task,
   onEdit,
   onTaskClick,
 }) => {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [statusChangeOpen, setStatusChangeOpen] = useState(false)
-  const [submenuPosition, setSubmenuPosition] = useState<'left' | 'right'>(
-    'right',
-  )
-  const dispatch: AppDispatch = useDispatch()
-  const menuRef = useRef<HTMLDivElement>(null)
-  const statusRef = useRef<HTMLLIElement>(null)
-
-  useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false)
-        setStatusChangeOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleOutsideClick)
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick)
-    }
-  }, [])
-
-  const handleStatusChange = (newStatus: string) => {
-    dispatch(
-      moveTeamTaskLocally({
-        taskId: task.id,
-        oldStatus: task.status || 'todo', // Default to 'todo' if status is undefined
-        newStatus,
-      }),
-    )
-    dispatch(
-      updateTeamTaskThunk({
-        teamId: task.teamId,
-        taskId: task.id,
-        data: { status: newStatus },
-      }),
-    )
-    setMenuOpen(false)
-    setStatusChangeOpen(false)
-  }
-
-  const handleDelete = () => {
-    dispatch(deleteTeamTaskThunk({ teamId: task.teamId, taskId: task.id }))
-    setMenuOpen(false)
-  }
-
-  const handleMouseEnterStatus = () => {
-    const statusMenuRect = statusRef.current?.getBoundingClientRect()
-    const viewportWidth = window.innerWidth
-    if (statusMenuRect && statusMenuRect.right + 200 > viewportWidth) {
-      setSubmenuPosition('left')
-    } else {
-      setSubmenuPosition('right')
-    }
-    setStatusChangeOpen(true)
-  }
-
   return (
-    <div
-      className="relative bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md text-gray-900 dark:text-white cursor-pointer"
-      onClick={() => onTaskClick(task)}
-    >
-      <FaFlag
-        className={`absolute top-2 left-2 ${getFlagColor(task.status || 'todo')}`} // Default to 'todo' if status is undefined
-        size={16}
-      />
-
-      <div className="absolute top-2 right-2" ref={menuRef}>
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            setMenuOpen(!menuOpen)
-          }}
-        >
-          <FaEllipsisV className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
-        </button>
-
-        {menuOpen && (
-          <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 shadow-lg rounded-lg z-10">
-            <ul className="py-1" onClick={(e) => e.stopPropagation()}>
-              <li>
-                <button
-                  onClick={() => onEdit(task)}
-                  className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <FaEdit className="mr-2" />
-                  Edit
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={handleDelete}
-                  className="w-full flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <FaTrash className="mr-2" />
-                  Delete
-                </button>
-              </li>
-              <li className="relative group" ref={statusRef}>
-                <button
-                  className="w-full flex items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  onMouseEnter={handleMouseEnterStatus}
-                  onMouseLeave={(e) => {
-                    const relatedTarget = e.relatedTarget as Element
-                    if (
-                      !relatedTarget ||
-                      !relatedTarget.closest('.status-submenu')
-                    ) {
-                      setStatusChangeOpen(false)
-                    }
-                  }}
-                >
-                  <span className="flex items-center">
-                    <FaTasks className="mr-2" />
-                    Status
-                  </span>
-                  <FaChevronRight className="ml-2" />
-                </button>
-                {statusChangeOpen && (
-                  <div
-                    className={`absolute ${
-                      submenuPosition === 'right' ? 'left-full' : 'right-full'
-                    } top-0 ml-1 w-40 bg-white dark:bg-gray-800 shadow-lg rounded-lg z-20 status-submenu`}
-                    onMouseEnter={() => setStatusChangeOpen(true)}
-                    onMouseLeave={() => setStatusChangeOpen(false)}
-                  >
-                    <ul className="py-1">
-                      {['todo', 'in-progress', 'review', 'done'].map(
-                        (status) => (
-                          <li key={status}>
-                            <button
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                              onClick={() => handleStatusChange(status)}
-                            >
-                              {status.charAt(0).toUpperCase() + status.slice(1)}
-                            </button>
-                          </li>
-                        ),
-                      )}
-                    </ul>
-                  </div>
-                )}
-              </li>
-            </ul>
-          </div>
-        )}
-      </div>
-
-      <div className="ml-8">
-        <h3 className="text-sm font-semibold md:text-base lg:text-base">
+    <div className="p-4 bg-white dark:bg-gray-700 shadow-md rounded-lg flex justify-between items-center cursor-pointer">
+      {/* Task Details */}
+      <div onClick={() => onTaskClick(task)} className="flex flex-col">
+        <h3 className="text-md font-semibold dark:text-white mb-1">
           {task.title}
         </h3>
-        <p className="text-xs md:text-xs mb-1">
-          Assignees:{' '}
-          {task.assigneeIds.length > 0
-            ? task.assigneeIds.join(', ')
-            : 'Unassigned'}
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          Due: {task.dueDate.toLocaleDateString()}
         </p>
-        <p className="text-xs md:text-xs mb-2">
-          Due Date:{' '}
-          {task.dueDate
-            ? formatDate(task.dueDate, 'MMM dd, yyyy')
-            : 'No due date'}
-        </p>
-        <p className="text-xs md:text-xs mb-2">
-          Team ID: <span className="font-semibold">{task.teamId}</span>
-        </p>
-
-        {/* Status Badge */}
         <span
-          className={`text-xs font-bold py-1 px-2 rounded-full ${getBadgeColor(task.status || 'todo')}`} // Default to 'todo'
+          className={`inline-block mt-1 text-xs px-2 py-1 rounded-lg ${
+            priorityStyles[task.priority]
+          }`}
         >
-          {task.status
-            ? task.status.charAt(0).toUpperCase() + task.status.slice(1)
-            : 'Todo'}
+          {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}{' '}
+          Priority
         </span>
+      </div>
 
-        {/* Priority Badge */}
-        <span
-          className={`text-xs font-bold py-1 px-2 rounded-full ml-2 ${getPriorityBadgeColor(
-            task.priority || 'low', // Default to 'low' if priority is undefined
-          )}`}
+      {/* Actions */}
+      <div className="flex space-x-2">
+        <button
+          onClick={() => onEdit(task)}
+          className="text-blue-500 hover:text-blue-700"
         >
-          {task.priority
-            ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1)
-            : 'Low'}
-        </span>
+          <HiPencil size={18} />
+        </button>
+        <button
+          onClick={() => onTaskClick(task)}
+          className="text-gray-500 hover:text-gray-700"
+        >
+          <HiOutlineEye size={18} />
+        </button>
       </div>
     </div>
   )
-}
-
-// Utility functions to handle task status and priority color
-function formatDate(dateString: string, _formatStr: string = 'MMM dd, yyyy') {
-  const date = new Date(dateString)
-  const formatter = new Intl.DateTimeFormat(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-  return formatter.format(date)
-}
-
-function getFlagColor(status: string) {
-  switch (status) {
-    case 'todo':
-      return 'text-yellow-500'
-    case 'in-progress':
-      return 'text-blue-500'
-    case 'review':
-      return 'text-orange-500'
-    case 'done':
-      return 'text-green-500'
-    default:
-      return 'text-gray-500'
-  }
-}
-
-function getBadgeColor(status: string) {
-  switch (status) {
-    case 'todo':
-      return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-200 dark:text-yellow-800'
-    case 'in-progress':
-      return 'bg-blue-100 text-blue-700 dark:bg-blue-200 dark:text-blue-800'
-    case 'review':
-      return 'bg-orange-100 text-orange-700 dark:bg-orange-200 dark:text-orange-800'
-    case 'done':
-      return 'bg-green-100 text-green-700 dark:bg-green-200 dark:text-green-800'
-    default:
-      return 'bg-gray-100 text-gray-700 dark:bg-gray-200 dark:text-gray-800'
-  }
-}
-
-function getPriorityBadgeColor(priority: string) {
-  switch (priority) {
-    case 'low':
-      return 'bg-green-100 text-green-700 dark:bg-green-200 dark:text-green-800'
-    case 'normal':
-      return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-200 dark:text-yellow-800'
-    case 'high':
-      return 'bg-red-100 text-red-700 dark:bg-red-200 dark:text-red-800'
-    default:
-      return 'bg-gray-100 text-gray-700 dark:bg-gray-200 dark:text-gray-800'
-  }
 }
 
 export default TeamTaskCard

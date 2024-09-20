@@ -6,9 +6,9 @@ import {
   updateTeamTaskThunk,
   deleteTeamTaskThunk,
   moveTeamTaskLocally,
-} from '../../redux/features/teams/teamTaskSlice'
-import { TeamTask } from '../../interfaces/Task'
-import { AppDispatch } from '../../redux/store'
+} from '../../../redux/features/teams/teamTaskSlice'
+import { TeamTask } from '../../../types/Task'
+import { AppDispatch } from '../../../redux/store'
 
 interface TeamTaskDetailsDrawerProps {
   isOpen: boolean
