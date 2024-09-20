@@ -21,11 +21,11 @@ import { Task } from '../../../redux/features/tasks/tasksSlice'
 import Loader from '../../Loader'
 
 interface PersonalTaskBoardProps {
-  filters?: { date: string; assignee: string; status: string } // Optional filters
+  filters?: { date: string; assignee: string; status: string }
 }
 
 const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
-  filters = { date: '', assignee: '', status: '' }, // Default values for filters
+  filters = { date: '', assignee: '', status: '' },
 }) => {
   const dispatch: AppDispatch = useDispatch()
   const personalTasks = useSelector(
@@ -51,8 +51,8 @@ const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
       (acc: { [key: string]: Task[] }, [status, tasksArray]) => {
         acc[status] = tasksArray.map((task) => ({
           ...task,
-          status: task.status.toLowerCase(), // Convert status to lowercase
-          priority: task.priority.toLowerCase(), // Convert priority to lowercase
+          status: task.status.toLowerCase(),
+          priority: task.priority.toLowerCase(),
         }))
         return acc
       },

@@ -7,8 +7,8 @@ import {
   DropResult,
 } from 'react-beautiful-dnd'
 import { Table, Button } from 'flowbite-react'
-import TeamTaskCard from '../TeamTaskCard'
-import TaskDetailsDrawer from '../Tasks/TaskDetailsDrawer'
+import TeamTaskCard from './TeamTaskCard'
+import TaskDetailsDrawer from './TeamTaskDetailsDrawer'
 import CreateTaskModal from '../../Modals/CreateTaskModal'
 import {
   fetchTeamTasks,
@@ -30,9 +30,7 @@ const TeamTaskBoard: React.FC<TeamTaskBoardProps> = ({
   filters = { date: '', assignee: '', status: '' },
 }) => {
   const dispatch: AppDispatch = useDispatch()
-  const teamTasks = useSelector((state: RootState) => state.teamTasks.tasks) // Fetch the whole tasks object
-  const tasksForTeam = teamTasks ? teamTasks[teamId] : undefined // Safely access team-specific tasks
-
+  const teamTasks = useSelector((state: RootState) => state.teamTask.tasks) // Directly use tasks without teamId
   const [selectedTask, setSelectedTask] = useState<TeamTask | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -49,7 +47,7 @@ const TeamTaskBoard: React.FC<TeamTaskBoardProps> = ({
   }, [dispatch, teamId])
 
   // Handle when there are no tasks or the data isn't ready yet
-  if (loading || !teamTasks || !tasksForTeam) {
+  if (loading || !teamTasks) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader message="Loading tasks..." />
@@ -77,7 +75,7 @@ const TeamTaskBoard: React.FC<TeamTaskBoardProps> = ({
     return filteredTasks
   }
 
-  const filteredTasks = applyFilters(tasksForTeam)
+  const filteredTasks = applyFilters(teamTasks)
 
   // Check if all tasks are empty
   const areAllTasksEmpty = Object.values(filteredTasks).every(
@@ -92,7 +90,7 @@ const TeamTaskBoard: React.FC<TeamTaskBoardProps> = ({
     const taskId = filteredTasks[source.droppableId][source.index].id
     const newStatus = destination.droppableId
 
-    const draggedTask = tasksForTeam?.[source.droppableId]?.find(
+    const draggedTask = teamTasks?.[source.droppableId]?.find(
       (task) => task.id === taskId,
     )
 
