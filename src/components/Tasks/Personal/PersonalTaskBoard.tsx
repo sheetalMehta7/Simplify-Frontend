@@ -15,11 +15,10 @@ import {
   updateTaskThunk,
   createNewTask,
   moveTaskLocally,
+  Task,
 } from '../../../redux/features/tasks/tasksSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
-import { Task } from '../../../redux/features/tasks/tasksSlice'
-import Loader from '../../Loader'
-
+import SkeletonCard from '../../Loader/SkeletonCard'
 interface PersonalTaskBoardProps {
   filters?: { date: string; assignee: string; status: string }
 }
@@ -30,7 +29,7 @@ const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
   const dispatch: AppDispatch = useDispatch()
   const personalTasks = useSelector(
     (state: RootState) => state.tasks.personalTasks,
-  ) // Fetching only personal tasks
+  )
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -40,7 +39,10 @@ const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
     const loadTasks = async () => {
       setLoading(true)
       await dispatch(fetchTasks())
-      setLoading(false)
+      // Simulate a 3-second loading delay using setTimeout
+      setTimeout(() => {
+        setLoading(false)
+      }, 3000)
     }
     loadTasks()
   }, [dispatch])
@@ -66,7 +68,7 @@ const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
       (acc: { [key: string]: Task[] }, [status, tasksArray]) => {
         acc[status] = tasksArray.filter((task) => {
           const matchesDate =
-            !filters?.date || task.dueDate.startsWith(filters.date) // Gracefully handle undefined filters
+            !filters?.date || task.dueDate.startsWith(filters.date)
           const matchesAssignee =
             !filters?.assignee || task.assignee === filters.assignee
           const matchesStatus =
@@ -80,8 +82,8 @@ const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
     return filteredTasks
   }
 
-  const normalizedTasks = normalizeTaskData(personalTasks) // Normalize tasks
-  const filteredTasks = applyFilters(normalizedTasks) // Apply filters to normalized tasks
+  const normalizedTasks = normalizeTaskData(personalTasks)
+  const filteredTasks = applyFilters(normalizedTasks)
 
   // Handle drag-and-drop event
   const onDragEnd = async (result: DropResult) => {
@@ -128,40 +130,34 @@ const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
   return (
     <>
       <div className="relative p-4 h-screen">
-        {loading ? (
-          <div className="flex items-center justify-center h-screen">
-            <Loader message="Loading tasks..." />
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="flex-1 overflow-x-auto min-h-screen">
+            {areAllTasksEmpty && areFilteredTasksEmpty ? (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <p className="text-gray-500 dark:text-gray-300 mb-4">
+                  No tasks available. You can create a new task to get started.
+                </p>
+                <Button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  gradientDuoTone="purpleToBlue"
+                >
+                  Create Task
+                </Button>
+              </div>
+            ) : areFilteredTasksEmpty ? (
+              <div className="text-center text-gray-500 dark:text-gray-300 p-4">
+                No tasks found for the applied filters.
+              </div>
+            ) : (
+              <TaskBoardTable
+                tasks={filteredTasks}
+                onTaskClick={handleTaskClick}
+                onEdit={handleEditTask}
+                loading={loading}
+              />
+            )}
           </div>
-        ) : (
-          <DragDropContext onDragEnd={onDragEnd}>
-            <div className="flex-1 overflow-x-auto min-h-screen">
-              {areAllTasksEmpty && areFilteredTasksEmpty ? (
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                  <p className="text-gray-500 dark:text-gray-300 mb-4">
-                    No tasks available. You can create a new task to get
-                    started.
-                  </p>
-                  <Button
-                    onClick={() => setIsCreateModalOpen(true)}
-                    gradientDuoTone="purpleToBlue"
-                  >
-                    Create Task
-                  </Button>
-                </div>
-              ) : areFilteredTasksEmpty ? (
-                <div className="text-center text-gray-500 dark:text-gray-300 p-4">
-                  No tasks found for the applied filters.
-                </div>
-              ) : (
-                <TaskBoardTable
-                  tasks={filteredTasks}
-                  onTaskClick={handleTaskClick}
-                  onEdit={handleEditTask}
-                />
-              )}
-            </div>
-          </DragDropContext>
-        )}
+        </DragDropContext>
       </div>
 
       <TaskDetailsDrawer
@@ -179,11 +175,13 @@ const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
   )
 }
 
+// TaskBoardTable Component (for actual tasks or skeletons)
 const TaskBoardTable: React.FC<{
   tasks: { [key: string]: Task[] }
   onTaskClick: (task: Task) => void
   onEdit: (task: Task) => void
-}> = ({ tasks, onTaskClick, onEdit }) => {
+  loading: boolean // Pass the loading state to the table
+}> = ({ tasks, onTaskClick, onEdit, loading }) => {
   const columns = ['todo', 'in-progress', 'review', 'done']
 
   return (
@@ -214,31 +212,37 @@ const TaskBoardTable: React.FC<{
                     }`}
                     style={{ minHeight: 'calc(100vh - 120px)' }}
                   >
-                    {tasks[columnId]?.map((task, index) => (
-                      <Draggable
-                        key={task.id.toString()}
-                        draggableId={task.id.toString()}
-                        index={index}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`bg-gray-100 dark:bg-gray-800 p-2 rounded-lg mb-2 shadow-sm hover:shadow-md transition-transform ${
-                              snapshot.isDragging ? 'transform scale-105' : ''
-                            }`}
-                            onClick={() => onTaskClick(task)}
+                    {loading
+                      ? Array.from({ length: tasks[columnId].length }).map(
+                          (_, index) => <SkeletonCard key={index} />,
+                        ) // Render skeletons during loading
+                      : tasks[columnId]?.map((task, index) => (
+                          <Draggable
+                            key={task.id.toString()}
+                            draggableId={task.id.toString()}
+                            index={index}
                           >
-                            <TaskCard
-                              task={task}
-                              onEdit={onEdit}
-                              onTaskClick={onTaskClick}
-                            />
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className={`bg-gray-100 dark:bg-gray-800 p-2 rounded-lg mb-2 shadow-sm hover:shadow-md transition-transform ${
+                                  snapshot.isDragging
+                                    ? 'transform scale-105'
+                                    : ''
+                                }`}
+                                onClick={() => onTaskClick(task)}
+                              >
+                                <TaskCard
+                                  task={task}
+                                  onEdit={onEdit}
+                                  onTaskClick={onTaskClick}
+                                />
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
                     {provided.placeholder}
                   </div>
                 )}
