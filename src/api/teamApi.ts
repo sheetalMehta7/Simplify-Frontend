@@ -1,18 +1,17 @@
 import axiosInstance from '../helpers/axiosInstance'
 
-// Types for team and API payloads
 interface TeamPayload {
   name: string
   description?: string
-  members: string[] // User IDs
-  projectId?: string // Optional project ID
+  members: string[]
+  projectId?: string
 }
 
 interface UpdateTeamPayload {
   name?: string
   description?: string
-  members?: string[] // Updated members (user IDs)
-  projectId?: string // Optional project ID
+  members?: string[]
+  projectId?: string
 }
 
 // Create a new team
