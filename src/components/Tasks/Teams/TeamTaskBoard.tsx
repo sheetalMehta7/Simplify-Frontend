@@ -17,7 +17,7 @@ import {
   moveTeamTaskLocally,
 } from '../../../redux/features/teams/teamTaskSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
-import Loader from '../../Loader'
+import Loader from '../../Loader/Loader'
 import { TeamTask } from '../../../types/Task'
 
 interface TeamTaskBoardProps {

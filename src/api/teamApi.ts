@@ -5,12 +5,14 @@ interface TeamPayload {
   name: string
   description?: string
   members: string[] // User IDs
+  projectId?: string // Optional project ID
 }
 
 interface UpdateTeamPayload {
   name?: string
   description?: string
   members?: string[] // Updated members (user IDs)
+  projectId?: string // Optional project ID
 }
 
 // Create a new team

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Modal, TextInput, Button } from 'flowbite-react'
+import { Modal, TextInput, Button, Select } from 'flowbite-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import { fetchAllUsers } from '../../redux/features/user/userSlice'
@@ -8,12 +8,19 @@ import {
   updateTeamThunk,
 } from '../../redux/features/teams/teamSlice'
 import { MdCheck, MdPersonAdd } from 'react-icons/md'
+import { fetchAllProjects } from '../../redux/features/projects/projectSlice' // Fetch all projects
 
 interface TeamModalProps {
   isOpen: boolean
   onClose: (teamUpdated?: boolean) => void
   mode: 'create' | 'edit'
-  team?: { id: string; name: string; description?: string; members: string[] }
+  team?: {
+    id: string
+    name: string
+    description?: string
+    members: { user: { id: string; name: string } }[]
+    projects: { id: string; title: string }[] // For edit mode to display project title
+  }
 }
 
 const TeamModal: React.FC<TeamModalProps> = ({
@@ -23,12 +30,19 @@ const TeamModal: React.FC<TeamModalProps> = ({
   team,
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+
+  // Fetch users and projects from Redux state
   const users = useSelector((state: RootState) => state.user.users)
   const loadingUsers = useSelector((state: RootState) => state.user.loading)
+  const projects = useSelector((state: RootState) => state.projects.projects) // Fetch projects from Redux
+  const loadingProjects = useSelector(
+    (state: RootState) => state.projects.loading,
+  )
 
   const [teamName, setTeamName] = useState('')
   const [description, setDescription] = useState('')
   const [selectedMembers, setSelectedMembers] = useState<string[]>([])
+  const [selectedProject, setSelectedProject] = useState<string | null>(null) // Selected project ID
   const [showMoreUsers, setShowMoreUsers] = useState(false)
 
   const [loggedInUser, setLoggedInUser] = useState<{
@@ -45,14 +59,28 @@ const TeamModal: React.FC<TeamModalProps> = ({
     }
   }, [])
 
-  // Fetch users when modal is opened
+  // Fetch users and projects when the modal is opened
   useEffect(() => {
     if (isOpen) {
       dispatch(fetchAllUsers())
+      dispatch(fetchAllProjects()) // Fetch all projects for the dropdown
+
       if (mode === 'edit' && team) {
         setTeamName(team.name)
         setDescription(team.description || '')
-        setSelectedMembers(team.members)
+
+        // Safely map members
+        setSelectedMembers(
+          (team.members || [])
+            .filter((member) => member && member.user && member.user.id) // Ensure member and user exist
+            .map((member) => member.user.id), // Map valid user IDs
+        )
+
+        if (team.projects && team.projects.length > 0) {
+          setSelectedProject(team.projects[0].id) // Set project if available in edit mode
+        } else {
+          setSelectedProject(null) // No project associated
+        }
       } else if (mode === 'create') {
         resetForm() // Ensure form is reset when the modal opens in create mode
       }
@@ -64,12 +92,12 @@ const TeamModal: React.FC<TeamModalProps> = ({
     setTeamName('')
     setDescription('')
     setSelectedMembers([])
+    setSelectedProject(null) // Reset selected project
   }
 
-  // Function to handle displaying only the first word of the username
-  const displayFirstWord = (name: string) => {
-    const nameParts = name.split(' ')
-    return nameParts.length > 1 ? nameParts[0] : name
+  // Function to handle project selection from the dropdown
+  const handleProjectSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedProject(e.target.value || null) // Set selected project or null if none is selected
   }
 
   // Toggle member selection
@@ -92,6 +120,7 @@ const TeamModal: React.FC<TeamModalProps> = ({
             name: teamName,
             description,
             members: selectedMembers,
+            projectId: selectedProject || undefined, // Include projectId if selected
           }),
         )
       } else if (mode === 'edit' && team) {
@@ -102,6 +131,7 @@ const TeamModal: React.FC<TeamModalProps> = ({
               name: teamName,
               description,
               members: selectedMembers,
+              // We don't need to update the project in edit mode, but the value can still be sent
             },
           }),
         )
@@ -147,7 +177,7 @@ const TeamModal: React.FC<TeamModalProps> = ({
               className={`relative w-12 h-12 rounded-full overflow-hidden transform transition-transform duration-200 hover:scale-105`}
             >
               <img
-                src={`https://ui-avatars.com/api/?name=${displayFirstWord(user.name)}&background=random`}
+                src={`https://ui-avatars.com/api/?name=${user.name}&background=random`}
                 alt={`Avatar of ${user.name}`}
                 className="w-full h-full rounded-full"
               />
@@ -158,7 +188,7 @@ const TeamModal: React.FC<TeamModalProps> = ({
               )}
             </div>
             <p className="text-center mt-2 text-sm text-gray-900 dark:text-white">
-              {displayFirstWord(user.name)}
+              {user.name.split(' ')[0]} {/* Display only the first name */}
             </p>
           </div>
         ))}
@@ -187,6 +217,33 @@ const TeamModal: React.FC<TeamModalProps> = ({
           className="dark:bg-gray-700 dark:text-white"
         />
 
+        {/* Project selection dropdown for create mode, and disabled input for edit mode */}
+        {mode === 'create' ? (
+          <Select
+            value={selectedProject || ''}
+            onChange={handleProjectSelect}
+            className="dark:bg-gray-700 dark:text-white"
+          >
+            <option value="">Select Project (Optional)</option>
+            {loadingProjects ? (
+              <option disabled>Loading projects...</option>
+            ) : (
+              projects.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.title}
+                </option>
+              ))
+            )}
+          </Select>
+        ) : (
+          <TextInput
+            placeholder="Project"
+            value={team?.projects?.[0]?.title || 'No Project Assigned'}
+            disabled
+            className="dark:bg-gray-700 dark:text-white"
+          />
+        )}
+
         <div className="flex flex-wrap gap-4 max-h-48 overflow-y-auto">
           {selectedMembers.map((memberId) => {
             const member = users.find((user) => user.id === memberId)
@@ -208,7 +265,7 @@ const TeamModal: React.FC<TeamModalProps> = ({
                     </div>
                   </div>
                   <p className="text-center mt-2 text-sm text-gray-900 dark:text-white">
-                    {displayFirstWord(member.name)}
+                    {member.name.split(' ')[0]}
                   </p>
                 </div>
               )

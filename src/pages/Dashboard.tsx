@@ -1,26 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import DashboardLayout from '../layout/DashboardLayout'
 import DashboardTabs from '../components/Tabs/DashboardTabs'
 import TeamsDashboardTabs from '../components/Tabs/TeamsDashboardTabs'
 import Calendar from '../components/Calendar/Calendar'
-import Loader from '../components/Loader'
 import ProjectDashboardTabs from '../components/Tabs/ProjectDashboardTabs'
 import { Outlet } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
-import { AppDispatch } from '../redux/store'
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('Dashboard')
-  const [loading, setLoading] = useState<boolean>(false)
-  const dispatch = useDispatch<AppDispatch>()
-
-  useEffect(() => {
-    setLoading(true)
-    const timer = setTimeout(() => {
-      setLoading(false)
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [activeTab])
 
   const handleTabSelect = async (tab: string) => {
     setActiveTab(tab)
@@ -31,14 +18,6 @@ const Dashboard: React.FC = () => {
   }
 
   const renderContent = () => {
-    if (loading) {
-      return (
-        <div className="flex items-center justify-center h-screen">
-          <Loader message="Loading content..." />
-        </div>
-      )
-    }
-
     switch (activeTab) {
       case 'Dashboard':
         return (
@@ -50,11 +29,7 @@ const Dashboard: React.FC = () => {
           </>
         )
       case 'TeamsBoard':
-        return (
-          <>
-            <TeamsDashboardTabs />
-          </>
-        )
+        return <TeamsDashboardTabs />
       case 'Calendar':
         return <Calendar />
       case 'Issues':
@@ -64,11 +39,7 @@ const Dashboard: React.FC = () => {
           </p>
         )
       case 'Projects':
-        return (
-          <>
-            <ProjectDashboardTabs />
-          </>
-        )
+        return <ProjectDashboardTabs />
       case 'Development':
         return (
           <p className="text-gray-900 dark:text-gray-200">

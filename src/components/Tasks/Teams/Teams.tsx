@@ -5,7 +5,7 @@ import {
   fetchTeams,
   deleteTeamThunk,
 } from '../../../redux/features/teams/teamSlice'
-import Loader from '../../Loader'
+import Loader from '../../Loader/Loader'
 import TeamModal from '../../Modals/TeamModal'
 import ConfirmModal from '../../Modals/ConfirmModal'
 import { Button } from 'flowbite-react'

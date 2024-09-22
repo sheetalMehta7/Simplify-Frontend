@@ -3,7 +3,7 @@ import { MdDashboard, MdGroups, MdPerson, MdCreate } from 'react-icons/md'
 import { VscSettings } from 'react-icons/vsc'
 import FilterDropdown from '../Modals/FilterModal'
 import TeamModal from '../Modals/TeamModal'
-import CreateTaskModal from '../Modals/CreateTaskModal' // Import Create Task Modal
+import CreateTaskModal from '../Modals/CreateTaskModal'
 import { Button } from 'flowbite-react'
 import Teams from '../Tasks/Teams/Teams'
 import TeamTaskBoard from '../Tasks/Teams/TeamTaskBoard'
