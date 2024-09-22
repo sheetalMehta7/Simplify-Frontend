@@ -11,10 +11,12 @@ import ProjectCard from '../Projects/ProjectCard'
 import FilterModal from '../Modals/FilterModal'
 import ProjectModal from '../Modals/ProjectModal'
 import ArchivedProjects from '../Projects/ArchivedProjects'
+import SkeletonCard from '../Loader/SkeletonCard'
 import { AppDispatch } from '../../redux/store'
 
 const ProjectDashboardTabs: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('Active Projects')
+  const [loading, setLoading] = useState<boolean>(false)
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
@@ -25,10 +27,17 @@ const ProjectDashboardTabs: React.FC = () => {
   })
 
   const dispatch = useDispatch<AppDispatch>()
-  const { projects, loading } = useSelector((state: any) => state.projects)
+  const { projects } = useSelector((state: any) => state.projects)
 
   useEffect(() => {
-    dispatch(fetchAllProjects())
+    const loadTasks = async () => {
+      setLoading(true)
+      await dispatch(fetchAllProjects())
+      setTimeout(() => {
+        setLoading(false)
+      }, 2000)
+    }
+    loadTasks()
   }, [dispatch])
 
   const handleTabClick = (tabName: string) => setActiveTab(tabName)
@@ -80,6 +89,12 @@ const ProjectDashboardTabs: React.FC = () => {
     }
   }
 
+  const renderSkeletons = (count: number) => {
+    return Array.from({ length: count }).map((_, index) => (
+      <SkeletonCard key={index} />
+    ))
+  }
+
   return (
     <div className="flex flex-col h-screen">
       <div className="container mx-auto p-4 md:p-5 flex-none">
@@ -127,7 +142,10 @@ const ProjectDashboardTabs: React.FC = () => {
       <div className="flex-1 container mx-auto p-4 md:p-5">
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md p-4 h-full">
           {loading ? (
-            <p>Loading projects...</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {renderSkeletons(6)}{' '}
+              {/* Adjust the number of skeletons as needed */}
+            </div>
           ) : activeTab === 'Active Projects' ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {projects
