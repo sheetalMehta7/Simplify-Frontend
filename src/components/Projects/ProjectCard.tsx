@@ -1,25 +1,30 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { FaEllipsisV, FaEdit, FaTrash, FaProjectDiagram } from 'react-icons/fa'
+import { MdOutlineUnarchive } from 'react-icons/md'
 import { Button, Modal, TextInput } from 'flowbite-react'
-import { Project } from '../redux/features/projects/projectSlice'
+import { Project } from '../../redux/features/projects/projectSlice'
 
 interface ProjectCardProps {
   project: Project
   onEdit: (project: Project) => void
   onDelete: (projectId: string) => void
+  onArchive?: () => void
+  onUnarchive?: () => void
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
   onEdit,
   onDelete,
+  onArchive,
+  onUnarchive,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
   const [editTitle, setEditTitle] = useState(project.title)
   const [editDescription, setEditDescription] = useState(
-    project.description || '',
+    project.description ?? '',
   )
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -79,12 +84,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
   return (
     <div className="relative p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md text-gray-900 dark:text-white">
-      {/* Project Icon in the top-left corner */}
       <div className="absolute top-4 left-4">
-        <FaProjectDiagram className="text-blue-500" size={24} />
+        {onArchive ? (
+          <FaProjectDiagram className="text-blue-500" size={24} />
+        ) : (
+          <MdOutlineUnarchive className="text-blue-500" size={24} />
+        )}
       </div>
 
-      {/* Three-dot Menu */}
       <div className="absolute top-4 right-4" ref={menuRef}>
         <button
           onClick={(e) => {
@@ -107,6 +114,28 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                   Edit
                 </button>
               </li>
+              {onArchive && (
+                <li>
+                  <button
+                    onClick={onArchive}
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <MdOutlineUnarchive className="mr-2" />
+                    Archive
+                  </button>
+                </li>
+              )}
+              {onUnarchive && (
+                <li>
+                  <button
+                    onClick={onUnarchive}
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <MdOutlineUnarchive className="mr-2" />
+                    Unarchive
+                  </button>
+                </li>
+              )}
               <li>
                 <button
                   onClick={handleDelete}
@@ -121,23 +150,21 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         )}
       </div>
 
-      {/* Content with reduced text size */}
       <div className="ml-12 mt-8">
         <h2 className="text-lg font-semibold mb-2">
           {truncateTitle(project.title)}
         </h2>
         <p className="text-sm text-gray-500 dark:text-gray-300 mb-1">
-          {project.description || 'No description'}
+          {project.description ?? 'No description'}
         </p>
         <p className="text-xs text-gray-400 mb-1">
-          Status: {project.status || 'No status'}
+          Status: {project.status ?? 'No status'}
         </p>
         {project.team && (
           <p className="text-xs text-gray-400">Team: {project.team.name}</p>
         )}
       </div>
 
-      {/* Edit Modal */}
       <Modal show={isEditModalOpen} onClose={closeEditModal} size="lg">
         <Modal.Header>Edit Project</Modal.Header>
         <Modal.Body>
@@ -165,7 +192,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         </Modal.Footer>
       </Modal>
 
-      {/* Delete Confirmation Modal */}
       {isDeleteAlertOpen && (
         <Modal show={isDeleteAlertOpen} onClose={cancelDelete} size="md">
           <Modal.Header>Confirm Deletion</Modal.Header>

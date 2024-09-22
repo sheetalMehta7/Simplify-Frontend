@@ -42,7 +42,7 @@ const PersonalTaskBoard: React.FC<PersonalTaskBoardProps> = ({
       // Simulate a 3-second loading delay using setTimeout
       setTimeout(() => {
         setLoading(false)
-      }, 3000)
+      }, 2000)
     }
     loadTasks()
   }, [dispatch])

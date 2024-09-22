@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   fetchAllProjects,
+  updateProject,
   deleteProject,
 } from '../../redux/features/projects/projectSlice'
 import { Button } from 'flowbite-react'
 import { MdCreate, MdFilterList } from 'react-icons/md'
-import ProjectCard from '../ProjectCard'
+import ProjectCard from '../Projects/ProjectCard'
 import FilterModal from '../Modals/FilterModal'
 import ProjectModal from '../Modals/ProjectModal'
+import ArchivedProjects from '../Projects/ArchivedProjects'
 import { AppDispatch } from '../../redux/store'
 
 const ProjectDashboardTabs: React.FC = () => {
@@ -22,11 +24,11 @@ const ProjectDashboardTabs: React.FC = () => {
     status: '',
   })
 
-  const dispatch = useDispatch<AppDispatch>() // Use AppDispatch to type the dispatch
+  const dispatch = useDispatch<AppDispatch>()
   const { projects, loading } = useSelector((state: any) => state.projects)
 
   useEffect(() => {
-    dispatch(fetchAllProjects()) // Fetch all projects on component mount
+    dispatch(fetchAllProjects())
   }, [dispatch])
 
   const handleTabClick = (tabName: string) => setActiveTab(tabName)
@@ -62,16 +64,29 @@ const ProjectDashboardTabs: React.FC = () => {
     }
   }
 
+  const handleArchive = async (projectId: string, isArchived: boolean) => {
+    try {
+      await dispatch(
+        updateProject({
+          projectId,
+          projectData: { archived: isArchived },
+        }),
+      ).unwrap()
+    } catch (error) {
+      console.error(
+        `Failed to ${isArchived ? 'unarchive' : 'archive'} project`,
+        error,
+      )
+    }
+  }
+
   return (
     <div className="flex flex-col h-screen">
-      {/* Header with Tabs, Filter, and Create Project Buttons */}
       <div className="container mx-auto p-4 md:p-5 flex-none">
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md mb-6 p-4">
           <div className="flex justify-between items-center">
-            {/* Tab Buttons */}
             <TabButtons activeTab={activeTab} onTabClick={handleTabClick} />
 
-            {/* Action Buttons: Filter and Create Project */}
             <div className="flex space-x-2 items-center">
               <Button
                 onClick={toggleFilter}
@@ -90,7 +105,6 @@ const ProjectDashboardTabs: React.FC = () => {
             </div>
           </div>
 
-          {/* Filter Modal */}
           {isFilterOpen && (
             <FilterModal
               isOpen={isFilterOpen}
@@ -101,53 +115,42 @@ const ProjectDashboardTabs: React.FC = () => {
             />
           )}
 
-          {/* Create/Update Project Modal */}
           <ProjectModal
             isOpen={isModalOpen}
             onClose={closeModal}
             mode={modalMode}
-            projectData={currentProject} // Pre-fill the form for edit
+            projectData={currentProject}
           />
         </div>
       </div>
 
-      {/* Display Projects based on active tab */}
       <div className="flex-1 container mx-auto p-4 md:p-5">
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md p-4 h-full">
           {loading ? (
             <p>Loading projects...</p>
-          ) : projects.length === 0 ? (
-            <div className="flex flex-col justify-center items-center h-full text-center">
-              <p className="text-gray-900 dark:text-gray-200 text-lg mb-4">
-                No projects available. Please create a new project.
-              </p>
-              <Button
-                onClick={openModal}
-                gradientDuoTone="purpleToBlue"
-                className="flex items-center justify-center h-10 text-sm font-medium px-4 py-2"
-              >
-                <MdCreate className="mr-2" /> Create New Project
-              </Button>
-            </div>
-          ) : (
+          ) : activeTab === 'Active Projects' ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {projects
-                .filter((project: any) => {
-                  if (filters.teamId && project.teamId !== filters.teamId)
-                    return false
-                  if (filters.status && project.status !== filters.status)
-                    return false
-                  return true
-                })
+                .filter((project: any) => !project.archived)
                 .map((project: any) => (
                   <ProjectCard
                     key={project.id}
                     project={project}
                     onEdit={openEditModal}
-                    onDelete={handleDelete} // Delete handler
+                    onDelete={handleDelete}
+                    onArchive={() => handleArchive(project.id, true)} // Archive Action
                   />
                 ))}
             </div>
+          ) : (
+            <ArchivedProjects
+              projects={projects.filter((project: any) => project.archived)}
+              onEdit={openEditModal}
+              onDelete={handleDelete}
+              onUnarchive={(projectId: string) =>
+                handleArchive(projectId, false)
+              }
+            />
           )}
         </div>
       </div>
@@ -157,7 +160,6 @@ const ProjectDashboardTabs: React.FC = () => {
 
 export default ProjectDashboardTabs
 
-// TabButtons Component for switching tabs between Active and Archived Projects
 const TabButtons: React.FC<{
   activeTab: string
   onTabClick: (tabName: string) => void

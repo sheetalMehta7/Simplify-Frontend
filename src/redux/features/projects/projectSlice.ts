@@ -73,6 +73,7 @@ export const updateProject = createAsyncThunk(
       title: string
       description?: string
       status?: string
+      archived?: boolean // Add support for updating the archived field
     }>
   }) => {
     const response = await projectApi.updateProject(projectId, projectData)
@@ -106,7 +107,7 @@ const projectSlice = createSlice({
       })
       .addCase(fetchAllProjects.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message || 'Failed to fetch projects'
+        state.error = action.error.message ?? 'Failed to fetch projects'
       })
       .addCase(fetchProjectById.pending, (state) => {
         state.loading = true
@@ -118,7 +119,7 @@ const projectSlice = createSlice({
       })
       .addCase(fetchProjectById.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message || 'Failed to fetch project'
+        state.error = action.error.message ?? 'Failed to fetch project'
       })
       .addCase(createProject.pending, (state) => {
         state.loading = true
@@ -130,7 +131,7 @@ const projectSlice = createSlice({
       })
       .addCase(createProject.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message || 'Failed to create project'
+        state.error = action.error.message ?? 'Failed to create project'
       })
       .addCase(updateProject.pending, (state) => {
         state.loading = true
@@ -147,7 +148,7 @@ const projectSlice = createSlice({
       })
       .addCase(updateProject.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message || 'Failed to update project'
+        state.error = action.error.message ?? 'Failed to update project'
       })
       .addCase(deleteProject.pending, (state) => {
         state.loading = true
@@ -161,7 +162,7 @@ const projectSlice = createSlice({
       })
       .addCase(deleteProject.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message || 'Failed to delete project'
+        state.error = action.error.message ?? 'Failed to delete project'
       })
   },
 })
