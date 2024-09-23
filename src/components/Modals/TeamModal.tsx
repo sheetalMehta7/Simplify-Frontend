@@ -8,7 +8,7 @@ import {
   updateTeamThunk,
 } from '../../redux/features/teams/teamSlice'
 import { MdCheck, MdPersonAdd } from 'react-icons/md'
-import { fetchAllProjects } from '../../redux/features/projects/projectSlice' // Fetch all projects
+import { fetchAllProjects } from '../../redux/features/projects/projectSlice'
 
 interface TeamModalProps {
   isOpen: boolean
@@ -19,7 +19,7 @@ interface TeamModalProps {
     name: string
     description?: string
     members: { user: { id: string; name: string } }[]
-    projects: { id: string; title: string }[] // For edit mode to display project title
+    projects: { id: string; title: string }[]
   }
 }
 
@@ -31,10 +31,9 @@ const TeamModal: React.FC<TeamModalProps> = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
 
-  // Fetch users and projects from Redux state
   const users = useSelector((state: RootState) => state.user.users)
   const loadingUsers = useSelector((state: RootState) => state.user.loading)
-  const projects = useSelector((state: RootState) => state.projects.projects) // Fetch projects from Redux
+  const projects = useSelector((state: RootState) => state.projects.projects)
   const loadingProjects = useSelector(
     (state: RootState) => state.projects.loading,
   )
@@ -42,76 +41,78 @@ const TeamModal: React.FC<TeamModalProps> = ({
   const [teamName, setTeamName] = useState('')
   const [description, setDescription] = useState('')
   const [selectedMembers, setSelectedMembers] = useState<string[]>([])
-  const [selectedProject, setSelectedProject] = useState<string | null>(null) // Selected project ID
+  const [selectedProject, setSelectedProject] = useState<string | null>(null)
   const [showMoreUsers, setShowMoreUsers] = useState(false)
 
-  const [loggedInUser, setLoggedInUser] = useState<{
-    name: string
-    email: string
-  } | null>(null)
-
-  // Fetch the logged-in user details from localStorage
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser)
-      setLoggedInUser(parsedUser)
-    }
-  }, [])
-
-  // Fetch users and projects when the modal is opened
   useEffect(() => {
     if (isOpen) {
-      dispatch(fetchAllUsers())
-      dispatch(fetchAllProjects()) // Fetch all projects for the dropdown
+      dispatch(fetchAllUsers()) // Fetch users when modal opens
+      dispatch(fetchAllProjects()) // Fetch projects
 
       if (mode === 'edit' && team) {
+        // Set the team name and description for editing
         setTeamName(team.name)
         setDescription(team.description || '')
 
-        // Safely map members
+        // Pre-load members into selectedMembers state
         setSelectedMembers(
           (team.members || [])
-            .filter((member) => member && member.user && member.user.id) // Ensure member and user exist
-            .map((member) => member.user.id), // Map valid user IDs
+            .filter((member) => member && member.user && member.user.id)
+            .map((member) => member.user.id),
         )
 
+        // Set selected project if present
         if (team.projects && team.projects.length > 0) {
-          setSelectedProject(team.projects[0].id) // Set project if available in edit mode
+          setSelectedProject(team.projects[0].id)
         } else {
-          setSelectedProject(null) // No project associated
+          setSelectedProject(null)
         }
-      } else if (mode === 'create') {
-        resetForm() // Ensure form is reset when the modal opens in create mode
+      } else {
+        resetForm() // Reset form if creating a new team
       }
     }
   }, [dispatch, isOpen, mode, team])
 
-  // Reset form fields for create mode
   const resetForm = () => {
     setTeamName('')
     setDescription('')
     setSelectedMembers([])
-    setSelectedProject(null) // Reset selected project
+    setSelectedProject(null)
   }
 
-  // Function to handle project selection from the dropdown
   const handleProjectSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedProject(e.target.value || null) // Set selected project or null if none is selected
+    setSelectedProject(e.target.value || null)
   }
 
-  // Toggle member selection
-  const handleSelectMember = (userId: string) => {
-    if (selectedMembers.includes(userId)) {
-      setSelectedMembers(selectedMembers.filter((id) => id !== userId))
-    } else {
-      setSelectedMembers([...selectedMembers, userId])
+  // Function to update the team members when they are selected or deselected
+  const updateMembers = async (updatedMembers: string[]) => {
+    if (team && mode === 'edit') {
+      await dispatch(
+        updateTeamThunk({
+          teamId: team.id,
+          data: {
+            name: team.name,
+            description: team.description,
+            members: updatedMembers, // Pass the updated members
+          },
+        }),
+      )
     }
+  }
+
+  const handleSelectMember = async (userId: string) => {
+    let updatedMembers = []
+    if (selectedMembers.includes(userId)) {
+      updatedMembers = selectedMembers.filter((id) => id !== userId) // Remove if already selected
+    } else {
+      updatedMembers = [...selectedMembers, userId] // Add if not selected
+    }
+    setSelectedMembers(updatedMembers)
+    await updateMembers(updatedMembers) // Call API to update team members
   }
 
   const isSelected = (userId: string) => selectedMembers.includes(userId)
 
-  // Handle team creation or updating
   const handleSaveTeam = async () => {
     if (teamName.trim()) {
       if (mode === 'create') {
@@ -120,19 +121,7 @@ const TeamModal: React.FC<TeamModalProps> = ({
             name: teamName,
             description,
             members: selectedMembers,
-            projectId: selectedProject || undefined, // Include projectId if selected
-          }),
-        )
-      } else if (mode === 'edit' && team) {
-        await dispatch(
-          updateTeamThunk({
-            teamId: team.id,
-            data: {
-              name: teamName,
-              description,
-              members: selectedMembers,
-              // We don't need to update the project in edit mode, but the value can still be sent
-            },
+            projectId: selectedProject || undefined,
           }),
         )
       }
@@ -141,7 +130,49 @@ const TeamModal: React.FC<TeamModalProps> = ({
     }
   }
 
-  // Render remaining users for selection
+  // Render selected members above the button
+  const renderSelectedMembers = () => {
+    if (selectedMembers.length === 0) {
+      return (
+        <p className="text-gray-500 dark:text-gray-400">
+          No members selected yet.
+        </p>
+      )
+    }
+
+    return (
+      <div className="flex flex-wrap gap-4 max-h-48 overflow-y-auto">
+        {selectedMembers.map((memberId) => {
+          const member = users.find((user) => user.id === memberId)
+          return (
+            member && (
+              <div
+                key={member.id}
+                className="relative cursor-pointer"
+                onClick={() => handleSelectMember(member.id)}
+              >
+                <div className="relative rounded-full overflow-hidden transform transition-transform duration-200 opacity-75 hover:scale-105">
+                  <img
+                    src={`https://ui-avatars.com/api/?name=${member.name}&background=random`}
+                    alt={`Avatar of ${member.name}`}
+                    className="w-12 h-12 rounded-full"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center rounded-full">
+                    <MdCheck className="text-white text-xl" />
+                  </div>
+                </div>
+                <p className="text-center mt-2 text-sm text-gray-900 dark:text-white">
+                  {member.name.split(' ')[0]} {/* Display first name */}
+                </p>
+              </div>
+            )
+          )
+        })}
+      </div>
+    )
+  }
+
+  // Render remaining users for selection, excluding selected ones
   const renderUsers = () => {
     if (loadingUsers) {
       return (
@@ -149,29 +180,27 @@ const TeamModal: React.FC<TeamModalProps> = ({
       )
     }
 
-    // Filter out already selected members and the logged-in user
-    const remainingUsers = users.filter(
-      (user) =>
-        !selectedMembers.includes(user.id) &&
-        user.email !== loggedInUser?.email,
+    // Filter users that are not selected
+    const availableUsers = users.filter(
+      (user) => !selectedMembers.includes(user.id),
     )
 
-    if (remainingUsers.length === 0) {
+    if (availableUsers.length === 0) {
       return (
         <p className="text-gray-500 dark:text-gray-400">
-          All members have been added to the team.
+          No users available to add to the team.
         </p>
       )
     }
 
     return (
       <div className="grid grid-cols-6 gap-4 max-h-48 overflow-y-auto">
-        {remainingUsers.map((user) => (
+        {availableUsers.map((user) => (
           <div
             key={user.id}
             className="relative cursor-pointer transition-opacity duration-300"
             onClick={() => handleSelectMember(user.id)}
-            style={{ opacity: isSelected(user.id) ? 0.5 : 1 }}
+            style={{ opacity: isSelected(user.id) ? 0.75 : 1 }}
           >
             <div
               className={`relative w-12 h-12 rounded-full overflow-hidden transform transition-transform duration-200 hover:scale-105`}
@@ -188,7 +217,7 @@ const TeamModal: React.FC<TeamModalProps> = ({
               )}
             </div>
             <p className="text-center mt-2 text-sm text-gray-900 dark:text-white">
-              {user.name.split(' ')[0]} {/* Display only the first name */}
+              {user.name.split(' ')[0]}
             </p>
           </div>
         ))}
@@ -217,7 +246,7 @@ const TeamModal: React.FC<TeamModalProps> = ({
           className="dark:bg-gray-700 dark:text-white"
         />
 
-        {/* Project selection dropdown for create mode, and disabled input for edit mode */}
+        {/* Display Selected Project */}
         {mode === 'create' ? (
           <Select
             value={selectedProject || ''}
@@ -244,34 +273,8 @@ const TeamModal: React.FC<TeamModalProps> = ({
           />
         )}
 
-        <div className="flex flex-wrap gap-4 max-h-48 overflow-y-auto">
-          {selectedMembers.map((memberId) => {
-            const member = users.find((user) => user.id === memberId)
-            return (
-              member && (
-                <div
-                  key={member.id}
-                  className="relative cursor-pointer"
-                  onClick={() => handleSelectMember(member.id)}
-                >
-                  <div className="relative rounded-full overflow-hidden transform transition-transform duration-200 opacity-75 hover:scale-105">
-                    <img
-                      src={`https://ui-avatars.com/api/?name=${member.name}&background=random`}
-                      alt={`Avatar of ${member.name}`}
-                      className="w-12 h-12 rounded-full"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center rounded-full">
-                      <MdCheck className="text-white text-xl" />
-                    </div>
-                  </div>
-                  <p className="text-center mt-2 text-sm text-gray-900 dark:text-white">
-                    {member.name.split(' ')[0]}
-                  </p>
-                </div>
-              )
-            )
-          })}
-        </div>
+        {/* Render Selected Members */}
+        {renderSelectedMembers()}
 
         <div className="mt-4">
           <Button
@@ -289,6 +292,7 @@ const TeamModal: React.FC<TeamModalProps> = ({
           </div>
         )}
       </Modal.Body>
+
       <Modal.Footer className="bg-white dark:bg-gray-800">
         <Button gradientDuoTone="purpleToBlue" onClick={handleSaveTeam}>
           {mode === 'create' ? 'Create' : 'Update'}

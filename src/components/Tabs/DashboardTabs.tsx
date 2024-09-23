@@ -11,10 +11,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import FilterDropdown from '../Modals/FilterModal'
 import CreateTaskModal from '../Modals/CreateTaskModal'
 import PersonalTaskBoard from '../Tasks/Personal/PersonalTaskBoard'
-import { createNewTask } from '../../redux/features/tasks/tasksSlice'
+import { createNewTask, Task } from '../../redux/features/tasks/tasksSlice'
 import { AppDispatch } from '../../redux/store'
 import { RootState } from '../../redux/rootReducer'
-import { Task } from '../../redux/features/tasks/tasksSlice'
 import { Button } from 'flowbite-react'
 
 interface Tab {
@@ -46,7 +45,6 @@ const DashboardTabs: React.FC = () => {
 
   const dispatch: AppDispatch = useDispatch()
 
-  // Fetch userId from the Redux state
   const userId = useSelector((state: RootState) => state.auth.user?.id)
 
   const handleTabClick = (tabName: string) => setActiveTab(tabName)
@@ -74,7 +72,6 @@ const DashboardTabs: React.FC = () => {
     }))
   }
 
-  // Handle task creation and map status to the correct enum values
   const handleSaveTask = async (newTask: Partial<Task>) => {
     try {
       const taskWithValidStatus = {
@@ -87,11 +84,11 @@ const DashboardTabs: React.FC = () => {
               : newTask.status === 'review'
                 ? 'review'
                 : 'done',
-        userId, // Fetch and use the correct userId
+        userId,
       }
 
       await dispatch(createNewTask(taskWithValidStatus)).unwrap()
-      closeModal() // Close the modal after successfully saving the task
+      closeModal()
     } catch (error) {
       console.error('Failed to create task:', error)
     }
@@ -101,7 +98,7 @@ const DashboardTabs: React.FC = () => {
     <div className="flex flex-col h-screen">
       {/* Header with Tabs and Filter/Task buttons */}
       <div className="container mx-auto p-4 md:p-5 flex-none">
-        <div className="bg-white dark:bg-slate-800 rounded-md shadow-md mb-6 p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-md shadow-md p-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             {/* Tabs */}
             <TabButtons
@@ -160,7 +157,7 @@ const DashboardTabs: React.FC = () => {
                   onRemove={() => removeFilter('status')}
                 />
               )}
-              <Button color="red" onClick={clearAllFilters}>
+              <Button size={'sm'} color="red" onClick={clearAllFilters}>
                 Clear All
               </Button>
             </div>
@@ -193,10 +190,10 @@ interface FilterTagProps {
 }
 
 const FilterTag: React.FC<FilterTagProps> = ({ label, onRemove }) => (
-  <div className="inline-flex items-center px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-full m-1">
-    <span className="mr-2">{label}</span>
+  <div className="inline-flex items-center px-2 py-1 bg-transparent border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 rounded-full m-1">
+    <span className="mr-2 text-sm">{label}</span>
     <button onClick={onRemove} className="text-red-500 hover:text-red-700">
-      <MdCancel size={18} />
+      <MdCancel size={16} />
     </button>
   </div>
 )
