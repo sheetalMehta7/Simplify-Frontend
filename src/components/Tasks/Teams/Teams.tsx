@@ -25,14 +25,12 @@ const Teams: React.FC = () => {
     dispatch(fetchTeams())
   }, [dispatch])
 
-  // Handle opening the create team modal
   const handleCreateTeam = () => {
-    setSelectedTeam(null) // No team selected in create mode
+    setSelectedTeam(null)
     setModalMode('create')
     setIsModalOpen(true)
   }
 
-  // Handle opening the edit team modal
   const openEditModal = (team: any) => {
     const teamWithMembers = {
       ...team,
@@ -45,12 +43,11 @@ const Teams: React.FC = () => {
     setIsModalOpen(true)
   }
 
-  // Close the modal and optionally refresh the team list if needed
   const closeModal = (teamUpdated: boolean = false) => {
     setIsModalOpen(false)
     setSelectedTeam(null)
     if (teamUpdated) {
-      dispatch(fetchTeams()) // Refresh the teams list if a team was updated
+      dispatch(fetchTeams()) // Fetch updated teams after the modal closes
     }
   }
 
@@ -128,15 +125,13 @@ const Teams: React.FC = () => {
         </>
       )}
 
-      {/* Reusable TeamModal for both Create and Edit */}
       <TeamModal
         isOpen={isModalOpen}
         onClose={closeModal}
         mode={modalMode}
-        team={selectedTeam} // Pass only when editing
+        team={selectedTeam}
       />
 
-      {/* Confirm Delete Modal */}
       <ConfirmModal
         isOpen={isConfirmModalOpen}
         onClose={closeConfirmModal}
