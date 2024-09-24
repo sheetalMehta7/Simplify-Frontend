@@ -15,8 +15,6 @@ import {
   MdPeople,
 } from 'react-icons/md'
 import { format } from 'date-fns'
-import { useSelector } from 'react-redux'
-import { RootState } from '../../redux/store'
 
 interface Task {
   title: string
@@ -33,6 +31,7 @@ interface CreateTeamTaskModalProps {
   onClose: () => void
   onSave: (task: Partial<Task>) => void
   teamId: string
+  teamMembers: { id: string; name: string }[]
   dueDate?: Date | null
 }
 
@@ -41,6 +40,7 @@ const CreateTeamTaskModal: React.FC<CreateTeamTaskModalProps> = ({
   onClose,
   onSave,
   teamId,
+  teamMembers,
   dueDate,
 }) => {
   const [taskDetails, setTaskDetails] = useState<Partial<Task>>({
@@ -55,9 +55,7 @@ const CreateTeamTaskModal: React.FC<CreateTeamTaskModalProps> = ({
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
-  // Fetch available team members from Redux store
-  const teamMembers = useSelector((state: RootState) => state.team.members) // Assuming 'team.members' contains team members
-
+  // Update task details when due date changes
   useEffect(() => {
     if (dueDate) {
       setTaskDetails((prevDetails) => ({
@@ -73,12 +71,10 @@ const CreateTeamTaskModal: React.FC<CreateTeamTaskModalProps> = ({
     >,
   ) => {
     const { name, value } = e.target
-
     setErrors((prevErrors) => ({
       ...prevErrors,
       [name]: '',
     }))
-
     setTaskDetails((prevDetails) => ({ ...prevDetails, [name]: value }))
   }
 
@@ -94,12 +90,13 @@ const CreateTeamTaskModal: React.FC<CreateTeamTaskModalProps> = ({
   }
 
   const validateForm = () => {
-    const { title, dueDate, priority, status } = taskDetails
+    const { title, dueDate, priority, status, teamId } = taskDetails
     const newErrors: { [key: string]: string } = {}
 
     if (!title) newErrors.title = 'Title is required'
     if (!priority) newErrors.priority = 'Priority is required'
     if (!status) newErrors.status = 'Status is required'
+    if (!teamId) newErrors.teamId = 'Team is required'
     if (!dueDate) {
       newErrors.dueDate = 'Due Date is required'
     } else if (new Date(dueDate) < new Date()) {
@@ -112,12 +109,7 @@ const CreateTeamTaskModal: React.FC<CreateTeamTaskModalProps> = ({
 
   const handleSubmit = () => {
     if (validateForm()) {
-      const finalTaskDetails = {
-        ...taskDetails,
-        teamId,
-      }
-
-      onSave(finalTaskDetails)
+      onSave(taskDetails)
 
       // Reset the form after submission
       setTaskDetails({
@@ -221,6 +213,15 @@ const CreateTeamTaskModal: React.FC<CreateTeamTaskModalProps> = ({
             )}
           </div>
           <div>
+            <Label htmlFor="teamId" value="Team" />
+            <TextInput
+              id="teamId"
+              name="teamId"
+              value={teamId} // Disabled and shows the selected team
+              disabled
+            />
+          </div>
+          <div>
             <Label htmlFor="assignees" value="Assign To Team Members" />
             <Select
               id="assignees"
@@ -229,6 +230,7 @@ const CreateTeamTaskModal: React.FC<CreateTeamTaskModalProps> = ({
               value={taskDetails.assigneeIds}
               onChange={handleAssigneeChange}
               icon={MdPeople}
+              disabled={!teamId} // Disable if no team is selected
             >
               {teamMembers.map((member) => (
                 <option key={member.id} value={member.id}>

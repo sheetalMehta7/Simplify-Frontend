@@ -4,11 +4,14 @@ import { VscSettings } from 'react-icons/vsc'
 import FilterDropdown from '../Modals/FilterModal'
 import TeamModal from '../Modals/TeamModal'
 import CreateTaskModal from '../Modals/CreateTaskModal'
-import { Button } from 'flowbite-react'
+import { Button, Select, Label } from 'flowbite-react'
 import Teams from '../Tasks/Teams/Teams'
 import TeamTaskBoard from '../Tasks/Teams/TeamTaskBoard'
 import { useSelector, useDispatch } from 'react-redux'
-import { fetchTeams } from '../../redux/features/teams/teamSlice'
+import {
+  fetchTeams,
+  fetchTeamMembers,
+} from '../../redux/features/teams/teamSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 
 interface Tab {
@@ -30,10 +33,13 @@ const TeamsDashboardTabs: React.FC = () => {
     useState<boolean>(false)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [selectedTeam, setSelectedTeam] = useState<any>(null)
+  const [currentTeamId, setCurrentTeamId] = useState<string>('') // Track the current team selection
 
   const dispatch: AppDispatch = useDispatch()
   const teams = useSelector((state: RootState) => state.teams.teams)
-  // const teamTasks = useSelector((state: RootState) => state.teamTasks.tasks)
+  const teamMembers = useSelector((state: RootState) => state.teams.teamMembers)
+  const loadingTeams = useSelector((state: RootState) => state.teams.loading)
+  const teamsError = useSelector((state: RootState) => state.teams.error)
 
   const [filters, setFilters] = useState<{
     date: string
@@ -50,6 +56,24 @@ const TeamsDashboardTabs: React.FC = () => {
   useEffect(() => {
     dispatch(fetchTeams())
   }, [dispatch])
+
+  // Automatically select the most recently created team when teams are fetched
+  useEffect(() => {
+    if (teams.length > 0) {
+      const latestTeam = teams.reduce((prev, current) =>
+        new Date(prev.created) > new Date(current.created) ? prev : current,
+      )
+      setCurrentTeamId(latestTeam.id)
+      dispatch(fetchTeamMembers(latestTeam.id))
+      setFilters((prev) => ({ ...prev, teamId: latestTeam.id }))
+    }
+  }, [teams, dispatch])
+
+  const handleTeamSelect = (teamId: string) => {
+    setCurrentTeamId(teamId)
+    dispatch(fetchTeamMembers(teamId)) // Fetch members of the selected team
+    setFilters((prev) => ({ ...prev, teamId })) // Update filters with the selected team
+  }
 
   const handleTabClick = (tabName: string) => setActiveTab(tabName)
   const toggleFilter = () => setIsFilterOpen((prev) => !prev)
@@ -97,9 +121,29 @@ const TeamsDashboardTabs: React.FC = () => {
       {/* Header with Tabs and Right-Side Buttons */}
       <div className="container mx-auto p-4 md:p-5 flex-none">
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md mb-6 p-4">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center flex-wrap gap-2">
             {/* Tab Buttons on the left */}
             <TabButtons activeTab={activeTab} onTabClick={handleTabClick} />
+
+            {/* Team Dropdown to select current team */}
+            {activeTab === 'Team Tasks' && (
+              <div className="w-full md:w-44">
+                <Label htmlFor="teamSelect" value="Select Team" />
+                <Select
+                  id="teamSelect"
+                  value={currentTeamId}
+                  onChange={(e) => handleTeamSelect(e.target.value)}
+                  disabled={loadingTeams}
+                  className="text-sm"
+                >
+                  {teams.map((team) => (
+                    <option key={team.id} value={team.id}>
+                      {team.name}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+            )}
 
             {/* Action Buttons: Filter and Create Team/Task on the right */}
             <div className="flex space-x-2">
@@ -108,14 +152,15 @@ const TeamsDashboardTabs: React.FC = () => {
                   <Button
                     onClick={toggleFilter}
                     color="gray"
-                    className="w-full md:w-32 h-10 flex items-center justify-center text-sm font-medium px-4 py-2"
+                    className="w-full md:w-28 h-10 flex items-center justify-center text-sm font-medium"
                   >
                     <VscSettings className="mr-2 mt-0.5" /> Filter
                   </Button>
                   <Button
                     onClick={openCreateTaskModal}
                     gradientDuoTone="purpleToBlue"
-                    className="w-full md:w-44 h-10 flex items-center justify-center text-sm font-medium px-4 py-2"
+                    className="w-full md:w-36 h-10 flex items-center justify-center text-sm font-medium"
+                    disabled={!currentTeamId} // Disable if no team is selected
                   >
                     <MdCreate className="mr-2 mt-0.5" /> Create Task
                   </Button>
@@ -125,13 +170,20 @@ const TeamsDashboardTabs: React.FC = () => {
                 <Button
                   onClick={openCreateTeamModal}
                   gradientDuoTone="purpleToBlue"
-                  className="w-full md:w-44 h-10 flex items-center justify-center text-sm font-medium px-4 py-2"
+                  className="w-full md:w-36 h-10 flex items-center justify-center text-sm font-medium"
                 >
                   <MdCreate className="mr-2 mt-0.5" /> Create Team
                 </Button>
               )}
             </div>
           </div>
+
+          {/* Error Handling */}
+          {teamsError && (
+            <div className="text-red-500">
+              <p>{teamsError}</p>
+            </div>
+          )}
 
           {/* Filter Modal */}
           {isFilterOpen && (
@@ -157,7 +209,8 @@ const TeamsDashboardTabs: React.FC = () => {
             isOpen={isCreateTaskModalOpen}
             onClose={closeCreateTaskModal}
             onSave={(task) => console.log('Saving task', task)}
-            teamId={filters.teamId} // Pass the selected team ID
+            teamId={currentTeamId} // Pass the selected team ID
+            teamMembers={teamMembers} // Pass the team members
           />
         </div>
       </div>
@@ -197,8 +250,7 @@ const TeamsDashboardTabs: React.FC = () => {
 
 export default TeamsDashboardTabs
 
-// Utility Components (Updated for equal and responsive sizing)
-
+// Utility Components for the Tab Buttons
 interface TabButtonsProps {
   activeTab: string
   onTabClick: (tabName: string) => void
