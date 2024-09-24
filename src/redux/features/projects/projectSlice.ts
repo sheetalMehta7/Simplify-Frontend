@@ -3,6 +3,7 @@ import * as projectApi from '../../../api/projectApi'
 
 // Export the Project interface
 export interface Project {
+  archived: any
   team: any
   id: string
   title: string

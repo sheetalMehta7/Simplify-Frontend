@@ -41,34 +41,39 @@ const TeamModal: React.FC<TeamModalProps> = ({
   const [teamName, setTeamName] = useState('')
   const [description, setDescription] = useState('')
   const [selectedMembers, setSelectedMembers] = useState<string[]>([])
-  const [selectedProject, setSelectedProject] = useState<string | null>(null)
+  const [selectedProject, setSelectedProject] = useState<string | undefined>(
+    undefined,
+  )
   const [showMoreUsers, setShowMoreUsers] = useState(false)
+
+  // Error state for validation
+  const [teamNameError, setTeamNameError] = useState<string>('')
+  const [projectError, setProjectError] = useState<string>('')
 
   useEffect(() => {
     if (isOpen) {
-      dispatch(fetchAllUsers()) // Fetch users when modal opens
-      dispatch(fetchAllProjects()) // Fetch projects
+      dispatch(fetchAllUsers())
+      dispatch(fetchAllProjects())
 
       if (mode === 'edit' && team) {
-        // Set the team name and description for editing
+        // Set team name and description
         setTeamName(team.name)
-        setDescription(team.description || '')
+        setDescription(team.description ?? '')
 
-        // Pre-load members into selectedMembers state
+        // Correctly map team members to their IDs
         setSelectedMembers(
-          (team.members || [])
-            .filter((member) => member && member.user && member.user.id)
-            .map((member) => member.user.id),
+          (team.members ?? [])
+            .map((member) => member.user?.id) // Access member.user.id correctly
+            .filter((id) => id !== undefined) as string[],
         )
 
-        // Set selected project if present
         if (team.projects && team.projects.length > 0) {
           setSelectedProject(team.projects[0].id)
         } else {
-          setSelectedProject(null)
+          setSelectedProject(undefined)
         }
       } else {
-        resetForm() // Reset form if creating a new team
+        resetForm()
       }
     }
   }, [dispatch, isOpen, mode, team])
@@ -77,14 +82,46 @@ const TeamModal: React.FC<TeamModalProps> = ({
     setTeamName('')
     setDescription('')
     setSelectedMembers([])
-    setSelectedProject(null)
+    setSelectedProject(undefined)
+    setTeamNameError('')
+    setProjectError('')
   }
 
   const handleProjectSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedProject(e.target.value || null)
+    const value = e.target.value
+    if (value) {
+      setSelectedProject(value)
+      setProjectError('') // Clear error when a valid project is selected
+    } else {
+      setSelectedProject(undefined)
+      setProjectError('Project selection is required.') // Set error if no project is selected
+    }
   }
 
-  // Function to update the team members when they are selected or deselected
+  const handleTeamNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setTeamName(value)
+    if (value.trim()) {
+      setTeamNameError('')
+    }
+  }
+
+  const validateFields = () => {
+    let valid = true
+
+    if (!teamName.trim()) {
+      setTeamNameError('Team name is required.')
+      valid = false
+    }
+
+    if (!selectedProject) {
+      setProjectError('Project selection is required.')
+      valid = false
+    }
+
+    return valid
+  }
+
   const updateMembers = async (updatedMembers: string[]) => {
     if (team && mode === 'edit') {
       await dispatch(
@@ -93,7 +130,7 @@ const TeamModal: React.FC<TeamModalProps> = ({
           data: {
             name: team.name,
             description: team.description,
-            members: updatedMembers, // Pass the updated members
+            members: updatedMembers,
           },
         }),
       )
@@ -103,17 +140,21 @@ const TeamModal: React.FC<TeamModalProps> = ({
   const handleSelectMember = async (userId: string) => {
     let updatedMembers = []
     if (selectedMembers.includes(userId)) {
-      updatedMembers = selectedMembers.filter((id) => id !== userId) // Remove if already selected
+      updatedMembers = selectedMembers.filter((id) => id !== userId)
     } else {
-      updatedMembers = [...selectedMembers, userId] // Add if not selected
+      updatedMembers = [...selectedMembers, userId]
     }
     setSelectedMembers(updatedMembers)
-    await updateMembers(updatedMembers) // Call API to update team members
+    await updateMembers(updatedMembers)
   }
 
   const isSelected = (userId: string) => selectedMembers.includes(userId)
 
   const handleSaveTeam = async () => {
+    if (!validateFields()) {
+      return
+    }
+
     if (teamName.trim()) {
       if (mode === 'create') {
         await dispatch(
@@ -121,7 +162,7 @@ const TeamModal: React.FC<TeamModalProps> = ({
             name: teamName,
             description,
             members: selectedMembers,
-            projectId: selectedProject || undefined,
+            projectId: selectedProject,
           }),
         )
       }
@@ -130,7 +171,6 @@ const TeamModal: React.FC<TeamModalProps> = ({
     }
   }
 
-  // Render selected members above the button
   const renderSelectedMembers = () => {
     if (selectedMembers.length === 0) {
       return (
@@ -162,7 +202,7 @@ const TeamModal: React.FC<TeamModalProps> = ({
                   </div>
                 </div>
                 <p className="text-center mt-2 text-sm text-gray-900 dark:text-white">
-                  {member.name.split(' ')[0]} {/* Display first name */}
+                  {member.name.split(' ')[0]}
                 </p>
               </div>
             )
@@ -172,7 +212,6 @@ const TeamModal: React.FC<TeamModalProps> = ({
     )
   }
 
-  // Render remaining users for selection, excluding selected ones
   const renderUsers = () => {
     if (loadingUsers) {
       return (
@@ -180,7 +219,6 @@ const TeamModal: React.FC<TeamModalProps> = ({
       )
     }
 
-    // Filter users that are not selected
     const availableUsers = users.filter(
       (user) => !selectedMembers.includes(user.id),
     )
@@ -236,9 +274,12 @@ const TeamModal: React.FC<TeamModalProps> = ({
         <TextInput
           placeholder="Team Name"
           value={teamName}
-          onChange={(e) => setTeamName(e.target.value)}
+          onChange={handleTeamNameChange}
           className="dark:bg-gray-700 dark:text-white"
         />
+        {teamNameError && (
+          <p className="text-red-600 text-sm mt-1">{teamNameError}</p>
+        )}
         <TextInput
           placeholder="Description"
           value={description}
@@ -246,24 +287,31 @@ const TeamModal: React.FC<TeamModalProps> = ({
           className="dark:bg-gray-700 dark:text-white"
         />
 
-        {/* Display Selected Project */}
+        {/* Display Selected Project with validation */}
         {mode === 'create' ? (
-          <Select
-            value={selectedProject || ''}
-            onChange={handleProjectSelect}
-            className="dark:bg-gray-700 dark:text-white"
-          >
-            <option value="">Select Project (Optional)</option>
-            {loadingProjects ? (
-              <option disabled>Loading projects...</option>
-            ) : (
-              projects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.title}
-                </option>
-              ))
+          <>
+            <Select
+              value={selectedProject ?? ''}
+              onChange={handleProjectSelect}
+              className="dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Select Project</option>
+              {loadingProjects ? (
+                <option disabled>Loading projects...</option>
+              ) : (
+                projects
+                  .filter((project) => !project.archived)
+                  .map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.title}
+                    </option>
+                  ))
+              )}
+            </Select>
+            {projectError && (
+              <p className="text-red-600 text-sm mt-1">{projectError}</p>
             )}
-          </Select>
+          </>
         ) : (
           <TextInput
             placeholder="Project"
@@ -294,7 +342,11 @@ const TeamModal: React.FC<TeamModalProps> = ({
       </Modal.Body>
 
       <Modal.Footer className="bg-white dark:bg-gray-800">
-        <Button gradientDuoTone="purpleToBlue" onClick={handleSaveTeam}>
+        <Button
+          gradientDuoTone="purpleToBlue"
+          onClick={handleSaveTeam}
+          disabled={!!teamNameError || !!projectError}
+        >
           {mode === 'create' ? 'Create' : 'Update'}
         </Button>
         <Button color="gray" onClick={() => onClose(false)}>

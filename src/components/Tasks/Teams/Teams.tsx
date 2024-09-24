@@ -35,7 +35,7 @@ const Teams: React.FC = () => {
     const teamWithMembers = {
       ...team,
       members: team.members
-        ? team.members.map((member: any) => member.user.id)
+        ? team.members.map((member: any) => member.user?.id) // Extract the user ID from the 'user' object
         : [],
     }
     setSelectedTeam(teamWithMembers)

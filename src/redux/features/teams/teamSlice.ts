@@ -9,6 +9,7 @@ import {
 } from '../../../api/teamApi'
 
 interface Team {
+  created: string | number | Date
   id: string
   name: string
   description?: string
