@@ -124,53 +124,55 @@ const DashboardTabs: React.FC = () => {
               </Button>
             </div>
           </div>
-
-          {/* Filter Dropdown */}
-          {isFilterOpen && (
-            <FilterDropdown
-              isOpen={isFilterOpen}
-              onClose={() => setIsFilterOpen(false)}
-              filters={filters}
-              onApply={applyFilters}
-              onClearAll={clearAllFilters}
-            />
-          )}
-
-          {/* Active Filters */}
-          {Object.values(filters).some((filter) => filter) && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {filters.date && (
-                <FilterTag
-                  label={`Date: ${filters.date}`}
-                  onRemove={() => removeFilter('date')}
-                />
-              )}
-              {filters.assignee && (
-                <FilterTag
-                  label={`Assignee: ${filters.assignee}`}
-                  onRemove={() => removeFilter('assignee')}
-                />
-              )}
-              {filters.status && (
-                <FilterTag
-                  label={`Status: ${filters.status}`}
-                  onRemove={() => removeFilter('status')}
-                />
-              )}
-              <Button size={'sm'} color="red" onClick={clearAllFilters}>
-                Clear All
-              </Button>
-            </div>
-          )}
-
-          {/* Create Task Modal */}
-          <CreateTaskModal
-            isOpen={isModalOpen}
-            onClose={closeModal}
-            onSave={handleSaveTask}
-          />
         </div>
+
+        {/* Filter Dropdown */}
+        {isFilterOpen && (
+          <FilterDropdown
+            isOpen={isFilterOpen}
+            onClose={() => setIsFilterOpen(false)}
+            filters={filters}
+            onApply={applyFilters}
+            onClearAll={clearAllFilters}
+          />
+        )}
       </div>
+
+      {/* Active Filters displayed separately without background */}
+      {Object.values(filters).some((filter) => filter) && (
+        <div className="container mx-auto px-4 md:px-5 mt-2 mb-4">
+          <div className="flex flex-wrap gap-2">
+            {filters.date && (
+              <FilterTag
+                label={`Date: ${filters.date}`}
+                onRemove={() => removeFilter('date')}
+              />
+            )}
+            {filters.assignee && (
+              <FilterTag
+                label={`Assignee: ${filters.assignee}`}
+                onRemove={() => removeFilter('assignee')}
+              />
+            )}
+            {filters.status && (
+              <FilterTag
+                label={`Status: ${filters.status}`}
+                onRemove={() => removeFilter('status')}
+              />
+            )}
+            <Button size="sm" color="red" onClick={clearAllFilters}>
+              Clear All
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Create Task Modal */}
+      <CreateTaskModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onSave={handleSaveTask}
+      />
 
       {/* Task Board based on active tab */}
       <div className="flex-1 container mx-auto p-4 md:p-5">
