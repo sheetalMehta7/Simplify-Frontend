@@ -24,9 +24,9 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     return Math.ceil(timeDifference / (1000 * 3600 * 24))
   }
 
-  // Filter out tasks that are past due
-  const upcomingTasks = taskNotifications.filter(
-    (task) => getDaysRemaining(task.dueDate) >= 0,
+  // Filter out tasks that are not in "todo" status and those that are past due
+  const upcomingTodoTasks = taskNotifications.filter(
+    (task) => task.status === 'todo' && getDaysRemaining(task.dueDate) >= 0,
   )
 
   return (
@@ -39,28 +39,24 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
           Notifications
         </h3>
         <ul className="mt-2 space-y-2 divide-y divide-gray-200 dark:divide-gray-700">
-          {upcomingTasks.length > 0 ? (
-            upcomingTasks.map((task) => {
+          {upcomingTodoTasks.length > 0 ? (
+            upcomingTodoTasks.map((task) => {
               const daysRemaining = getDaysRemaining(task.dueDate)
 
               // Determine bell icon style based on due date
               let bellClass = 'text-gray-500 dark:text-gray-300'
               if (daysRemaining === 0) {
-                // Use LuBellRing icon and make it red if task is due today
-                bellClass = 'text-red-500'
-              }
-
-              if (daysRemaining === 2) {
-                // Use LuBellRing icon and make it red if task is due today
-                bellClass = 'text-yellow-300'
+                bellClass = 'text-red-500' // Red for tasks due today
+              } else if (daysRemaining === 2) {
+                bellClass = 'text-yellow-300' // Yellow for tasks due in 2 days
               }
 
               // Conditional class for highlighting the due date
               let dueDateClass = 'text-gray-500'
               if (daysRemaining === 0) {
-                dueDateClass = 'text-red-500'
+                dueDateClass = 'text-red-500' // Red for tasks due today
               } else if (daysRemaining === 2) {
-                dueDateClass = 'text-yellow-300'
+                dueDateClass = 'text-yellow-300' // Yellow for tasks due in 2 days
               }
 
               return (

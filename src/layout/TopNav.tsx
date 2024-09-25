@@ -42,14 +42,6 @@ const TopNav: React.FC = () => {
     dispatch(fetchTasks())
   }, [dispatch])
 
-  // Initialize notification badge visibility based on session storage
-  useEffect(() => {
-    const badgeShown = sessionStorage.getItem('notificationsBadgeShown')
-    if (!badgeShown) {
-      setHasUnreadNotifications(true)
-    }
-  }, [])
-
   const tasks: { [key: string]: Task[] } = useSelector((state: RootState) => {
     return (
       state.tasks.personalTasks || {
@@ -69,15 +61,19 @@ const TopNav: React.FC = () => {
     return Math.ceil(timeDifference / (1000 * 3600 * 24))
   }
 
-  // Update unread notifications based on task deadlines
-  useEffect(() => {
-    const upcomingTasks = (Object.values(tasks) as Task[][])
-      .flat() // Flatten tasks by statuses
-      .filter((task) => calculateDaysRemaining(task.dueDate) <= 5)
-      .sort((a, b) => a.priority.localeCompare(b.priority))
+  // Filter tasks that have a due date within the next 5 days and are in 'todo' status
+  const upcomingTasks = (Object.values(tasks) as Task[][])
+    .flat()
+    .filter(
+      (task: Task) =>
+        task.status === 'todo' && calculateDaysRemaining(task.dueDate) <= 5,
+    )
+    .sort((a, b) => a.priority.localeCompare(b.priority))
 
+  // Update notification badge visibility based on filtered tasks
+  useEffect(() => {
     setHasUnreadNotifications(upcomingTasks.length > 0)
-  }, [tasks])
+  }, [upcomingTasks])
 
   const handleClickOutside = (event: MouseEvent) => {
     if (
@@ -97,8 +93,6 @@ const TopNav: React.FC = () => {
     if (!isNotificationsOpen) {
       setIsProfileOpen(false)
       setHasUnreadNotifications(false)
-      // Update session storage to mark that the badge has been shown
-      sessionStorage.setItem('notificationsBadgeShown', 'true')
     }
   }
 
@@ -138,24 +132,14 @@ const TopNav: React.FC = () => {
             onClick={handleNotificationClick}
           >
             <IoMdNotificationsOutline className="text-2xl cursor-pointer" />
-            {hasUnreadNotifications && (
+            {hasUnreadNotifications && upcomingTasks.length > 0 && (
               <div className="absolute -top-3 -right-3 w-6 h-6 flex items-center justify-center bg-red-600 text-white text-xs font-bold rounded-full">
-                {
-                  (Object.values(tasks) as Task[][])
-                    .flat()
-                    .filter(
-                      (task: Task) => calculateDaysRemaining(task.dueDate) <= 5,
-                    ).length
-                }
+                {upcomingTasks.length}
               </div>
             )}
             {isNotificationsOpen && (
               <NotificationDropdown
-                taskNotifications={(Object.values(tasks) as Task[][])
-                  .flat()
-                  .filter(
-                    (task: Task) => calculateDaysRemaining(task.dueDate) <= 5,
-                  )}
+                taskNotifications={upcomingTasks}
                 dropdownRef={dropdownRef}
                 onClose={() => setIsNotificationsOpen(false)}
               />
