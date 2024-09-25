@@ -26,7 +26,9 @@ interface CreateTaskModalProps {
   onClose: () => void
   onSave: (task: Partial<Task>) => void
   teamId?: string
+  teamName?: string // Pass the team name to display
   dueDate?: Date | null
+  teamMembers: any[] // Array of team members
 }
 
 const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
@@ -34,7 +36,9 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   onClose,
   onSave,
   teamId,
+  teamName,
   dueDate,
+  teamMembers,
 }) => {
   const [taskDetails, setTaskDetails] = useState<Partial<Task>>({
     title: '',
@@ -43,7 +47,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     priority: 'low',
     dueDate: dueDate ? format(dueDate, 'yyyy-MM-dd') : '',
     assigneeName: '',
-    userId: '', // New addition
+    userId: '',
     teamId: teamId || '',
   })
 
@@ -51,14 +55,14 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}')
-    if (user && user.name && user.id) {
+    if (user && user.name && user.id && !teamId) {
       setTaskDetails((prevDetails) => ({
         ...prevDetails,
         assigneeName: user.name,
-        userId: user.id, // Set the userId here
+        userId: user.id,
       }))
     }
-  }, [])
+  }, [teamId])
 
   useEffect(() => {
     if (dueDate) {
@@ -117,7 +121,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         assigneeName: taskDetails.teamId
           ? taskDetails.assigneeName
           : taskDetails.assigneeName,
-        userId: taskDetails.userId, // Ensure the userId is included in the task data
+        userId: taskDetails.userId,
       }
 
       onSave(finalTaskDetails)
@@ -130,7 +134,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         priority: 'low',
         dueDate: dueDate ? format(dueDate, 'yyyy-MM-dd') : '',
         assigneeName: '',
-        userId: taskDetails.userId, // Keep userId for subsequent tasks
+        userId: taskDetails.userId,
         teamId: teamId || '',
       })
 
@@ -224,19 +228,45 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               <p className="text-red-500 text-sm mt-1">{errors.status}</p>
             )}
           </div>
-          <div>
-            <Label htmlFor="assignee" value="Assigned To" />
-            <TextInput
-              id="assignee"
-              name="assignee"
-              value={taskDetails.assigneeName}
-              disabled
-            />
-          </div>
-          {teamId && (
+
+          {/* Show team members dropdown if teamId exists */}
+          {teamId && teamMembers?.length > 0 ? (
             <div>
-              <Label htmlFor="teamId" value="Assigned Team" />
-              <TextInput id="teamId" name="teamId" value={teamId} disabled />
+              <Label htmlFor="assignee" value="Assign to Team Member" />
+              <Select
+                id="assignee"
+                name="assignee"
+                value={taskDetails.assigneeName}
+                onChange={handleChange}
+              >
+                {teamMembers.map((member) => (
+                  <option key={member.id} value={member.name}>
+                    {member.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          ) : (
+            <div>
+              <Label htmlFor="assignee" value="Assigned To" />
+              <TextInput
+                id="assignee"
+                name="assignee"
+                value={taskDetails.assigneeName}
+                disabled
+              />
+            </div>
+          )}
+
+          {teamName && (
+            <div>
+              <Label htmlFor="teamName" value="Assigned Team" />
+              <TextInput
+                id="teamName"
+                name="teamName"
+                value={teamName}
+                disabled
+              />
             </div>
           )}
         </div>
