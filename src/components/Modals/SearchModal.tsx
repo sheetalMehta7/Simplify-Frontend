@@ -1,4 +1,3 @@
-// src/components/SearchModal.tsx
 import React from 'react'
 import { Modal, TextInput, Kbd } from 'flowbite-react'
 import { IoMdSearch } from 'react-icons/io'
