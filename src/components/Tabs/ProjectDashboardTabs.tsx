@@ -35,7 +35,7 @@ const ProjectDashboardTabs: React.FC = () => {
       await dispatch(fetchAllProjects())
       setTimeout(() => {
         setLoading(false)
-      }, 2000)
+      }, 1000)
     }
     loadTasks()
   }, [dispatch])

@@ -99,7 +99,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
               <li key={item.tab}>
                 <button
                   onClick={() => handleTabSelect(item.tab)}
-                  className={`flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg w-full text-left transition-all duration-200 ${
+                  className={`flex items-center p-4 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md w-full text-left transition-all duration-200 ${
                     selectedTab === item.tab
                       ? 'bg-gray-200 dark:bg-gray-700'
                       : ''
@@ -134,8 +134,6 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
       {/* Main Content Section */}
       <main className="ml-52 p-6 w-full">
         {selectedTab === 'Projects' && <div>Projects Content</div>}
-        {/* Use the new ProjectDashboardTabs component */}
-        {/* Render other tabs like "Dashboard", "Issues", etc., here */}
         {selectedTab === 'Dashboard' && <div>Dashboard Content</div>}
         {selectedTab === 'TeamsBoard' && <div>Teams Board Content</div>}
       </main>

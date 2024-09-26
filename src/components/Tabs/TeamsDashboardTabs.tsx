@@ -34,6 +34,7 @@ const TeamsDashboardTabs: React.FC = () => {
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [selectedTeam, setSelectedTeam] = useState<any>(null)
   const [currentTeamId, setCurrentTeamId] = useState<string>('') // Track the current team selection
+  const [currentTeamName, setCurrentTeamName] = useState<string>('') // Track the current team name
 
   const dispatch: AppDispatch = useDispatch()
   const teams = useSelector((state: RootState) => state.teams.teams)
@@ -64,15 +65,20 @@ const TeamsDashboardTabs: React.FC = () => {
         new Date(prev.created) > new Date(current.created) ? prev : current,
       )
       setCurrentTeamId(latestTeam.id)
+      setCurrentTeamName(latestTeam.name)
       dispatch(fetchTeamMembers(latestTeam.id))
       setFilters((prev) => ({ ...prev, teamId: latestTeam.id }))
     }
   }, [teams, dispatch])
 
   const handleTeamSelect = (teamId: string) => {
-    setCurrentTeamId(teamId)
-    dispatch(fetchTeamMembers(teamId)) // Fetch members of the selected team
-    setFilters((prev) => ({ ...prev, teamId })) // Update filters with the selected team
+    const selectedTeam = teams.find((team) => team.id === teamId)
+    if (selectedTeam) {
+      setCurrentTeamId(teamId)
+      setCurrentTeamName(selectedTeam.name)
+      dispatch(fetchTeamMembers(teamId)) // Fetch members of the selected team
+      setFilters((prev) => ({ ...prev, teamId })) // Update filters with the selected team
+    }
   }
 
   const handleTabClick = (tabName: string) => setActiveTab(tabName)
@@ -138,7 +144,7 @@ const TeamsDashboardTabs: React.FC = () => {
                 >
                   {teams.map((team) => (
                     <option key={team.id} value={team.id}>
-                      {team.name}
+                      {team.name} {/* Display team name instead of ID */}
                     </option>
                   ))}
                 </Select>
@@ -210,6 +216,7 @@ const TeamsDashboardTabs: React.FC = () => {
             onClose={closeCreateTaskModal}
             onSave={(task) => console.log('Saving task', task)}
             teamId={currentTeamId} // Pass the selected team ID
+            teamName={currentTeamName} // Pass the selected team name
             teamMembers={teamMembers} // Pass the team members
           />
         </div>

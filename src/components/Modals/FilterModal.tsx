@@ -163,22 +163,26 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
               </Select>
             </div>
 
-            <div>
-              <Label
-                htmlFor="teamId"
-                value="Team"
-                className="text-gray-900 dark:text-gray-200"
-              />
-              <TextInput
-                id="teamId"
-                name="teamId"
-                icon={MdGroup}
-                value={formik.values.teamId}
-                onChange={handleInputChange}
-                placeholder="Enter team ID"
-                className="dark:bg-gray-700 dark:text-gray-100"
-              />
-            </div>
+            {!formik.values.teamId ||
+              (formik.values.teamId === '' && (
+                <div>
+                  <Label
+                    htmlFor="teamId"
+                    value="Team"
+                    className="text-gray-900 dark:text-gray-200"
+                  />
+
+                  <TextInput
+                    id="teamId"
+                    name="teamId"
+                    icon={MdGroup}
+                    value={formik.values.teamId}
+                    onChange={handleInputChange}
+                    placeholder="Enter team ID"
+                    className="dark:bg-gray-700 dark:text-gray-100"
+                  />
+                </div>
+              ))}
 
             {showValidationMessage && (
               <div className="text-red-500 text-sm mt-2">
