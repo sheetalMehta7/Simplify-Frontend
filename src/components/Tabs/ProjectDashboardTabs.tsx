@@ -1,3 +1,5 @@
+// src/components/Dashboard/ProjectDashboardTabs.tsx
+
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -95,8 +97,22 @@ const ProjectDashboardTabs: React.FC = () => {
     ))
   }
 
+  // Apply Filters to Projects
+  const filteredProjects = projects.filter((project: any) => {
+    // Filter based on activeTab
+    if (activeTab === 'Active Projects' && project.archived) return false
+    if (activeTab === 'Archived Projects' && !project.archived) return false
+
+    // Apply additional filters
+    if (filters.teamId && project.teamId !== filters.teamId) return false
+    if (filters.status && project.status !== filters.status) return false
+
+    return true
+  })
+
   return (
     <div className="flex flex-col h-screen">
+      {/* Header Section */}
       <div className="container mx-auto p-4 md:p-5 flex-none">
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md mb-6 p-4">
           <div className="flex justify-between items-center">
@@ -139,36 +155,38 @@ const ProjectDashboardTabs: React.FC = () => {
         </div>
       </div>
 
+      {/* Projects Section */}
       <div className="flex-1 container mx-auto p-4 md:p-5">
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md p-4 h-full">
+          {/* Display Project Count */}
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">
+              {activeTab} ({filteredProjects.length})
+            </h2>
+          </div>
+
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {renderSkeletons(6)}{' '}
-              {/* Adjust the number of skeletons as needed */}
+              {renderSkeletons(filteredProjects.length)}{' '}
             </div>
-          ) : activeTab === 'Active Projects' ? (
+          ) : filteredProjects.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {projects
-                .filter((project: any) => !project.archived)
-                .map((project: any) => (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                    onEdit={openEditModal}
-                    onDelete={handleDelete}
-                    onArchive={() => handleArchive(project.id, true)} // Archive Action
-                  />
-                ))}
+              {filteredProjects.map((project: any) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  onEdit={openEditModal}
+                  onDelete={handleDelete}
+                  onArchive={() =>
+                    handleArchive(project.id, activeTab === 'Active Projects')
+                  }
+                />
+              ))}
             </div>
           ) : (
-            <ArchivedProjects
-              projects={projects.filter((project: any) => project.archived)}
-              onEdit={openEditModal}
-              onDelete={handleDelete}
-              onUnarchive={(projectId: string) =>
-                handleArchive(projectId, false)
-              }
-            />
+            <div className="text-center text-gray-500 dark:text-gray-400">
+              No projects found.
+            </div>
           )}
         </div>
       </div>
@@ -178,6 +196,7 @@ const ProjectDashboardTabs: React.FC = () => {
 
 export default ProjectDashboardTabs
 
+// TabButtons Component
 const TabButtons: React.FC<{
   activeTab: string
   onTabClick: (tabName: string) => void
