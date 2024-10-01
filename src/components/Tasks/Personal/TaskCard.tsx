@@ -14,8 +14,8 @@ import {
   updateTaskThunk,
   deleteTaskThunk,
   moveTaskLocally,
+  Task,
 } from '../../../redux/features/tasks/tasksSlice'
-import { Task } from '../../../redux/features/tasks/tasksSlice'
 import { AppDispatch } from '../../../redux/store'
 
 interface TaskCardProps {
@@ -34,8 +34,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
   const menuRef = useRef<HTMLDivElement>(null)
   const statusRef = useRef<HTMLLIElement>(null)
 
-  // Helper function to check if the task is overdue and not done
-  const isOverdue = task.dueDate ? new Date(task.dueDate) < new Date() : false
+  const isTodo = task.status === 'todo'
+  const isOverdue =
+    isTodo && task.dueDate ? new Date(task.dueDate) < new Date() : false
   const isDone = task.status === 'done'
 
   useEffect(() => {
@@ -84,7 +85,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
   return (
     <div
       className={`relative p-4 rounded-lg shadow-md text-gray-900 dark:text-white cursor-pointer 
-        ${isOverdue && !isDone ? 'bg-red-100 border-l-4 border-red-500' : 'bg-white dark:bg-gray-700'}`}
+        ${isOverdue ? 'bg-red-100 border-l-4 border-red-500' : 'bg-white dark:bg-gray-700'}`}
       onClick={() => onTaskClick(task)}
     >
       {/* Flag icon */}
@@ -94,7 +95,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
       />
 
       {/* Overdue warning icon wrapped in Tooltip */}
-      {isOverdue && !isDone && (
+      {isOverdue && (
         <div className="flex gap-2 absolute top-2 right-6">
           <Tooltip placement="top" content="Task is Overdue!">
             <FaExclamationTriangle className="text-red-500" size={18} />
@@ -184,9 +185,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
       </div>
 
       <div
-        className={`${
-          isOverdue && !isDone ? 'dark:text-black' : 'dark:text-white'
-        } ml-8`}
+        className={`${isOverdue ? 'dark:text-black' : 'dark:text-white'} ml-8`}
       >
         <h3
           className="text-sm font-semibold md:text-base lg:text-base"
@@ -197,12 +196,16 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onTaskClick }) => {
         <p className="text-xs md:text-xs mb-1">
           Assignee: {task.assignee || 'Unassigned'}
         </p>
-        <p className="text-xs md:text-xs mb-2">
-          Due Date:{' '}
-          {task.dueDate
-            ? formatDate(task.dueDate, 'MMM dd, yyyy')
-            : 'No due date'}
-        </p>
+
+        {/* Due Date - Only for Todo Tasks */}
+        {isTodo && (
+          <p className="text-xs md:text-xs mb-2">
+            Due Date:{' '}
+            {task.dueDate
+              ? formatDate(task.dueDate, 'MMM dd, yyyy')
+              : 'No due date'}
+          </p>
+        )}
 
         {/* Status Badge */}
         <span
