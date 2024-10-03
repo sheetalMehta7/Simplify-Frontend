@@ -1,9 +1,9 @@
 import axiosInstance from '../helpers/axiosInstance'
-import { TaskStatus, TaskPriority } from '../types/taskTypes' // Assuming enums for status/priority are defined
+import { TaskStatus, TaskPriority } from '../types/taskTypes'
 
 // Fetch all tasks for a specific team
 export const getTeamTasks = async (teamId: string) => {
-  const response = await axiosInstance.get(`/teams/${teamId}/tasks`)
+  const response = await axiosInstance.get(`/team-tasks/${teamId}/tasks`)
   return response.data
 }
 
@@ -13,13 +13,13 @@ export const createTeamTask = async (
   data: {
     title: string
     description?: string
-    status: TaskStatus // Using enum for TaskStatus
-    priority: TaskPriority // Using enum for TaskPriority
+    status: TaskStatus
+    priority: TaskPriority
     dueDate?: string
-    assigneeIds?: string[] // Array of user IDs
+    assigneeIds?: string[]
   },
 ) => {
-  const response = await axiosInstance.post(`/teams/${teamId}/tasks`, data)
+  const response = await axiosInstance.post(`/team-tasks/${teamId}/tasks`, data)
   return response.data
 }
 
@@ -30,14 +30,14 @@ export const updateTeamTask = async (
   data: {
     title?: string
     description?: string
-    status?: TaskStatus // Using enum for TaskStatus
-    priority?: TaskPriority // Using enum for TaskPriority
+    status?: TaskStatus
+    priority?: TaskPriority
     dueDate?: string
-    assigneeIds?: string[] // Array of user IDs
+    assigneeIds?: string[]
   },
 ) => {
   const response = await axiosInstance.put(
-    `/teams/${teamId}/tasks/${taskId}`,
+    `/team-tasks/${teamId}/tasks/${taskId}`,
     data,
   )
   return response.data
@@ -46,7 +46,7 @@ export const updateTeamTask = async (
 // Delete a team task by task ID
 export const deleteTeamTask = async (teamId: string, taskId: string) => {
   const response = await axiosInstance.delete(
-    `/teams/${teamId}/tasks/${taskId}`,
+    `/team-tasks/${teamId}/tasks/${taskId}`,
   )
   return response.data
 }
