@@ -28,19 +28,9 @@ const TopNav: React.FC = () => {
   const notificationsIconRef = useRef<HTMLDivElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
+  // Selectors
   const profile = useSelector((state: RootState) => state.user.profile)
   const profileLoading = useSelector((state: RootState) => state.user.loading)
-
-  useEffect(() => {
-    if (isProfileOpen) {
-      dispatch(fetchUserProfile())
-    }
-  }, [isProfileOpen, dispatch])
-
-  // Fetch tasks when component mounts
-  useEffect(() => {
-    dispatch(fetchTasks())
-  }, [dispatch])
 
   const tasks: { [key: string]: Task[] } = useSelector((state: RootState) => {
     return (
@@ -52,6 +42,18 @@ const TopNav: React.FC = () => {
       }
     )
   })
+
+  // Fetch user profile when profile dropdown is opened
+  useEffect(() => {
+    if (isProfileOpen && !profile) {
+      dispatch(fetchUserProfile())
+    }
+  }, [isProfileOpen, dispatch, profile])
+
+  // Fetch tasks when component mounts
+  useEffect(() => {
+    dispatch(fetchTasks())
+  }, [dispatch])
 
   // Calculate remaining days for a task's due date
   const calculateDaysRemaining = (dueDate: string) => {
@@ -75,6 +77,7 @@ const TopNav: React.FC = () => {
     setHasUnreadNotifications(upcomingTasks.length > 0)
   }, [upcomingTasks])
 
+  // Handle clicks outside the dropdowns to close them
   const handleClickOutside = (event: MouseEvent) => {
     if (
       notificationsIconRef.current &&
@@ -86,6 +89,13 @@ const TopNav: React.FC = () => {
       setIsProfileOpen(false)
     }
   }
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   // Handle notification icon click
   const handleNotificationClick = () => {
@@ -104,16 +114,10 @@ const TopNav: React.FC = () => {
     }
   }
 
-  useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
-
   return (
     <>
       <div className="sticky top-0 z-30 flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 shadow-md">
+        {/* Search Bar */}
         <div className="flex items-center w-full max-w-4xl relative">
           <TextInput
             icon={IoMdSearch}
@@ -124,8 +128,12 @@ const TopNav: React.FC = () => {
             <Kbd>Ctrl</Kbd> + <Kbd>Shift</Kbd> + <Kbd>K</Kbd>
           </div>
         </div>
+
+        {/* Icons and Dropdowns */}
         <div className="flex gap-6 relative items-center pl-4">
           <DarkThemeToggle />
+
+          {/* Notifications */}
           <div
             className="relative flex items-center"
             ref={notificationsIconRef}
@@ -145,7 +153,11 @@ const TopNav: React.FC = () => {
               />
             )}
           </div>
+
+          {/* Settings */}
           <IoSettingsOutline className="text-2xl cursor-pointer" />
+
+          {/* Profile */}
           <div className="relative flex items-center">
             <CgProfileWithRef
               className="text-2xl cursor-pointer"
@@ -165,6 +177,7 @@ const TopNav: React.FC = () => {
         </div>
       </div>
 
+      {/* Search Modal */}
       <SearchModal
         show={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
