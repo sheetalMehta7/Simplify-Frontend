@@ -1,3 +1,5 @@
+// TeamTaskBoard.tsx
+
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -30,13 +32,17 @@ const TeamTaskBoard: React.FC<TeamTaskBoardProps> = ({
   filters = { date: '', assignee: '', status: '' },
 }) => {
   const dispatch: AppDispatch = useDispatch()
+
+  // Select teamTasks and teamMembers from Redux store
   const teamTasks = useSelector((state: RootState) => state.teamTask.tasks) // Directly use tasks without teamId
+  const teamMembers =
+    useSelector((state: RootState) => state.teams.teamMembers) || [] // Ensure it's always an array
   const [selectedTask, setSelectedTask] = useState<TeamTask | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  // Fetch team tasks on component mount
+  // Fetch team tasks on component mount or when teamId changes
   useEffect(() => {
     const loadTasks = async () => {
       setLoading(true)
@@ -96,6 +102,7 @@ const TeamTaskBoard: React.FC<TeamTaskBoardProps> = ({
 
     if (!draggedTask) return
 
+    // Optimistically update the UI
     dispatch(
       moveTeamTaskLocally({
         taskId,
@@ -104,16 +111,19 @@ const TeamTaskBoard: React.FC<TeamTaskBoardProps> = ({
       }),
     )
 
+    // Update the task status in the backend
     await dispatch(
       updateTeamTaskThunk({ teamId, taskId, data: { status: newStatus } }),
     )
   }
 
+  // Handle task card click to open details drawer
   const handleTaskClick = (task: TeamTask) => {
     setSelectedTask(task)
     setIsDrawerOpen(true)
   }
 
+  // Handle task edit to open details drawer
   const handleEditTask = (task: TeamTask) => {
     setSelectedTask(task)
     setIsDrawerOpen(true)
@@ -148,21 +158,23 @@ const TeamTaskBoard: React.FC<TeamTaskBoardProps> = ({
         </DragDropContext>
       </div>
 
+      {/* Task Details Drawer */}
       <TaskDetailsDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         task={selectedTask}
       />
 
+      {/* Create Task Modal */}
       <CreateTaskModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSave={(task) =>
           dispatch(createTeamTaskThunk({ teamId, data: { ...task } }))
         }
-        userId="1"
-        userName="John Doe"
         teamId={teamId}
+        teamName="" // You can pass the team name here if available
+        teamMembers={teamMembers} // Pass the team members from Redux
       />
     </>
   )
