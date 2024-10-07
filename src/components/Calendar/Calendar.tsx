@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import {
   format,
   startOfMonth,
@@ -49,10 +49,13 @@ const CalendarComponent: React.FC = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false)
   const [isCreateTaskModalOpen, setCreateTaskModalOpen] = useState(false)
 
+  // Reference for the month dropdown
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
   // Correctly typed dispatch function
   const dispatch: AppDispatch = useDispatch()
 
-  // Fetch tasks from Redux store, grouped by status (e.g., { todo: [], 'in-progress': [], review: [], done: [] })
+  // Fetch tasks from Redux store, grouped by status
   const tasksFromRedux: { [key: string]: TaskFromApi[] } = useSelector(
     (state: RootState) => state.tasks.personalTasks,
   )
@@ -116,6 +119,29 @@ const CalendarComponent: React.FC = () => {
     return task ? task.title : ''
   }
 
+  // Outside click handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false)
+      }
+    }
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isDropdownOpen])
+
   return (
     <div className="w-full text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-700 rounded-md relative pb-4">
       <header className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
@@ -144,10 +170,12 @@ const CalendarComponent: React.FC = () => {
         </h2>
 
         <div className="flex items-center space-x-2 sm:space-x-4 ml-auto mr-4">
-          <div className="relative">
+          <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setDropdownOpen(!isDropdownOpen)}
-              className="flex items-center p-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600"
+              className="flex items-center p-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:outline-none"
+              aria-haspopup="true"
+              aria-expanded={isDropdownOpen}
             >
               Months <MdArrowDropDown className="ml-1" />
             </button>

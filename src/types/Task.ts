@@ -33,3 +33,15 @@ export interface TeamTaskFromApi {
   assigneeIds?: string[]
   teamId?: string
 }
+
+export interface Task {
+  id: string
+  title: string
+  description?: string
+  dueDate: Date
+  status: TaskStatus
+  priority: TaskPriority
+  assignee?: string
+  assigneeIds?: string[]
+  teamId?: string
+}
