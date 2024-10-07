@@ -51,9 +51,19 @@ export const fetchTeamTasks = createAsyncThunk(
 export const createTeamTaskThunk = createAsyncThunk(
   'teamTasks/createTeamTask',
   async ({ teamId, data }: { teamId: string; data: Partial<TeamTask> }) => {
+    // Ensure that required fields (title, status, priority) are defined
+    if (!data.title || !data.status || !data.priority) {
+      throw new Error('Missing required fields: title, status, or priority')
+    }
+
+    // Convert dueDate to ISO string if present
     const taskData = {
-      ...data,
-      dueDate: data.dueDate ? data.dueDate.toISOString() : undefined, // Ensure ISO string format
+      title: data.title,
+      status: data.status,
+      priority: data.priority,
+      description: data.description || '', // Provide a default description if not present
+      dueDate: data.dueDate ? data.dueDate.toISOString() : undefined,
+      assigneeIds: data.assigneeIds || [],
     }
 
     const task = await createTeamTask(teamId, taskData)
@@ -71,9 +81,23 @@ export const updateTeamTaskThunk = createAsyncThunk(
   }) => {
     const { teamId, taskId, data } = params
 
+    // Ensure that required fields (title, status, priority) are handled
+    if (
+      data.title === undefined ||
+      data.status === undefined ||
+      data.priority === undefined
+    ) {
+      throw new Error('Cannot update task: missing title, status, or priority')
+    }
+
+    // Convert dueDate to ISO string if present
     const taskData = {
-      ...data,
-      dueDate: data.dueDate ? data.dueDate.toISOString() : undefined, // Ensure ISO string format
+      title: data.title,
+      status: data.status,
+      priority: data.priority,
+      description: data.description || '', // Provide default value
+      dueDate: data.dueDate ? data.dueDate.toISOString() : undefined,
+      assigneeIds: data.assigneeIds || [],
     }
 
     const updatedTask = await updateTeamTask(teamId, taskId, taskData)

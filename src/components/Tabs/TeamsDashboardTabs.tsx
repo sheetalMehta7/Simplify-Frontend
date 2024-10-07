@@ -1,4 +1,3 @@
-// TeamsDashboardTabs.tsx
 import React, { useState, useEffect } from 'react'
 import { MdDashboard, MdGroups, MdPerson, MdCreate } from 'react-icons/md'
 import { VscSettings } from 'react-icons/vsc'
@@ -13,6 +12,7 @@ import {
   fetchTeams,
   fetchTeamMembers,
 } from '../../redux/features/teams/teamSlice'
+import { fetchTeamTasks } from '../../redux/features/teams/teamTaskSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 
 // Define the Tab interface
@@ -28,6 +28,8 @@ const TABS: Tab[] = [
   { name: 'Members', icon: <MdPerson /> },
 ]
 
+const LOCAL_STORAGE_TEAM_KEY = 'recentTeamId'
+
 const TeamsDashboardTabs: React.FC = () => {
   // Local state
   const [activeTab, setActiveTab] = useState<string>(TABS[0].name)
@@ -39,12 +41,14 @@ const TeamsDashboardTabs: React.FC = () => {
   const [selectedTeam, setSelectedTeam] = useState<any>(null)
   const [currentTeamId, setCurrentTeamId] = useState<string>('') // Current team selection
   const [currentTeamName, setCurrentTeamName] = useState<string>('') // Current team name
+  const [isInitialLoadComplete, setIsInitialLoadComplete] =
+    useState<boolean>(false) // For first load
 
   // Redux hooks
   const dispatch: AppDispatch = useDispatch()
   const teams = useSelector((state: RootState) => state.teams.teams)
   const teamMembers =
-    useSelector((state: RootState) => state.teams.teamMembers) || [] // Default to empty array
+    useSelector((state: RootState) => state.teams.teamMembers) || []
   const loadingTeams = useSelector((state: RootState) => state.teams.loading)
   const teamsError = useSelector((state: RootState) => state.teams.error)
 
@@ -66,18 +70,34 @@ const TeamsDashboardTabs: React.FC = () => {
     dispatch(fetchTeams())
   }, [dispatch])
 
-  // Automatically select the most recently created team when teams are fetched
+  // Handle the first load when teams are fetched
   useEffect(() => {
-    if (teams.length > 0) {
-      const latestTeam = teams.reduce((prev, current) =>
-        new Date(prev.created) > new Date(current.created) ? prev : current,
-      )
-      setCurrentTeamId(latestTeam.id)
-      setCurrentTeamName(latestTeam.name)
-      dispatch(fetchTeamMembers(latestTeam.id))
-      setFilters((prev) => ({ ...prev, teamId: latestTeam.id }))
+    if (teams.length > 0 && !isInitialLoadComplete) {
+      const storedTeamId = localStorage.getItem(LOCAL_STORAGE_TEAM_KEY)
+      const selectedTeam = teams.find((team) => team.id === storedTeamId)
+
+      if (selectedTeam) {
+        setCurrentTeamId(selectedTeam.id)
+        setCurrentTeamName(selectedTeam.name)
+        dispatch(fetchTeamMembers(selectedTeam.id))
+        setFilters((prev) => ({ ...prev, teamId: selectedTeam.id }))
+        dispatch(fetchTeamTasks(selectedTeam.id)) // Fetch tasks for the stored team
+      } else {
+        // Fallback to the most recently created team if no team is found in localStorage
+        const latestTeam = teams.reduce((prev, current) =>
+          new Date(prev.created) > new Date(current.created) ? prev : current,
+        )
+        setCurrentTeamId(latestTeam.id)
+        setCurrentTeamName(latestTeam.name)
+        dispatch(fetchTeamMembers(latestTeam.id))
+        setFilters((prev) => ({ ...prev, teamId: latestTeam.id }))
+        dispatch(fetchTeamTasks(latestTeam.id)) // Fetch tasks for the latest team
+      }
+
+      // Mark initial load as complete to prevent re-triggering
+      setIsInitialLoadComplete(true)
     }
-  }, [teams, dispatch])
+  }, [teams, dispatch, isInitialLoadComplete])
 
   // Handle team selection from dropdown
   const handleTeamSelect = (teamId: string) => {
@@ -87,6 +107,10 @@ const TeamsDashboardTabs: React.FC = () => {
       setCurrentTeamName(selectedTeam.name)
       dispatch(fetchTeamMembers(teamId)) // Fetch members of the selected team
       setFilters((prev) => ({ ...prev, teamId })) // Update filters with the selected team
+      dispatch(fetchTeamTasks(teamId)) // Fetch tasks for the selected team
+
+      // Store the selected team in localStorage for future sessions
+      localStorage.setItem(LOCAL_STORAGE_TEAM_KEY, teamId)
     }
   }
 
