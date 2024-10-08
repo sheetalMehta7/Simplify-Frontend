@@ -64,7 +64,7 @@ const TeamModal: React.FC<TeamModalProps> = ({
         setSelectedMembers(
           (team.members ?? [])
             .map((member) => member.user?.id) // Access member.user.id correctly
-            .filter((id) => id !== undefined) as string[],
+            .filter((id) => id !== undefined),
         )
 
         if (team.projects && team.projects.length > 0) {

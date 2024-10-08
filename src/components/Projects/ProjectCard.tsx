@@ -1,20 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { FaEllipsisV, FaEdit, FaTrash, FaProjectDiagram } from 'react-icons/fa'
-import { MdOutlineUnarchive } from 'react-icons/md'
-import { Button, Modal, TextInput } from 'flowbite-react'
+import { MdOutlineUnarchive, MdOutlineArchive } from 'react-icons/md'
+import { Button, Modal } from 'flowbite-react'
 import { Project } from '../../redux/features/projects/projectSlice'
+import ProjectModal from '../Modals/ProjectModal'
 
 interface ProjectCardProps {
   project: Project
-  onEdit: (project: Project) => void
   onDelete: (projectId: string) => void
+  onEdit: (updatedProject: Project) => void
   onArchive?: () => void
   onUnarchive?: () => void
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
-  onEdit,
   onDelete,
   onArchive,
   onUnarchive,
@@ -22,10 +22,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const [menuOpen, setMenuOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
-  const [editTitle, setEditTitle] = useState(project.title)
-  const [editDescription, setEditDescription] = useState(
-    project.description ?? '',
-  )
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -49,15 +45,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     setIsEditModalOpen(false)
   }
 
-  const handleSaveEdit = () => {
-    onEdit({
-      ...project,
-      title: editTitle,
-      description: editDescription,
-    })
-    closeEditModal()
-  }
-
   const handleDelete = () => {
     setIsDeleteAlertOpen(true)
     setMenuOpen(false)
@@ -76,19 +63,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     return title.length > 50 ? title.substring(0, 50) + '...' : title
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSaveEdit()
-    }
-  }
-
   return (
     <div className="relative p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md text-gray-900 dark:text-white">
       <div className="absolute top-4 left-4">
-        {onArchive ? (
-          <FaProjectDiagram className="text-blue-500" size={24} />
-        ) : (
+        {project.archived ? (
           <MdOutlineUnarchive className="text-blue-500" size={24} />
+        ) : (
+          <FaProjectDiagram className="text-blue-500" size={24} />
         )}
       </div>
 
@@ -114,18 +95,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                   Edit
                 </button>
               </li>
-              {onArchive && (
-                <li>
-                  <button
-                    onClick={onArchive}
-                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <MdOutlineUnarchive className="mr-2" />
-                    Archive
-                  </button>
-                </li>
-              )}
-              {onUnarchive && (
+              {project.archived ? (
                 <li>
                   <button
                     onClick={onUnarchive}
@@ -133,6 +103,16 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                   >
                     <MdOutlineUnarchive className="mr-2" />
                     Unarchive
+                  </button>
+                </li>
+              ) : (
+                <li>
+                  <button
+                    onClick={onArchive}
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <MdOutlineArchive className="mr-2" />
+                    Archive
                   </button>
                 </li>
               )}
@@ -165,32 +145,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         )}
       </div>
 
-      <Modal show={isEditModalOpen} onClose={closeEditModal} size="lg">
-        <Modal.Header>Edit Project</Modal.Header>
-        <Modal.Body>
-          <TextInput
-            placeholder="Project Title"
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            className="mb-4"
-            onKeyPress={handleKeyPress}
-          />
-          <TextInput
-            placeholder="Description"
-            value={editDescription}
-            onChange={(e) => setEditDescription(e.target.value)}
-            onKeyPress={handleKeyPress}
-          />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button gradientDuoTone="purpleToBlue" onClick={handleSaveEdit}>
-            Save Changes
-          </Button>
-          <Button color="gray" onClick={closeEditModal}>
-            Cancel
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      {isEditModalOpen && (
+        <ProjectModal
+          isOpen={isEditModalOpen}
+          onClose={closeEditModal}
+          mode="edit"
+          projectData={{
+            id: project.id,
+            title: project.title,
+            description: project.description ?? '',
+          }}
+        />
+      )}
 
       {isDeleteAlertOpen && (
         <Modal show={isDeleteAlertOpen} onClose={cancelDelete} size="md">
