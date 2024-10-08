@@ -72,17 +72,20 @@ const ProjectDashboardTabs: React.FC = () => {
     }
   }
 
-  const handleArchive = async (projectId: string, isArchived: boolean) => {
+  const handleArchive = async (
+    projectId: string,
+    currentArchivedStatus: boolean,
+  ) => {
     try {
       await dispatch(
         updateProject({
           projectId,
-          projectData: { archived: isArchived },
+          projectData: { archived: !currentArchivedStatus },
         }),
       ).unwrap()
     } catch (error) {
       console.error(
-        `Failed to ${isArchived ? 'unarchive' : 'archive'} project`,
+        `Failed to ${currentArchivedStatus ? 'unarchive' : 'archive'} project`,
         error,
       )
     }
@@ -164,7 +167,7 @@ const ProjectDashboardTabs: React.FC = () => {
 
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {renderSkeletons(filteredProjects.length)}{' '}
+              {renderSkeletons(filteredProjects.length)}
             </div>
           ) : filteredProjects.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -174,8 +177,9 @@ const ProjectDashboardTabs: React.FC = () => {
                   project={project}
                   onEdit={openEditModal}
                   onDelete={handleDelete}
-                  onArchive={() =>
-                    handleArchive(project.id, activeTab === 'Active Projects')
+                  onArchive={() => handleArchive(project.id, project.archived)}
+                  onUnarchive={() =>
+                    handleArchive(project.id, project.archived)
                   }
                 />
               ))}
