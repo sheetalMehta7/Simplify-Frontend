@@ -1,6 +1,6 @@
 // AppRouter.tsx
 import { useEffect } from 'react'
-import { Routes, Route, useNavigate } from 'react-router-dom'
+import { Routes, Route, useNavigate, Navigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import {
   loadUserFromLocalStorage,
@@ -47,6 +47,9 @@ const AppRouter = () => {
           </ProtectedRoute>
         }
       >
+        {/* Default Route Redirect to "my-tasks" */}
+        <Route index element={<Navigate to="my-tasks" replace />} />
+
         <Route path="my-tasks" element={<DashboardTabs />} />
         <Route path="teams" element={<TeamsDashboardTabs />} />
         <Route path="projects" element={<ProjectDashboardTabs />} />
