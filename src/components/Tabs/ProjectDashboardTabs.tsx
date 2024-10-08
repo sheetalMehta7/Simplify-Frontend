@@ -1,5 +1,3 @@
-// src/components/Dashboard/ProjectDashboardTabs.tsx
-
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -12,7 +10,6 @@ import { MdCreate, MdFilterList } from 'react-icons/md'
 import ProjectCard from '../Projects/ProjectCard'
 import FilterModal from '../Modals/FilterModal'
 import ProjectModal from '../Modals/ProjectModal'
-import ArchivedProjects from '../Projects/ArchivedProjects'
 import SkeletonCard from '../Loader/SkeletonCard'
 import { AppDispatch } from '../../redux/store'
 
