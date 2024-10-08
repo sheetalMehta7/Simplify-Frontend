@@ -95,7 +95,7 @@ const Teams: React.FC = () => {
                   >
                     <h3 className="text-lg font-bold">{team.name}</h3>
                     <p className="text-gray-600 dark:text-gray-300">
-                      {team.description || 'No description available'}
+                      {team.description ?? 'No description available'}
                     </p>
                     <div className="flex justify-end mt-4 space-x-2">
                       <Button
