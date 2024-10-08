@@ -47,7 +47,7 @@ const SignUpModal: FC<SignUpModalProps> = ({ onClose, onSwitch }) => {
         dispatch(clearError())
 
         // Redirect to dashboard
-        navigate('/dashboard')
+        navigate('/dashboard/my-tasks')
       } else {
         dispatch(setError('Name is required'))
       }

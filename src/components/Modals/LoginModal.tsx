@@ -32,7 +32,7 @@ const LoginModal: FC<LoginModalProps> = ({ onClose, onSwitch }) => {
       dispatch(loginSuccess({ user, token }))
 
       // Redirect to dashboard
-      navigate('/dashboard')
+      navigate('/dashboard/my-tasks')
 
       // Clear any previous errors
       dispatch(clearError())
