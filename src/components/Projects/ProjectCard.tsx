@@ -9,8 +9,8 @@ interface ProjectCardProps {
   project: Project
   onDelete: (projectId: string) => void
   onEdit: (updatedProject: Project) => void
-  onArchive?: () => void
-  onUnarchive?: () => void
+  onArchive: () => void
+  onUnarchive: () => void
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
