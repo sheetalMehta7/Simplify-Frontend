@@ -7,6 +7,7 @@ interface UserProfileDropdownProps {
   isOpen: boolean
   onClose: () => void
   iconRef: React.RefObject<SVGSVGElement>
+  dropdownRef: React.RefObject<HTMLDivElement>
   profile: { name?: string; email?: string } | null
   loading: boolean
 }
@@ -15,6 +16,7 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
   isOpen,
   onClose,
   iconRef,
+  dropdownRef,
   profile,
   loading,
 }) => {
@@ -37,6 +39,7 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
 
   return (
     <div
+      ref={dropdownRef}
       className="absolute z-50 bg-white dark:bg-slate-800 rounded-lg shadow-lg"
       style={{
         top: dropdownPosition.top + 30,
