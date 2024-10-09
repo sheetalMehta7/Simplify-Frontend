@@ -166,6 +166,7 @@ const TopNav: React.FC = () => {
             />
             {isProfileOpen && (
               <UserProfileDropdown
+                dropdownRef={dropdownRef}
                 isOpen={isProfileOpen}
                 onClose={() => setIsProfileOpen(false)}
                 iconRef={profileIconRef}
