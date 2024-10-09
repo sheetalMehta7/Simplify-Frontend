@@ -25,7 +25,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const menuRef = useRef<HTMLDivElement>(null)
 
   // Retrieve logged-in user ID from localStorage
-  const loggedInUserId = localStorage.getItem('userId')
+
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const loggedInUserId = user?.id
 
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
