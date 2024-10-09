@@ -24,6 +24,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
+  // Retrieve logged-in user ID from localStorage
+  const loggedInUserId = localStorage.getItem('userId')
+
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -73,62 +76,65 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         )}
       </div>
 
-      <div className="absolute top-4 right-4" ref={menuRef}>
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            setMenuOpen(!menuOpen)
-          }}
-        >
-          <FaEllipsisV className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
-        </button>
+      {/* Conditionally render the three-dot menu only if the logged-in user is the owner */}
+      {project.ownerId === loggedInUserId && (
+        <div className="absolute top-4 right-4" ref={menuRef}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setMenuOpen(!menuOpen)
+            }}
+          >
+            <FaEllipsisV className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
+          </button>
 
-        {menuOpen && (
-          <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 shadow-lg rounded-lg z-10">
-            <ul className="py-1">
-              <li>
-                <button
-                  onClick={openEditModal}
-                  className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <FaEdit className="mr-2" />
-                  Edit
-                </button>
-              </li>
-              {project.archived ? (
+          {menuOpen && (
+            <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 shadow-lg rounded-lg z-10">
+              <ul className="py-1">
                 <li>
                   <button
-                    onClick={onUnarchive}
+                    onClick={openEditModal}
                     className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
-                    <MdOutlineUnarchive className="mr-2" />
-                    Unarchive
+                    <FaEdit className="mr-2" />
+                    Edit
                   </button>
                 </li>
-              ) : (
+                {project.archived ? (
+                  <li>
+                    <button
+                      onClick={onUnarchive}
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <MdOutlineUnarchive className="mr-2" />
+                      Unarchive
+                    </button>
+                  </li>
+                ) : (
+                  <li>
+                    <button
+                      onClick={onArchive}
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <MdOutlineArchive className="mr-2" />
+                      Archive
+                    </button>
+                  </li>
+                )}
                 <li>
                   <button
-                    onClick={onArchive}
-                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    onClick={handleDelete}
+                    className="w-full flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
-                    <MdOutlineArchive className="mr-2" />
-                    Archive
+                    <FaTrash className="mr-2" />
+                    Delete
                   </button>
                 </li>
-              )}
-              <li>
-                <button
-                  onClick={handleDelete}
-                  className="w-full flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <FaTrash className="mr-2" />
-                  Delete
-                </button>
-              </li>
-            </ul>
-          </div>
-        )}
-      </div>
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="ml-12 mt-8">
         <h2 className="text-lg font-semibold mb-2">
