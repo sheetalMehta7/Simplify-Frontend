@@ -1,8 +1,11 @@
+// src/Components/DashboardTabs.tsx
+
 import React, { useState } from 'react'
 import {
   MdDashboard,
-  MdLockClock,
-  MdFolder,
+  MdCheckCircle,
+  MdStar,
+  MdArchive,
   MdCreate,
   MdCancel,
 } from 'react-icons/md'
@@ -23,8 +26,9 @@ interface Tab {
 
 const TABS: Tab[] = [
   { name: 'My Tasks', icon: <MdDashboard /> },
-  { name: 'Recent', icon: <MdLockClock /> },
-  { name: 'Projects', icon: <MdFolder /> },
+  { name: 'Completed', icon: <MdCheckCircle /> },
+  { name: 'Favorites', icon: <MdStar /> },
+  { name: 'Archived', icon: <MdArchive /> },
 ]
 
 const DashboardTabs: React.FC = () => {
@@ -177,7 +181,15 @@ const DashboardTabs: React.FC = () => {
       {/* Task Board based on active tab */}
       <div className="flex-1 container mx-auto p-4 md:p-5">
         <div className="bg-white dark:bg-slate-800 rounded-md shadow-md p-4 h-full">
-          {activeTab === 'My Tasks' && <PersonalTaskBoard filters={filters} />}
+          {activeTab === 'My Tasks' ? (
+            <PersonalTaskBoard filters={filters} />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-gray-500 dark:text-gray-400 text-lg">
+                {activeTab} feature is coming soon!
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -185,6 +197,8 @@ const DashboardTabs: React.FC = () => {
 }
 
 export default DashboardTabs
+
+// --- FilterTag Component ---
 
 interface FilterTagProps {
   label: string
@@ -199,6 +213,8 @@ const FilterTag: React.FC<FilterTagProps> = ({ label, onRemove }) => (
     </button>
   </div>
 )
+
+// --- TabButtons Component ---
 
 interface TabButtonsProps {
   tabs: Tab[]
