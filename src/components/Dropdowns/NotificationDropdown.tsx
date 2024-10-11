@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { LuBellRing } from 'react-icons/lu'
 import { Task } from '../../redux/features/tasks/tasksSlice'
 
@@ -16,18 +16,34 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     console.log(`Task ${taskId} clicked!`)
   }
 
-  // Function to get the number of days remaining for a task
-  const getDaysRemaining = (dueDate: string) => {
-    const currentDate = new Date()
-    const taskDueDate = new Date(dueDate)
-    const timeDifference = taskDueDate.getTime() - currentDate.getTime()
-    return Math.ceil(timeDifference / (1000 * 3600 * 24))
+  const currentDate = useMemo(() => new Date(), [])
+
+  const upcomingTodoTasks = useMemo(
+    () =>
+      taskNotifications
+        .filter((task) => task.status === 'todo')
+        .map((task) => ({
+          ...task,
+          daysRemaining: Math.ceil(
+            (new Date(task.dueDate).getTime() - currentDate.getTime()) /
+              (1000 * 3600 * 24),
+          ),
+        }))
+        .filter((task) => task.daysRemaining >= 0),
+    [taskNotifications, currentDate],
+  )
+
+  const getBellClass = (daysRemaining: number) => {
+    if (daysRemaining === 0) return 'text-red-500'
+    if (daysRemaining === 2) return 'text-yellow-300'
+    return 'text-gray-500 dark:text-gray-300'
   }
 
-  // Filter out tasks that are not in "todo" status and those that are past due
-  const upcomingTodoTasks = taskNotifications.filter(
-    (task) => task.status === 'todo' && getDaysRemaining(task.dueDate) >= 0,
-  )
+  const getDueDateClass = (daysRemaining: number) => {
+    if (daysRemaining === 0) return 'text-red-500'
+    if (daysRemaining === 2) return 'text-yellow-300'
+    return 'text-gray-500'
+  }
 
   return (
     <div
@@ -40,44 +56,27 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
         </h3>
         <ul className="mt-2 space-y-2 divide-y divide-gray-200 dark:divide-gray-700">
           {upcomingTodoTasks.length > 0 ? (
-            upcomingTodoTasks.map((task) => {
-              const daysRemaining = getDaysRemaining(task.dueDate)
-
-              // Determine bell icon style based on due date
-              let bellClass = 'text-gray-500 dark:text-gray-300'
-              if (daysRemaining === 0) {
-                bellClass = 'text-red-500' // Red for tasks due today
-              } else if (daysRemaining === 2) {
-                bellClass = 'text-yellow-300' // Yellow for tasks due in 2 days
-              }
-
-              // Conditional class for highlighting the due date
-              let dueDateClass = 'text-gray-500'
-              if (daysRemaining === 0) {
-                dueDateClass = 'text-red-500' // Red for tasks due today
-              } else if (daysRemaining === 2) {
-                dueDateClass = 'text-yellow-300' // Yellow for tasks due in 2 days
-              }
-
-              return (
-                <li
-                  key={task.id}
-                  className="flex items-center py-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
-                  onClick={() => handleNotificationItemClick(task.id)}
-                >
-                  <LuBellRing className={`h-5 w-5 mr-2 ${bellClass}`} />{' '}
-                  {/* LuBellRing icon */}
-                  <div>
-                    <p>{task.title}</p>
-                    <p className={`text-xs ${dueDateClass}`}>
-                      {daysRemaining === 0
-                        ? 'Due today'
-                        : `Due in ${daysRemaining} day${daysRemaining > 1 ? 's' : ''}`}
-                    </p>
-                  </div>
-                </li>
-              )
-            })
+            upcomingTodoTasks.map((task) => (
+              <li
+                key={task.id}
+                className="flex items-center py-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                onClick={() => handleNotificationItemClick(task.id)}
+              >
+                <LuBellRing
+                  className={`h-5 w-5 mr-2 ${getBellClass(task.daysRemaining)}`}
+                />
+                <div>
+                  <p>{task.title}</p>
+                  <p
+                    className={`text-xs ${getDueDateClass(task.daysRemaining)}`}
+                  >
+                    {task.daysRemaining === 0
+                      ? 'Due today'
+                      : `Due in ${task.daysRemaining} day${task.daysRemaining > 1 ? 's' : ''}`}
+                  </p>
+                </div>
+              </li>
+            ))
           ) : (
             <li className="py-2 text-sm text-gray-700 dark:text-gray-300">
               No upcoming tasks
