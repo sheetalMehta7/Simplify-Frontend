@@ -8,7 +8,7 @@ import ProjectModal from '../Modals/ProjectModal'
 interface ProjectCardProps {
   project: Project
   onDelete: (projectId: string) => void
-  onEdit: (updatedProject: Project) => void
+  _onEdit: (updatedProject: Project) => void
   onArchive: () => void
   onUnarchive: () => void
 }
